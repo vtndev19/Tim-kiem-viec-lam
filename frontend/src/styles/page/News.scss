@@ -1,0 +1,60 @@
+@import "../global.scss";
+
+.news-page {
+  background-color: #f9fafc;
+  min-height: 100vh;
+  padding: $spacing-2xl 0;
+}
+
+.news-container {
+  display: flex;
+  gap: $spacing-2xl;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 $spacing-lg;
+
+  .news-sidebar {
+    width: 320px;
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-xl;
+  }
+
+  .news-main {
+    flex: 1;
+    background: $white;
+    border-radius: $radius-lg;
+    padding: $spacing-2xl;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+
+    .loading,
+    .no-article {
+      text-align: center;
+      padding: $spacing-2xl;
+      color: $text-light;
+      font-size: $font-size-lg;
+    }
+  }
+}
+
+@media (max-width: 1024px) {
+  .news-container {
+    flex-direction: column;
+    .news-sidebar {
+      width: 100%;
+      flex-direction: row;
+      gap: $spacing-lg;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .news-container {
+    .news-sidebar {
+      flex-direction: column;
+    }
+    .news-main {
+      padding: $spacing-lg;
+    }
+  }
+}

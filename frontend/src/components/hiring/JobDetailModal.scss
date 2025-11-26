@@ -1,0 +1,136 @@
+@import "../../styles/hiring/variables.scss";
+
+.job-detail-modal {
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+
+    h2 {
+      margin: 0 0 4px 0;
+      font-size: 22px;
+      color: $text-dark;
+    }
+
+    .modal-subtitle {
+      font-size: 13px;
+      color: $text-light;
+      margin: 0;
+      font-weight: 500;
+    }
+  }
+
+  .modal-body {
+    max-height: 600px;
+    overflow-y: auto;
+  }
+
+  .detail-section {
+    margin-bottom: 24px;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    h3 {
+      font-size: 16px;
+      font-weight: 700;
+      color: $primary-blue;
+      margin: 0 0 12px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+
+      @media (max-width: $mobile) {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .detail-item {
+      background-color: $pale-blue;
+      padding: 12px;
+      border-radius: $border-radius-medium;
+      border-left: 3px solid $primary-blue;
+
+      label {
+        font-size: 12px;
+        font-weight: 600;
+        color: $primary-blue;
+        display: block;
+        margin-bottom: 4px;
+      }
+
+      p {
+        font-size: 14px;
+        color: $text-dark;
+        margin: 0;
+        font-weight: 500;
+      }
+    }
+
+    .detail-text {
+      font-size: 14px;
+      line-height: 1.6;
+      color: $text-light;
+      margin: 0;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+
+    &.info-section {
+      background-color: $light-gray;
+      padding: 12px;
+      border-radius: $border-radius-medium;
+      border-left: 3px solid $text-light;
+
+      p {
+        font-size: 13px;
+        color: $text-light;
+        margin: 0;
+
+        strong {
+          color: $text-dark;
+        }
+      }
+    }
+  }
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+
+  .button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+}
+
+// Scrollbar for modal
+.job-detail-modal .modal-body {
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: $light-gray;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: $primary-blue;
+    border-radius: 3px;
+
+    &:hover {
+      background: $primary-dark-blue;
+    }
+  }
+}

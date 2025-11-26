@@ -1,0 +1,40 @@
+{
+  "name": "backend-job-finder",
+  "version": "1.0.0",
+  "description": "Backend cho dự án Job Finder",
+  "main": "src/server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon --exec babel-node src/server.js",
+    "gen-secret": "node scripts/generateSecret.js"
+  },
+  "author": "Viet",
+  "license": "ISC",
+  "dependencies": {
+    "@google/generative-ai": "^0.24.1",
+    "axios": "^1.12.2",
+    "bcrypt": "^6.0.0",
+    "body-parser": "^1.20.2",
+    "cors": "^2.8.5",
+    "crypto": "^1.0.1",
+    "dotenv": "^16.6.1",
+    "ejs": "^3.1.9",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2",
+    "moment": "^2.30.1",
+    "morgan": "^1.10.1",
+    "multer": "^2.0.2",
+    "mysql2": "^3.15.2",
+    "node-cron": "^4.2.1",
+    "nodemailer": "^7.0.10",
+    "pg": "^8.16.3",
+    "socket.io": "^4.8.1"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.28.4",
+    "@babel/node": "^7.28.0",
+    "@babel/preset-env": "^7.28.3",
+    "nodemon": "^3.0.3"
+  }
+}

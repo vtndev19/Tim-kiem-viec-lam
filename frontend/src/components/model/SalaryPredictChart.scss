@@ -1,0 +1,78 @@
+.salary-chart-wrapper {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+  margin-bottom: 32px;
+  transition: all 0.3s ease;
+  border: 1px solid #f1f1f1;
+
+  &:hover {
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+    transform: translateY(-2px);
+  }
+
+  .title {
+    font-size: 20px;
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 16px;
+
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    .icon {
+      font-size: 22px;
+    }
+  }
+
+  .predict-btn {
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    color: white;
+    font-size: 15px;
+    font-weight: 500;
+    border-radius: 12px;
+    border: none;
+    cursor: pointer;
+    margin-bottom: 20px;
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+
+    &:hover {
+      background: linear-gradient(135deg, #1d4ed8, #1e40af);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(37, 99, 235, 0.35);
+    }
+
+    &:active {
+      transform: translateY(0);
+      box-shadow: none;
+    }
+  }
+
+  .no-data {
+    font-size: 15px;
+    color: #6b7280;
+    margin-top: 8px;
+  }
+
+  .chart-container {
+    height: 360px;
+    width: 100%;
+    animation: fadeIn 0.3s ease-in-out;
+  }
+}
+
+/* Animation mượt */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

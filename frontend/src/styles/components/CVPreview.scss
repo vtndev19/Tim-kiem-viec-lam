@@ -1,0 +1,251 @@
+.cv-preview {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+
+  .preview-toolbar {
+    background: #f8f9fa;
+    padding: 16px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #eee;
+
+    h3 {
+      font-size: 16px;
+      font-weight: 600;
+      color: #1a1a1a;
+      margin: 0;
+    }
+
+    .toolbar-actions {
+      display: flex;
+      gap: 10px;
+
+      .btn-action {
+        background: #667eea;
+        color: white;
+        border: none;
+        padding: 8px 14px;
+        border-radius: 6px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+
+        &:hover {
+          background: #5568d3;
+        }
+      }
+    }
+  }
+
+  .preview-content {
+    padding: 20px;
+    max-height: calc(90vh - 70px);
+    overflow-y: auto;
+
+    &::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: #f1f1f1;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: #ccc;
+      border-radius: 3px;
+
+      &:hover {
+        background: #999;
+      }
+    }
+  }
+}
+
+.cv-document {
+  width: 210mm;
+  height: 297mm;
+  margin: 0 auto;
+  background: white;
+  padding: 20mm;
+  box-shadow: 0 0 0 1px #ddd;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 11px;
+  color: #333;
+  line-height: 1.4;
+
+  @media print {
+    box-shadow: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .cv-header {
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #667eea;
+
+    .header-top {
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+
+      .photo-section {
+        width: 80px;
+        height: 100px;
+        overflow: hidden;
+        border-radius: 6px;
+        flex-shrink: 0;
+
+        img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+      }
+
+      .personal-details {
+        flex: 1;
+
+        h1 {
+          font-size: 22px;
+          font-weight: 700;
+          color: #1a1a1a;
+          margin: 0 0 8px 0;
+        }
+
+        .contact-brief {
+          display: flex;
+          flex-direction: column;
+          gap: 3px;
+          font-size: 10px;
+          color: #666;
+
+          span {
+            word-break: break-word;
+          }
+        }
+      }
+    }
+  }
+
+  .social-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 12px;
+    font-size: 10px;
+
+    a {
+      color: #667eea;
+      text-decoration: none;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+
+  .cv-section {
+    margin-bottom: 12px;
+
+    .section-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin: 0 0 8px 0;
+      padding-bottom: 4px;
+      border-bottom: 1px solid #667eea;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .summary-text {
+      font-size: 10px;
+      line-height: 1.5;
+      color: #555;
+      margin: 0;
+      text-align: justify;
+    }
+  }
+
+  .cv-entry {
+    margin-bottom: 10px;
+
+    .entry-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 4px;
+
+      div:first-child {
+        flex: 1;
+      }
+
+      h3 {
+        font-size: 11px;
+        font-weight: 700;
+        color: #1a1a1a;
+        margin: 0 0 2px 0;
+      }
+
+      .company {
+        font-size: 10px;
+        font-weight: 600;
+        color: #667eea;
+        margin: 0 0 2px 0;
+        font-style: italic;
+      }
+
+      .field {
+        font-size: 9px;
+        color: #666;
+        margin: 0;
+      }
+
+      .date-range {
+        font-size: 9px;
+        color: #999;
+        white-space: nowrap;
+        text-align: right;
+      }
+    }
+
+    .description {
+      font-size: 10px;
+      color: #555;
+      margin: 4px 0 0 0;
+      line-height: 1.4;
+      text-align: justify;
+    }
+  }
+
+  .skills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+
+    .skill-badge {
+      background: #f0f0f0;
+      color: #667eea;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 9px;
+      font-weight: 600;
+      border: 1px solid #667eea;
+      display: inline-block;
+    }
+  }
+}
+
+@media (max-width: 1024px) {
+  .cv-document {
+    width: 100%;
+    height: auto;
+    box-shadow: 0 0 0 1px #ddd;
+  }
+}

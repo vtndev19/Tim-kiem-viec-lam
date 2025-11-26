@@ -1,0 +1,105 @@
+@import "../styles/hiring/variables.scss";
+
+.hiring-dashboard {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: $light-gray;
+
+  .success-toast {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    background: linear-gradient(
+      135deg,
+      $success-green 0%,
+      darken($success-green, 10%) 100%
+    );
+    color: $white;
+    padding: 16px 24px;
+    border-radius: $border-radius-medium;
+    box-shadow: $shadow-heavy;
+    font-size: 14px;
+    font-weight: 600;
+    animation: slideInRight 0.3s ease-out;
+    z-index: 999;
+
+    @media (max-width: $mobile) {
+      top: 70px;
+      right: 10px;
+      left: 10px;
+      max-width: none;
+    }
+  }
+
+  .delete-confirm-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1001;
+    animation: fadeInUp 0.3s ease-out;
+
+    .delete-confirm-modal {
+      background-color: $white;
+      border-radius: $border-radius-large;
+      padding: 32px;
+      max-width: 400px;
+      width: 90%;
+      box-shadow: $shadow-heavy;
+      text-align: center;
+      animation: slideInRight 0.3s ease-out;
+
+      h3 {
+        font-size: 18px;
+        color: $text-dark;
+        margin: 0 0 8px 0;
+      }
+
+      p {
+        font-size: 14px;
+        color: $text-light;
+        margin: 0 0 24px 0;
+        line-height: 1.5;
+      }
+
+      .modal-actions {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+
+        .button {
+          flex: 1;
+          min-width: 100px;
+        }
+      }
+    }
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

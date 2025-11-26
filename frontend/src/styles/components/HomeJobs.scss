@@ -1,0 +1,178 @@
+.home-jobs-container {
+  background: #fff;
+  border-radius: 5px;
+  padding: 20px;
+  margin: 20px 0;
+
+  // --- Tiêu đề ---
+  .section-header {
+    width: 100%;
+    padding: 0;
+    margin-bottom: 20px;
+
+    h2 {
+      font-size: 20px;
+      font-weight: 600;
+      color: #1a1a1a;
+      margin: 0;
+      text-align: center;
+    }
+  }
+
+  // --- Danh sách job dạng lưới ---
+  .job-list {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); // ✅ 3 cột
+    gap: 16px;
+    transition: all 0.3s ease;
+
+    @media (max-width: 992px) {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    @media (max-width: 600px) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  // --- Thẻ job ---
+  .job-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 16px;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    background-color: #fff;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+    text-decoration: none;
+    color: #000;
+    transition: all 0.25s ease;
+
+    &:hover {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      transform: translateY(-3px);
+      border: 1px solid #0940f5;
+    }
+
+    .job-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+
+      .job-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: #333;
+        flex: 1;
+        line-height: 1.4;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .hot-badge {
+        background: #ffe6e6;
+        color: #ff3b30;
+        font-weight: 600;
+        font-size: 13px;
+        padding: 2px 8px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+
+        &::before {
+          content: "🔥";
+          font-size: 14px;
+        }
+      }
+    }
+
+    .job-card-company {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 8px;
+
+      img {
+        width: 36px;
+        height: 36px;
+        object-fit: contain;
+      }
+
+      span {
+        font-size: 14px;
+        color: #555;
+      }
+    }
+
+    .job-salary {
+      color: #ff5733;
+      font-weight: 500;
+      margin-top: 4px;
+    }
+
+    .job-card-footer {
+      margin-top: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      color: #666;
+    }
+  }
+
+  // --- Phân trang ---
+  .pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 24px;
+    gap: 12px;
+
+    .page-btn {
+      background: #046ff1;
+      color: #fff;
+      border: none;
+      padding: 8px 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.2s ease;
+
+      &:hover:not(:disabled) {
+        background: #004ccf;
+      }
+
+      &:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+      }
+    }
+
+    .page-info {
+      font-size: 15px;
+      font-weight: 600;
+      color: #333;
+    }
+  }
+
+  // --- Hiệu ứng chuyển trang mượt ---
+  .job-list {
+    animation: fadeIn 0.4s ease-in-out;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}

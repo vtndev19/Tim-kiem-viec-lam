@@ -1,0 +1,56 @@
+@import "../global.scss";
+
+@keyframes floatSlow {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+.banner {
+  background: linear-gradient(135deg, #0052cc 0%, #0066cc 50%, #004aa8 100%);
+  padding: 4rem 0;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+
+  .banner-content {
+    width: 90%;
+    max-width: 1280px;
+    margin: 0 auto;
+    text-align: center;
+    color: white;
+    padding: 0 1.5rem;
+    position: relative;
+    z-index: 1;
+
+    h2 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin: 0 0 1rem 0;
+      line-height: 1.3;
+
+      @media (max-width: 768px) {
+        font-size: 1.75rem;
+      }
+
+      @media (max-width: 576px) {
+        font-size: 1.5rem;
+      }
+    }
+
+    p {
+      font-size: 1.1rem;
+      margin: 0 0 2rem 0;
+      opacity: 0.95;
+      font-weight: 400;
+
+      @media (max-width: 576px) {
+        font-size: 1rem;
+      }
+    }
+  }
+}

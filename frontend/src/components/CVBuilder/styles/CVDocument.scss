@@ -1,0 +1,34 @@
+/* ========== CV DOCUMENT ========== */
+.cv-document {
+  width: 100%;
+  max-width: 800px;
+}
+
+/* ========== CV A4 CHUẨN ========== */
+.cv-a4 {
+  width: 210mm;
+  height: 297mm;
+  background: white;
+  padding: 16mm 10mm 16mm 10mm;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+  margin: 0 auto;
+  font-size: inherit;
+  line-height: 1.45;
+  color: inherit;
+  position: relative;
+  overflow: visible;
+  display: flex;
+  flex-direction: column;
+}
+
+@media print {
+  .cv-a4 {
+    box-shadow: none;
+    margin: 0;
+    padding: 16mm 10mm 16mm 10mm;
+    width: 210mm;
+    height: 297mm;
+    overflow: visible;
+  }
+}

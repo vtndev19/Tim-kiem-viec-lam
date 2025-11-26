@@ -1,0 +1,174 @@
+@import "../../styles/hiring/variables.scss";
+
+.job-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  transition: all $transition-normal;
+
+  &:hover {
+    box-shadow: $shadow-heavy;
+    transform: translateY(-8px);
+
+    .job-title {
+      color: $primary-blue;
+    }
+
+    .job-card-footer {
+      background-color: $pale-blue;
+    }
+  }
+
+  .job-card-header {
+    padding: 16px;
+    border-bottom: 2px solid $medium-gray;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    background: linear-gradient(
+      135deg,
+      rgba(30, 136, 229, 0.05) 0%,
+      transparent 100%
+    );
+
+    .job-info {
+      flex: 1;
+
+      .job-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: $text-dark;
+        margin: 0 0 4px 0;
+        transition: color $transition-normal;
+        line-height: 1.3;
+      }
+
+      .company-name {
+        font-size: 13px;
+        color: $text-light;
+        margin: 0;
+        font-weight: 500;
+      }
+    }
+
+    .job-badge {
+      background: linear-gradient(
+        135deg,
+        $success-green 0%,
+        darken($success-green, 10%) 100%
+      );
+      color: $white;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+  }
+
+  .job-card-body {
+    padding: 16px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .job-meta {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+
+    @media (max-width: $mobile) {
+      grid-template-columns: 1fr;
+    }
+
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: $text-light;
+
+      .meta-icon {
+        font-size: 16px;
+      }
+
+      .meta-text {
+        font-weight: 500;
+        color: $text-dark;
+      }
+    }
+  }
+
+  .job-description {
+    p {
+      font-size: 14px;
+      color: $text-light;
+      line-height: 1.5;
+      margin: 0;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+  }
+
+  .job-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+
+    .tag {
+      background-color: $pale-blue;
+      color: $primary-blue;
+      padding: 4px 10px;
+      border-radius: $border-radius-small;
+      font-size: 12px;
+      font-weight: 500;
+    }
+  }
+
+  .job-card-footer {
+    padding: 12px;
+    border-top: 1px solid $medium-gray;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+    background-color: $light-gray;
+    transition: background-color $transition-normal;
+
+    .button {
+      flex: 1;
+      min-width: 80px;
+      font-size: 12px;
+
+      @media (max-width: $mobile) {
+        min-width: 70px;
+      }
+    }
+  }
+}
+
+.job-card-empty {
+  text-align: center;
+  padding: 60px 20px;
+  color: $text-light;
+
+  .empty-icon {
+    font-size: 60px;
+    margin-bottom: 16px;
+    display: block;
+  }
+
+  p {
+    font-size: 16px;
+    margin-bottom: 12px;
+  }
+
+  .empty-button {
+    margin-top: 20px;
+  }
+}

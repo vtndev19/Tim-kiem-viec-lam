@@ -1,0 +1,297 @@
+@import "../global.scss";
+
+.header {
+  background: white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  padding: 0.75rem 0;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  border-bottom: 1px solid #e5e7eb;
+  transition: box-shadow 0.2s ease;
+
+  &:hover {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .header-inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+
+    .brand {
+      display: flex;
+      align-items: center;
+
+      a {
+        text-decoration: none;
+        color: #0066cc;
+
+        h1 {
+          font-size: 1.5rem;
+          font-weight: 700;
+          color: #0066cc;
+          margin: 0;
+          letter-spacing: -0.5px;
+        }
+      }
+    }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+
+      > a,
+      .jobs-menu-item > a {
+        text-decoration: none;
+        color: #374151;
+        font-weight: 500;
+        font-size: 0.95rem;
+        transition: color 0.2s ease;
+        position: relative;
+        padding: 0.4rem 0;
+
+        &:hover,
+        &.active {
+          color: #0066cc;
+        }
+      }
+
+      .jobs-menu-item {
+        position: relative;
+
+        &:hover .jobs-dropdown {
+          visibility: visible;
+          opacity: 1;
+          transform: translateY(0);
+        }
+
+        .jobs-dropdown {
+          position: absolute;
+          top: 100%;
+          left: 0;
+          background: white;
+          border: 1px solid #e5e7eb;
+          border-radius: 0.5rem;
+          box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+          min-width: 250px;
+          z-index: 1001;
+          margin-top: 0.5rem;
+          visibility: hidden;
+          opacity: 0;
+          transform: translateY(-10px);
+          transition: all 0.2s ease;
+
+          ul {
+            display: flex;
+            flex-direction: column;
+            list-style: none;
+            margin: 0;
+            padding: 0.5rem 0;
+
+            li {
+              a {
+                display: block;
+                padding: 0.7rem 1rem;
+                color: #374151;
+                text-decoration: none;
+                font-weight: 400;
+                font-size: 0.9rem;
+                transition: background 0.15s ease;
+
+                &:hover {
+                  background: #f3f4f6;
+                  color: #0066cc;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    .auth {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+
+      .btn {
+        padding: 0.55rem 1.2rem;
+        border-radius: 0.4rem;
+        font-weight: 500;
+        font-size: 0.9rem;
+        transition: all 0.2s ease;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+        text-align: center;
+        background: #0066cc;
+        color: white;
+        border: 1px solid #0066cc;
+
+        &:hover {
+          background: #0052a3;
+          border-color: #0052a3;
+        }
+
+        &.outline {
+          background: transparent;
+          color: #0066cc;
+          border: 1px solid #d1d5db;
+
+          &:hover {
+            background: #f9fafb;
+            border-color: #9ca3af;
+          }
+        }
+      }
+
+      .user-menu {
+        position: relative;
+        display: flex;
+        align-items: center;
+
+        .user-avatar {
+          display: flex;
+          align-items: center;
+          gap: 0.6rem;
+          cursor: pointer;
+          padding: 0.4rem 0.6rem;
+          border-radius: 0.4rem;
+          transition: background 0.2s ease;
+
+          &:hover {
+            background: #f3f4f6;
+          }
+
+          img {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1px solid #e5e7eb;
+          }
+
+          span {
+            font-weight: 500;
+            color: #374151;
+            font-size: 0.9rem;
+            max-width: 100px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+          }
+        }
+
+        .user-dropdown {
+          position: absolute;
+          top: calc(100% + 0.5rem);
+          right: 0;
+          background: white;
+          border: 1px solid #e5e7eb;
+          border-radius: 0.5rem;
+          box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+          min-width: 220px;
+          z-index: 999;
+
+          ul {
+            list-style: none;
+            margin: 0;
+            padding: 0.5rem 0;
+
+            li {
+              padding: 0;
+              transition: background 0.15s ease;
+
+              a {
+                text-decoration: none;
+                color: #374151;
+                display: block;
+                padding: 0.7rem 1rem;
+                font-weight: 400;
+                font-size: 0.9rem;
+              }
+
+              &:hover {
+                background: #f3f4f6;
+
+                a {
+                  color: #0066cc;
+                }
+              }
+
+              &.logout {
+                border-top: 1px solid #e5e7eb;
+                color: #dc2626;
+                padding: 0.7rem 1rem;
+                cursor: pointer;
+                font-weight: 500;
+
+                &:hover {
+                  background: #fef2f2;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .menu-button {
+    display: none;
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    color: #374151;
+
+    &:hover {
+      color: #0066cc;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .header {
+    .header-inner {
+      .nav {
+        display: none;
+
+        &.active {
+          display: flex;
+          position: fixed;
+          top: 60px;
+          left: 0;
+          right: 0;
+          background: white;
+          padding: 1rem;
+          flex-direction: column;
+          gap: 0.5rem;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+          z-index: 999;
+        }
+      }
+
+      .auth {
+        display: none;
+
+        &.active {
+          display: flex;
+          flex-direction: column;
+          width: 100%;
+          gap: 0.5rem;
+          margin-top: 1rem;
+        }
+      }
+
+      .menu-button {
+        display: block;
+      }
+    }
+  }
+}

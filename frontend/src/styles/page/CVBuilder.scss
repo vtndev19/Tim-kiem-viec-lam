@@ -1,0 +1,109 @@
+/* ================================
+   🎨 CV BUILDER - LAYOUT CHÍNH
+================================ */
+
+// Main Layout
+.cv-builder {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: #f3f4f6;
+  overflow: hidden;
+}
+
+// Main content area
+.cv-main-content {
+  display: flex;
+  flex: 1;
+  gap: 0;
+  overflow: hidden;
+}
+
+// Import component styles
+@import "../../components/CVBuilder/styles/CVTopTabs.scss";
+@import "../../components/CVBuilder/styles/CVInputSidebar.scss";
+@import "../../components/CVBuilder/styles/CVPreviewArea.scss";
+@import "../../components/CVBuilder/styles/CVDocument.scss";
+@import "../../components/CVBuilder/styles/CVHeader.scss";
+@import "../../components/CVBuilder/styles/CVSummary.scss";
+@import "../../components/CVBuilder/styles/CVEducation.scss";
+@import "../../components/CVBuilder/styles/CVExperience.scss";
+@import "../../components/CVBuilder/styles/CVSkills.scss";
+
+// Print Media
+@media print {
+  * {
+    margin: 0 !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  html,
+  body {
+    width: 100% !important;
+    height: auto !important;
+    background: white !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* ẨN GIAO DIỆN CHÍNH */
+  .cv-builder,
+  .cv-top-tabs,
+  .cv-input-sidebar,
+  .sidebar-actions,
+  .tabs-content {
+    display: none !important;
+  }
+
+  /* CHỈ IN PREVIEW */
+  .cv-main-content {
+    display: flex !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    height: auto !important;
+  }
+
+  .cv-preview-area {
+    display: flex !important;
+    flex: 1;
+    width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background: white !important;
+    overflow: visible !important;
+    border: none !important;
+  }
+
+  .cv-document {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .cv-a4 {
+    width: 210mm !important;
+    height: 297mm !important;
+    margin: 0 !important;
+    padding: 16mm 10mm 16mm 10mm !important;
+    background: white !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    page-break-after: always !important;
+    page-break-inside: avoid !important;
+  }
+
+  .cv-photo,
+  .cv-photo img {
+    max-width: 100% !important;
+    height: auto !important;
+    object-fit: cover !important;
+  }
+
+  @page {
+    size: A4 portrait !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+}

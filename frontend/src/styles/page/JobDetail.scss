@@ -1,0 +1,144 @@
+// src/styles/JobDetail.scss
+@import "../global.scss";
+
+.job-detail-page {
+  padding: $spacing-2xl 0;
+
+  .job-detail-header {
+    background: $white;
+    padding: $spacing-2xl;
+    border-radius: $radius-lg;
+    box-shadow: $shadow-md;
+    margin-bottom: $spacing-xl;
+    border-left: 5px solid $primary;
+
+    h1 {
+      font-size: $font-size-4xl;
+      color: $text-dark;
+      margin-bottom: $spacing-sm;
+    }
+
+    .header-meta {
+      display: flex;
+      align-items: center;
+      gap: $spacing-md;
+      margin-bottom: $spacing-md;
+      font-size: $font-size-lg;
+      color: $text-light;
+
+      .company-name {
+        font-weight: $font-semibold;
+        color: $primary;
+      }
+    }
+
+    .salary-type {
+      display: flex;
+      gap: $spacing-lg;
+      margin-bottom: $spacing-xl;
+      font-size: $font-size-base;
+
+      .salary {
+        font-weight: $font-bold;
+        color: $success;
+      }
+    }
+
+    .apply-now-btn {
+      background: $primary;
+      color: $white;
+      border: none;
+      padding: $spacing-md $spacing-xl;
+      font-size: $font-size-lg;
+      font-weight: $font-semibold;
+      border-radius: $radius-md;
+      cursor: pointer;
+      transition: $transition-smooth;
+
+      &:hover {
+        background: $primary-dark;
+        transform: translateY(-2px);
+      }
+    }
+  }
+
+  .job-detail-content {
+    background: $white;
+    padding: $spacing-2xl;
+    border-radius: $radius-lg;
+    box-shadow: $shadow-sm;
+
+    .job-section {
+      margin-bottom: $spacing-xl;
+
+      h2 {
+        font-size: $font-size-2xl;
+        color: $text-dark;
+        margin-bottom: $spacing-lg;
+        padding-bottom: $spacing-sm;
+        border-bottom: 2px solid $gray-100;
+      }
+
+      p,
+      ul {
+        font-size: $font-size-base;
+        line-height: $line-height-relaxed;
+        color: $text;
+      }
+
+      ul {
+        list-style-type: disc;
+        padding-left: $spacing-lg;
+
+        li {
+          margin-bottom: $spacing-sm;
+        }
+      }
+    }
+  }
+
+  .job-detail-footer {
+    margin-top: $spacing-xl;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: $text-light;
+  }
+
+  .back-link {
+    color: $primary;
+    text-decoration: none;
+    font-weight: $font-medium;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+/* Thêm vào cuối file JobDetail.scss */
+.job-detail-buttons {
+  display: flex;
+  gap: 12px;
+  margin-top: 15px;
+}
+
+.save-job-btn {
+  background-color: #f3f3f3;
+  color: #333;
+  border: 1px solid #ccc;
+  padding: 10px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.save-job-btn:hover {
+  background-color: #e6e6e6;
+}
+
+.save-job-btn.saved {
+  color: #ffb400;
+  border-color: #ffb400;
+  background-color: #fff8e1;
+  font-weight: 600;
+}

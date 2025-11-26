@@ -1,0 +1,206 @@
+@import "../global.scss";
+
+.featured-industries {
+  padding: $spacing-xl 0;
+  background-color: $gray-50;
+  overflow: hidden; // cần thiết để ẩn phần trượt ra ngoài
+
+  .container {
+    max-width: 100%;
+    margin: 0 auto;
+  }
+
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: $spacing-xl;
+
+    h2 {
+      font-size: 1.75rem;
+      font-weight: $font-bold;
+      color: $text-dark;
+      margin: 0;
+    }
+
+    .view-all {
+      display: flex;
+      align-items: center;
+      gap: $spacing-xs;
+      color: $primary;
+      text-decoration: none;
+      font-weight: $font-medium;
+      transition: $transition-smooth;
+
+      svg {
+        transition: $transition-smooth;
+      }
+
+      &:hover {
+        color: $primary-dark;
+
+        svg {
+          transform: translateX(4px);
+        }
+      }
+    }
+  }
+  .industry-video {
+    position: relative;
+    width: 100%;
+    height: 500px;
+    border-radius: $radius-lg;
+    overflow: hidden;
+    margin-bottom: $spacing-xl;
+    box-shadow: $shadow-md;
+
+    video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .overlay-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      color: $white;
+      background: rgba(0, 0, 0, 0.45);
+      padding: $spacing-lg $spacing-xl;
+      border-radius: $radius-md;
+
+      h3 {
+        font-size: 1.75rem;
+        font-weight: $font-bold;
+        margin-bottom: $spacing-sm;
+      }
+
+      p {
+        font-size: 1rem;
+        font-weight: $font-medium;
+        opacity: 0.9;
+      }
+    }
+  }
+  /* --- THAY ĐỔI CHÍNH: chuyển grid thành hàng ngang trượt --- */
+  .industries-grid {
+    display: flex;
+    align-items: center;
+    gap: $spacing-lg;
+    width: max-content;
+    animation: scroll-left 25s linear infinite;
+
+    // Dừng trượt khi hover
+    &:hover {
+      animation-play-state: paused;
+    }
+
+    // Nếu muốn trượt mượt không ngắt, bạn có thể nhân đôi dữ liệu ở React
+  }
+
+  .industry-card {
+    flex: 0 0 220px; // mỗi box có độ rộng cố định
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: $spacing-xl;
+    background-color: $white;
+    border-radius: $radius-lg;
+    text-decoration: none;
+    transition: $transition-smooth;
+    position: relative;
+    overflow: hidden;
+    box-shadow: $shadow-sm;
+
+    // Màu nền tuỳ ngành nghề
+    &[data-industry="1"] {
+      background-color: rgba($primary, 0.05);
+    }
+    &[data-industry="2"] {
+      background-color: rgba($success, 0.05);
+    }
+    &[data-industry="3"] {
+      background-color: rgba($warning, 0.05);
+    }
+    &[data-industry="4"] {
+      background-color: rgba($info, 0.05);
+    }
+    &[data-industry="5"] {
+      background-color: rgba($primary-dark, 0.05);
+    }
+    &[data-industry="6"] {
+      background-color: rgba($success-dark, 0.05);
+    }
+    &[data-industry="7"] {
+      background-color: rgba($warning-dark, 0.05);
+    }
+    &[data-industry="8"] {
+      background-color: rgba($info-dark, 0.05);
+    }
+
+    &:hover {
+      transform: translateY(-4px);
+      box-shadow: $shadow-lg;
+
+      .industry-icon {
+        transform: scale(1.05);
+      }
+
+      &::after {
+        opacity: 1;
+      }
+    }
+
+    &::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      border-radius: $radius-lg;
+      box-shadow: 0 0 0 2px $primary;
+      opacity: 0;
+      transition: $transition-smooth;
+    }
+
+    .industry-icon {
+      width: 64px;
+      height: 64px;
+      margin-bottom: $spacing-md;
+      transition: $transition-smooth;
+
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+      }
+    }
+
+    h3 {
+      font-size: 1.1rem;
+      font-weight: $font-semibold;
+      color: $text-dark;
+      margin: 0 0 $spacing-xs;
+    }
+
+    p {
+      font-size: 0.9rem;
+      color: $text-muted;
+      margin: 0;
+    }
+  }
+
+  /* --- Hiệu ứng trượt ngang vô tận --- */
+  @keyframes scroll-left {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
+  }
+}

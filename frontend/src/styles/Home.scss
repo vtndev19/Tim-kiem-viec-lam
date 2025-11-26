@@ -1,0 +1,123 @@
+// src/styles/Home.scss
+@import "./global.scss";
+
+.home-container {
+  padding: $spacing-xl;
+  color: $text;
+
+  .search-bar {
+    display: flex;
+    gap: $spacing-md;
+    margin-bottom: $spacing-xl;
+
+    input {
+      flex: 1;
+      padding: $spacing-md;
+      border: 1px solid $gray-200;
+      border-radius: $radius-md;
+      color: $text-dark;
+
+      &:focus {
+        outline: none;
+        border-color: $primary;
+        box-shadow: 0 0 0 3px rgba($primary, 0.1);
+      }
+    }
+
+    button {
+      background: $primary;
+      color: $white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 8px;
+
+      &:hover {
+        background: $primary-dark;
+      }
+    }
+  }
+
+  .banner {
+    margin: 20px 0;
+    background: linear-gradient(to right, $primary, $secondary);
+    height: 200px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: $white;
+    font-size: 24px;
+    font-weight: bold;
+  }
+
+  .filters {
+    margin: 20px 0;
+    display: flex;
+    gap: 15px;
+
+    select {
+      flex: 1;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+    }
+  }
+
+  .jobs-section {
+    margin-top: 30px;
+
+    h2 {
+      margin-bottom: 15px;
+    }
+
+    .job-card {
+      background: $white;
+      border: 1px solid #eee;
+      border-radius: 12px;
+      padding: 15px;
+      margin-bottom: 15px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+
+      h3 {
+        margin-bottom: 10px;
+        font-size: 18px;
+      }
+
+      .actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 10px;
+
+        button {
+          flex: 1;
+          padding: 8px;
+          border-radius: 6px;
+          border: none;
+        }
+
+        .apply {
+          background: $secondary;
+          color: $white;
+        }
+
+        .save {
+          background: #eaeaea;
+          color: $text;
+        }
+      }
+    }
+  }
+}
+
+// Responsive
+@media (max-width: $tablet) {
+  .home-container {
+    .search-bar {
+      flex-direction: column;
+    }
+
+    .filters {
+      flex-direction: column;
+    }
+  }
+}

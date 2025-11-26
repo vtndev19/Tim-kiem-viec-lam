@@ -1,0 +1,422 @@
+@import "../global.scss";
+
+.chat-container {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  z-index: 1000;
+}
+
+.chat-toggle-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  border-radius: 50%;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  background-color: #f8f9fa;
+
+  img {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+  }
+
+  &:hover {
+    transform: scale(1.2);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+  }
+}
+
+.chat-window {
+  position: absolute;
+  bottom: 80px;
+  right: 0;
+  width: 550px;
+  max-width: 90vw;
+  height: 500px;
+  max-height: 80vh;
+  background-color: $primary-white;
+  border-radius: 15px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.chat-header {
+  background: linear-gradient(
+    135deg,
+    $primary-blue,
+    darken($primary-blue, 10%)
+  );
+  color: $primary-white;
+  padding: $spacing-md $spacing-lg;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
+
+  .close-chat {
+    background: none;
+    border: none;
+    color: $primary-white;
+    font-size: 1.5rem;
+    cursor: pointer;
+    opacity: 0.8;
+    transition: opacity 0.2s;
+
+    &:hover {
+      opacity: 1;
+    }
+  }
+}
+
+.chat-messages {
+  flex: 1;
+  padding: $spacing-lg;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+
+  .message {
+    padding: $spacing-sm $spacing-md;
+    border-radius: 18px;
+    max-width: 80%;
+    line-height: 1.5;
+
+    &.user {
+      background-color: $primary-blue;
+      color: $primary-white;
+      align-self: flex-end;
+      border-bottom-right-radius: 4px;
+    }
+
+    &.bot {
+      background-color: #f1f1f1;
+      color: $text-dark;
+      align-self: flex-start;
+      border-bottom-left-radius: 4px;
+    }
+
+    &.loading {
+      display: flex;
+      gap: 5px;
+      align-items: center;
+
+      span {
+        width: 8px;
+        height: 8px;
+        background-color: #999;
+        border-radius: 50%;
+        animation: bounce 1.4s infinite ease-in-out both;
+
+        &:nth-child(1) {
+          animation-delay: -0.32s;
+        }
+        &:nth-child(2) {
+          animation-delay: -0.16s;
+        }
+      }
+    }
+  }
+}
+
+@keyframes bounce {
+  0%,
+  80%,
+  100% {
+    transform: scale(0);
+  }
+  40% {
+    transform: scale(1);
+  }
+}
+
+.chat-input-area {
+  display: flex;
+  padding: $spacing-md;
+  border-top: 1px solid #eee;
+
+  input {
+    flex: 1;
+    padding: $spacing-sm $spacing-md;
+    border: 1px solid #ddd;
+    border-radius: 20px;
+    outline: none;
+    transition: border-color 0.3s;
+
+    &:focus {
+      border-color: $primary-blue;
+    }
+  }
+
+  button {
+    margin-left: $spacing-sm;
+    padding: $spacing-sm $spacing-lg;
+    border: none;
+    background-color: $primary-blue;
+    color: $primary-white;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.3s;
+
+    &:hover {
+      background-color: darken($primary-blue, 10%);
+    }
+  }
+}
+
+/* ========== CHAT REALTIME BOX ========== */
+.chat-realtime {
+  position: fixed;
+  bottom: 110px; // 👈 nằm phía trên icon chat bot
+  right: 32px;
+  z-index: 900;
+
+  .chat-toggle-button {
+    cursor: pointer;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease;
+    img {
+      width: 60px;
+      height: 55px;
+    }
+    &:hover {
+      transform: scale(1.1);
+    }
+  }
+
+  .chat-window {
+    position: absolute;
+    bottom: 70px;
+    right: 0;
+    width: 400px;
+    height: 400px;
+    background-color: $primary-white;
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    animation: slideIn 0.3s ease-out;
+  }
+
+  .chat-header {
+    background: linear-gradient(135deg, #2d8cff, #1a73e8);
+    color: white;
+    padding: 12px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    h3 {
+      margin: 0;
+      font-size: 1rem;
+    }
+
+    .close-chat {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.2rem;
+      cursor: pointer;
+      opacity: 0.8;
+
+      &:hover {
+        opacity: 1;
+      }
+    }
+  }
+
+  .chat-messages {
+    flex: 1;
+    padding: 12px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    .message {
+      padding: 8px 12px;
+      border-radius: 16px;
+      max-width: 80%;
+      line-height: 1.4;
+      font-size: 0.9rem;
+
+      &.user {
+        background-color: $primary-blue;
+        color: $primary-white;
+        align-self: flex-end;
+        border-bottom-right-radius: 4px;
+      }
+
+      &.other {
+        background-color: #f2f2f2;
+        color: $text-dark;
+        align-self: flex-start;
+        border-bottom-left-radius: 4px;
+      }
+    }
+  }
+
+  .chat-input-area {
+    display: flex;
+    padding: 10px;
+    border-top: 1px solid #eee;
+
+    input {
+      flex: 1;
+      padding: 8px 12px;
+      border-radius: 16px;
+      border: 1px solid #ddd;
+      outline: none;
+
+      &:focus {
+        border-color: $primary-blue;
+      }
+    }
+
+    button {
+      margin-left: 8px;
+      background-color: $primary-blue;
+      color: white;
+      border: none;
+      border-radius: 16px;
+      padding: 8px 14px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+
+      &:hover {
+        background-color: darken($primary-blue, 10%);
+      }
+    }
+  }
+}
+.notification-bell {
+  position: fixed;
+  bottom: 180px; // nằm trên icon chat realtime
+  right: 32px;
+  height: 60px;
+  border-radius: 50%;
+  font-size: 2.2rem;
+  color: #666;
+  background-color: #e8f0fe;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  z-index: 899;
+  transition: transform 0.2s ease, color 0.3s ease;
+  img {
+    width: 60px;
+    height: 55px;
+  }
+  &:hover {
+    transform: scale(1.1);
+  }
+
+  &.active {
+    color: #ff3b3b; // khi có thông báo mới -> icon màu đỏ
+  }
+
+  &.shake {
+    animation: shake 0.4s ease-in-out infinite alternate;
+  }
+}
+
+@keyframes shake {
+  0% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(8deg);
+  }
+  50% {
+    transform: rotate(0deg);
+  }
+  75% {
+    transform: rotate(-8deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+}
+/* ====== BOX THÔNG BÁO ====== */
+.notification-box {
+  position: fixed;
+  bottom: 240px; // nằm trên icon chuông
+  right: 40px;
+  width: 280px;
+  max-height: 300px;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  overflow-y: auto;
+  animation: fadeIn 0.25s ease-out;
+  z-index: 899;
+  padding: 12px 16px;
+
+  h4 {
+    margin: 0 0 10px;
+    font-size: 1rem;
+    color: #1a73e8;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 6px;
+  }
+
+  ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+
+    li {
+      background: #f8f9fa;
+      padding: 8px 10px;
+      border-radius: 8px;
+      margin-bottom: 6px;
+      font-size: 0.9rem;
+      color: #333;
+      transition: background 0.2s;
+
+      &:hover {
+        background: #e8f0fe;
+      }
+    }
+  }
+
+  .no-noti {
+    color: #777;
+    text-align: center;
+    font-size: 0.9rem;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

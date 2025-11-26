@@ -1,0 +1,252 @@
+// src/styles/Login.scss
+@import "../global.scss";
+// 🎨 Biến khoảng cách cơ bản
+$spacing-2xs: 4px;
+$spacing-xs: 8px;
+$spacing-sm: 12px;
+$spacing-md: 16px;
+$spacing-lg: 24px;
+
+.login-page {
+  width: 100%;
+  height: 90vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  .login-background {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+
+    .login-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0);
+      display: flex;
+      align-items: center;
+      justify-content: flex-start; // ✅ box nằm bên trái
+      padding-left: 8%;
+      padding-right: 8%;
+    }
+
+    .login-container {
+      margin-left: 10%;
+      margin-bottom: 2%; // ✅ đẩy box vào trong, nằm bên trái
+      width: 100%;
+      max-width: 460px; // 👈 hơi thu nhỏ lại (480 → 460)
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(8px);
+      border-radius: $radius-lg;
+      padding: $spacing-lg $spacing-xl; // 👈 giảm padding tổng thể
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+      animation: slideInLeft 1s ease both;
+      display: flex;
+      flex-direction: column;
+      gap: $spacing-sm; // 👈 giảm khoảng trống tổng thể giữa các phần
+
+      @include tablet {
+        max-width: 420px;
+        padding: $spacing-lg;
+      }
+
+      @include mobile {
+        max-width: none;
+        margin: 0 auto;
+        padding: $spacing-md;
+      }
+
+      .login-header {
+        text-align: center;
+        margin-bottom: $spacing-lg;
+
+        h2 {
+          font-size: $font-size-2xl;
+          color: $text-dark;
+          font-weight: $font-bold;
+        }
+
+        p {
+          color: $text-light;
+          font-size: $font-size-base;
+        }
+      }
+
+      .form-group {
+        margin-bottom: $spacing-md; // ✅ thu nhỏ khoảng cách giữa các ô input
+
+        label {
+          display: block;
+          margin-bottom: $spacing-2xs; // ✅ giảm khoảng cách label-input
+          color: $text-dark;
+          font-weight: $font-medium;
+          font-size: $font-size-sm;
+        }
+
+        input {
+          width: 100%;
+          padding: $spacing-sm $spacing-md; // ✅ giảm chiều cao ô input
+          border: 2px solid $gray-200;
+          border-radius: $radius-md;
+          font-size: $font-size-base;
+          background: $white;
+          transition: all 0.3s ease;
+
+          &:focus {
+            border-color: $primary;
+            box-shadow: 0 0 0 3px rgba($primary, 0.15);
+            outline: none;
+          }
+
+          &::placeholder {
+            color: $gray-400;
+          }
+        }
+      }
+
+      .remember-forgot {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: $spacing-lg; // ✅ thu ngắn khoảng cách
+
+        .remember-me {
+          display: flex;
+          align-items: center;
+          gap: $spacing-xs;
+
+          label {
+            color: $text-light;
+            font-size: $font-size-sm;
+          }
+        }
+
+        .forgot-password {
+          color: $primary;
+          text-decoration: none;
+          font-size: $font-size-sm;
+          font-weight: $font-medium;
+
+          &:hover {
+            text-decoration: underline;
+          }
+        }
+      }
+
+      .login-button {
+        width: 100%;
+        padding: $spacing-sm $spacing-md; // ✅ nút gọn hơn
+        background: $primary;
+        color: $white;
+        border: none;
+        border-radius: $radius-md;
+        font-size: $font-size-base;
+        font-weight: $font-semibold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-bottom: $spacing-lg; // ✅ giảm khoảng cách sau nút
+
+        &:hover {
+          background: $primary-dark;
+          transform: translateY(-2px);
+          box-shadow: 0 6px 15px rgba($primary, 0.25);
+        }
+
+        &:active {
+          transform: translateY(0);
+        }
+      }
+
+      .social-login {
+        text-align: center;
+        margin-bottom: $spacing-lg; // ✅ giảm khoảng cách
+
+        p {
+          color: $text-light;
+          font-size: $font-size-sm;
+          margin-bottom: $spacing-sm; // ✅ dòng chữ gần nút hơn
+          position: relative;
+
+          &::before,
+          &::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            width: 28%;
+            height: 1px;
+            background: $gray-200;
+          }
+
+          &::before {
+            left: 0;
+          }
+
+          &::after {
+            right: 0;
+          }
+        }
+
+        .social-buttons {
+          display: flex;
+          gap: $spacing-sm; // ✅ các nút gần nhau hơn
+          justify-content: center;
+
+          button {
+            flex: 1;
+            max-width: 110px;
+            padding: $spacing-sm;
+            border: 1px solid $gray-200;
+            border-radius: $radius-md;
+            background: $white;
+            transition: all 0.3s ease;
+            cursor: pointer;
+
+            &:hover {
+              background: $gray-100;
+              transform: translateY(-2px);
+              box-shadow: $shadow-sm;
+            }
+
+            img {
+              height: 22px; // ✅ nhỏ gọn
+              width: auto;
+            }
+          }
+        }
+      }
+
+      .register-link {
+        text-align: center;
+        color: $text-light;
+        font-size: $font-size-sm; // ✅ nhỏ gọn
+        margin-top: $spacing-xs;
+
+        a {
+          color: $primary;
+          text-decoration: none;
+          font-weight: $font-medium;
+          margin-left: $spacing-2xs;
+
+          &:hover {
+            text-decoration: underline;
+          }
+        }
+      }
+    }
+  }
+}
+
+// Hiệu ứng trượt mượt
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}

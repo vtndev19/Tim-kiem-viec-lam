@@ -1,0 +1,160 @@
+@import "../../styles/hiring/variables.scss";
+
+.job-management-section {
+  background-color: $white;
+  scroll-margin-top: 80px;
+
+  .container {
+    max-width: 1200px;
+  }
+
+  .management-header {
+    display: grid;
+    grid-template-columns: 2fr 1fr auto;
+    gap: 16px;
+    align-items: center;
+    margin-bottom: 32px;
+    padding: 20px;
+
+    @media (max-width: $tablet) {
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+
+    .search-box {
+      .search-input {
+        width: 100%;
+        padding: 12px;
+        border: 2px solid $medium-gray;
+        border-radius: $border-radius-medium;
+        font-size: 14px;
+        transition: all $transition-normal;
+
+        &:focus {
+          outline: none;
+          border-color: $primary-blue;
+          box-shadow: 0 0 0 3px rgba(30, 136, 229, 0.1);
+        }
+
+        &::placeholder {
+          color: $text-light;
+        }
+      }
+    }
+
+    .filter-box {
+      .filter-select {
+        width: 100%;
+        padding: 12px;
+        border: 2px solid $medium-gray;
+        border-radius: $border-radius-medium;
+        font-size: 14px;
+        color: $text-dark;
+        cursor: pointer;
+        background-color: $white;
+        transition: all $transition-normal;
+
+        &:focus {
+          outline: none;
+          border-color: $primary-blue;
+          box-shadow: 0 0 0 3px rgba(30, 136, 229, 0.1);
+        }
+
+        option {
+          color: $text-dark;
+        }
+      }
+    }
+
+    .job-stats {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      background-color: $pale-blue;
+      padding: 12px 16px;
+      border-radius: $border-radius-medium;
+      border-left: 3px solid $primary-blue;
+
+      .stat {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        font-size: 13px;
+
+        .stat-label {
+          color: $text-light;
+          font-weight: 500;
+        }
+
+        .stat-value {
+          color: $primary-blue;
+          font-weight: 700;
+          font-size: 14px;
+
+          &.highlight {
+            color: $primary-dark-blue;
+          }
+        }
+      }
+    }
+  }
+
+  .jobs-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 20px;
+
+    @media (max-width: $tablet) {
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 16px;
+    }
+
+    @media (max-width: $mobile) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 60px 40px;
+    border: 2px dashed $medium-gray;
+    margin-top: 40px;
+
+    @media (max-width: $mobile) {
+      padding: 40px 20px;
+    }
+
+    .empty-icon {
+      font-size: 64px;
+      margin-bottom: 16px;
+      display: block;
+      animation: bounce 2s infinite;
+    }
+
+    h3 {
+      font-size: 20px;
+      color: $text-dark;
+      margin: 0 0 8px 0;
+    }
+
+    p {
+      font-size: 14px;
+      color: $text-light;
+      margin: 0 0 20px 0;
+    }
+
+    .button {
+      margin-top: 12px;
+    }
+  }
+}
+
+@keyframes bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}

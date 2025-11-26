@@ -1,0 +1,683 @@
+{
+    "industries": [
+        {
+            "id": 1,
+            "name": "Công nghệ thông tin",
+            "job_count": 1250
+        },
+        {
+            "id": 2,
+            "name": "Marketing & Quảng cáo",
+            "job_count": 830
+        },
+        {
+            "id": 3,
+            "name": "Tài chính & Ngân hàng",
+            "job_count": 760
+        },
+        {
+            "id": 4,
+            "name": "Bán lẻ & Thương mại điện tử",
+            "job_count": 980
+        },
+        {
+            "id": 5,
+            "name": "Sản xuất & Chế biến",
+            "job_count": 640
+        },
+        {
+            "id": 6,
+            "name": "Xây dựng & Bất động sản",
+            "job_count": 550
+        },
+        {
+            "id": 7,
+            "name": "Giáo dục & Đào tạo",
+            "job_count": 420
+        },
+        {
+            "id": 8,
+            "name": "Du lịch & Nhà hàng",
+            "job_count": 710
+        }
+    ],
+    "jobs": [
+        {
+            "id": "web-dev-01",
+            "title": "Lập trình viên Web Full-Stack (ReactJS & Node.js)",
+            "company": "TechCorp Solutions",
+            "location": "Hà Nội",
+            "salary": "20-30 triệu VND",
+            "type": "Toàn thời gian",
+            "posted_date": "2025-09-10",
+            "description": "Phát triển và duy trì các ứng dụng web sử dụng ReactJS cho front-end và Node.js cho back-end. Tham gia vào toàn bộ vòng đời phát triển sản phẩm.",
+            "requirements": [
+                "Ít nhất 2 năm kinh nghiệm với ReactJS và Node.js.",
+                "Có kiến thức về RESTful APIs, GraphQL.",
+                "Kinh nghiệm làm việc với cơ sở dữ liệu như MongoDB, PostgreSQL.",
+                "Sử dụng thành thạo Git."
+            ],
+            "benefits": [
+                "Mức lương cạnh tranh, thưởng theo hiệu suất.",
+                "Bảo hiểm sức khỏe toàn diện.",
+                "Môi trường làm việc năng động, chuyên nghiệp.",
+                "Cơ hội đào tạo và phát triển."
+            ]
+        },
+        {
+            "id": "digital-mkt-02",
+            "title": "Chuyên viên Digital Marketing",
+            "company": "MarketPro Agency",
+            "location": "TP. Hồ Chí Minh",
+            "salary": "15-25 triệu VND",
+            "type": "Toàn thời gian",
+            "posted_date": "2025-09-08",
+            "description": "Lập kế hoạch và triển khai các chiến dịch marketing trên các kênh digital (Google Ads, Facebook Ads, SEO). Phân tích và báo cáo hiệu quả.",
+            "requirements": [
+                "Tối thiểu 1 năm kinh nghiệm ở vị trí tương đương.",
+                "Hiểu biết sâu về các công cụ digital marketing.",
+                "Kỹ năng phân tích số liệu và tư duy chiến lược.",
+                "Sáng tạo, năng động và có khả năng làm việc nhóm."
+            ],
+            "benefits": [
+                "Lương tháng 13, thưởng lễ, Tết.",
+                "Team building, du lịch hàng năm.",
+                "Được đào tạo nâng cao chuyên môn."
+            ]
+        },
+        {
+            "id": "business-analyst-03",
+            "title": "Business Analyst (Finance)",
+            "company": "FinBank",
+            "location": "Đà Nẵng",
+            "salary": "Thỏa thuận",
+            "type": "Toàn thời gian",
+            "posted_date": "2025-09-09",
+            "description": "Phân tích yêu cầu nghiệp vụ cho các dự án phần mềm trong lĩnh vực tài chính, ngân hàng. Làm cầu nối giữa đội ngũ kinh doanh và đội ngũ kỹ thuật.",
+            "requirements": [
+                "Có kinh nghiệm làm Business Analyst trong ngành tài chính.",
+                "Kỹ năng giao tiếp và trình bày tốt.",
+                "Có khả năng viết tài liệu đặc tả yêu cầu (SRS).",
+                "Tiếng Anh giao tiếp tốt là một lợi thế."
+            ],
+            "benefits": [
+                "Gói thu nhập hấp dẫn.",
+                "Chế độ bảo hiểm theo luật lao động và bảo hiểm sức khỏe cao cấp.",
+                "Lộ trình thăng tiến rõ ràng."
+            ]
+        },
+        {
+            "id": "ui-ux-designer-04",
+            "title": "UI/UX Designer",
+            "company": "Creative Hub",
+            "location": "TP. Hồ Chí Minh",
+            "salary": "18-28 triệu VND",
+            "type": "Toàn thời gian",
+            "posted_date": "2025-09-11",
+            "description": "Thiết kế giao diện và trải nghiệm người dùng cho các sản phẩm web và mobile. Xây dựng wireframe, prototype và final design.",
+            "requirements": [
+                "Portfolio ấn tượng về các dự án đã thực hiện.",
+                "Thành thạo các công cụ thiết kế: Figma, Sketch, Adobe XD.",
+                "Hiểu biết về các nguyên tắc thiết kế, user-centered design.",
+                "Có khả năng làm việc độc lập và phối hợp với team."
+            ],
+            "benefits": [
+                "Môi trường làm việc sáng tạo, thoải mái.",
+                "Phụ cấp ăn trưa, gửi xe.",
+                "Tham gia các khóa học thiết kế chuyên sâu."
+            ]
+        },
+        {
+            "id": "project-manager-05",
+            "title": "Project Manager (IT)",
+            "company": "Innovate Tech",
+            "location": "Hà Nội",
+            "salary": "30-50 triệu VND",
+            "type": "Toàn thời gian",
+            "posted_date": "2025-09-07",
+            "description": "Quản lý và điều phối các dự án phần mềm, đảm bảo tiến độ, chất lượng và ngân sách. Quản lý team và giao tiếp với khách hàng.",
+            "requirements": [
+                "Trên 3 năm kinh nghiệm quản lý dự án phần mềm.",
+                "Có chứng chỉ PMP hoặc tương đương là một lợi thế.",
+                "Kỹ năng lãnh đạo, giải quyết vấn đề và đàm phán.",
+                "Am hiểu quy trình phát triển phần mềm (Agile, Scrum)."
+            ],
+            "benefits": [
+                "Thưởng dự án, thưởng cuối năm.",
+                "Cổ phần ưu đãi cho nhân viên xuất sắc.",
+                "Thời gian làm việc linh hoạt."
+            ]
+        },
+        {
+            "id": "hr-specialist-06",
+            "title": "Chuyên viên Nhân sự Tổng hợp",
+            "company": "PeopleFirst HR",
+            "location": "TP. Hồ Chí Minh",
+            "salary": "14-20 triệu VND",
+            "type": "Toàn thời gian",
+            "posted_date": "2025-09-05",
+            "description": "Thực hiện các công việc liên quan đến tuyển dụng, C&B, đào tạo và phát triển văn hóa doanh nghiệp.",
+            "requirements": [
+                "Ít nhất 2 năm kinh nghiệm trong lĩnh vực nhân sự.",
+                "Nắm vững luật lao động.",
+                "Kỹ năng giao tiếp, xử lý tình huống tốt.",
+                "Cẩn thận, chi tiết và có trách nhiệm."
+            ],
+            "benefits": [
+                "Môi trường làm việc thân thiện.",
+                "Được tham gia các hoạt động gắn kết đội ngũ.",
+                "Chính sách phúc lợi tốt."
+            ]
+        },
+        {
+            "id": "data-analyst-07",
+            "title": "Data Analyst",
+            "company": "Data Insights Inc.",
+            "location": "Hà Nội",
+            "salary": "22-35 triệu VND",
+            "type": "Toàn thời gian",
+            "posted_date": "2025-09-12",
+            "description": "Thu thập, xử lý và phân tích dữ liệu để đưa ra các báo cáo và đề xuất kinh doanh. Xây dựng các dashboard trực quan hóa dữ liệu.",
+            "requirements": [
+                "Kinh nghiệm làm việc với SQL, Python hoặc R.",
+                "Thành thạo các công cụ BI như Power BI, Tableau.",
+                "Tư duy logic và khả năng phân tích mạnh mẽ.",
+                "Có kiến thức về thống kê là một lợi thế."
+            ],
+            "benefits": [
+                "Lương thưởng hấp dẫn, phù hợp với năng lực.",
+                "Làm việc với các chuyên gia hàng đầu trong ngành dữ liệu.",
+                "Cơ hội tiếp cận các công nghệ mới nhất."
+            ]
+        },
+        {
+            "id": "sale-executive-08",
+            "title": "Nhân viên Kinh doanh (B2B)",
+            "company": "Global Sales",
+            "location": "Đà Nẵng",
+            "salary": "Lương cứng + Hoa hồng",
+            "type": "Toàn thời gian",
+            "posted_date": "2025-09-06",
+            "description": "Tìm kiếm, tiếp cận và tư vấn các giải pháp của công ty cho khách hàng doanh nghiệp. Đàm phán và ký kết hợp đồng.",
+            "requirements": [
+                "Đam mê kinh doanh, không ngại thử thách.",
+                "Kỹ năng giao tiếp và thuyết phục tốt.",
+                "Có kinh nghiệm bán hàng B2B là một lợi thế.",
+                "Năng động, chịu được áp lực công việc."
+            ],
+            "benefits": [
+                "Thu nhập không giới hạn theo năng lực.",
+                "Được đào tạo bài bản về sản phẩm và kỹ năng bán hàng.",
+                "Lộ trình phát triển lên các vị trí quản lý."
+            ]
+        },
+        {
+            "id": "content-creator-09",
+            "title": "Content Creator (Social Media)",
+            "company": "ViralWorks",
+            "location": "TP. Hồ Chí Minh",
+            "salary": "12-18 triệu VND",
+            "type": "Hybrid",
+            "posted_date": "2025-09-10",
+            "description": "Sáng tạo nội dung (bài viết, hình ảnh, video) cho các kênh mạng xã hội của công ty và khách hàng. Bắt trend và tạo ra các nội dung viral.",
+            "requirements": [
+                "Có kinh nghiệm sáng tạo nội dung trên các nền tảng (Facebook, TikTok, Instagram).",
+                "Khả năng viết lách tốt, tư duy hình ảnh sáng tạo.",
+                "Biết sử dụng các công cụ chỉnh sửa ảnh/video cơ bản.",
+                "Năng động, sáng tạo và luôn cập nhật xu hướng mới."
+            ],
+            "benefits": [
+                "Môi trường làm việc trẻ trung, năng động.",
+                "Thời gian làm việc linh hoạt, có thể làm việc từ xa.",
+                "Thưởng theo hiệu quả của nội dung."
+            ]
+        },
+        {
+            "id": "customer-support-10",
+            "title": "Nhân viên Chăm sóc Khách hàng",
+            "company": "SupportPro",
+            "location": "Hà Nội",
+            "salary": "9-13 triệu VND",
+            "type": "Làm theo ca",
+            "posted_date": "2025-09-09",
+            "description": "Tiếp nhận và giải đáp các thắc mắc, khiếu nại của khách hàng qua điện thoại, email, chat. Hỗ trợ khách hàng sử dụng sản phẩm/dịch vụ.",
+            "requirements": [
+                "Giọng nói rõ ràng, dễ nghe.",
+                "Kỹ năng lắng nghe và giải quyết vấn đề tốt.",
+                "Kiên nhẫn, bình tĩnh và có tinh thần dịch vụ.",
+                "Có thể làm việc theo ca."
+            ],
+            "benefits": [
+                "Phụ cấp ca đêm, thưởng chuyên cần.",
+                "Được đào tạo nghiệp vụ bài bản.",
+                "Môi trường làm việc chuyên nghiệp."
+            ]
+        },
+        {
+            "id": "accountant-11",
+            "title": "Kế toán Tổng hợp",
+            "company": "Finance Solutions",
+            "location": "Hà Nội",
+            "salary": "15-20 triệu VND",
+            "type": "Toàn thời gian",
+            "posted_date": "2025-09-13",
+            "description": "Chịu trách nhiệm về các hoạt động kế toán tổng hợp, báo cáo thuế, và báo cáo tài chính của công ty.",
+            "requirements": [
+                "Tốt nghiệp Đại học chuyên ngành Kế toán, Kiểm toán.",
+                "Ít nhất 2 năm kinh nghiệm ở vị trí tương đương.",
+                "Nắm vững các quy định về thuế và kế toán.",
+                "Sử dụng thành thạo phần mềm kế toán (MISA, FAST)."
+            ],
+            "benefits": [
+                "Lương tháng 13, thưởng hiệu quả công việc.",
+                "Bảo hiểm xã hội, y tế, thất nghiệp theo quy định.",
+                "Môi trường làm việc ổn định, chuyên nghiệp."
+            ]
+        },
+        {
+            "id": "mobile-dev-12",
+            "title": "Lập trình viên Mobile (React Native)",
+            "company": "Appify",
+            "location": "TP. Hồ Chí Minh",
+            "salary": "25-40 triệu VND",
+            "type": "Toàn thời gian",
+            "posted_date": "2025-09-14",
+            "description": "Phát triển ứng dụng di động đa nền tảng cho iOS và Android bằng React Native.",
+            "requirements": [
+                "Trên 2 năm kinh nghiệm với React Native.",
+                "Có kinh nghiệm làm việc với Redux, MobX.",
+                "Đã có sản phẩm trên App Store hoặc Google Play là một lợi thế.",
+                "Kỹ năng giải quyết vấn đề và tối ưu hiệu năng ứng dụng."
+            ],
+            "benefits": [
+                "Cổ phần ưu đãi (ESOP) cho nhân viên chủ chốt.",
+                "Làm việc với các dự án lớn, thách thức.",
+                "Phụ cấp ăn trưa, gym, thể thao."
+            ]
+        },
+        {
+            "id": "devops-engineer-13",
+            "title": "DevOps Engineer",
+            "company": "Cloud Services",
+            "location": "Đà Nẵng",
+            "salary": "30-45 triệu VND",
+            "type": "Remote",
+            "posted_date": "2025-09-15",
+            "description": "Xây dựng và quản lý hệ thống CI/CD, tự động hóa quy trình triển khai và giám sát hệ thống trên nền tảng cloud (AWS, GCP).",
+            "requirements": [
+                "Kinh nghiệm với Docker, Kubernetes.",
+                "Thành thạo các công cụ CI/CD (Jenkins, GitLab CI).",
+                "Có kinh nghiệm về Infrastructure as Code (Terraform, Ansible).",
+                "Hiểu biết về mạng và bảo mật hệ thống."
+            ],
+            "benefits": [
+                "Làm việc từ xa 100%.",
+                "Ngân sách đào tạo và chứng chỉ hàng năm.",
+                "Gói phúc lợi chăm sóc sức khỏe cao cấp cho cả gia đình."
+            ]
+        },
+        {
+            "id": "graphic-designer-14",
+            "title": "Graphic Designer",
+            "company": "Design Studio",
+            "location": "Hà Nội",
+            "salary": "12-18 triệu VND",
+            "type": "Toàn thời gian",
+            "posted_date": "2025-09-16",
+            "description": "Thiết kế các ấn phẩm marketing (banner, poster, brochure), bộ nhận diện thương hiệu và các sản phẩm đồ họa khác.",
+            "requirements": [
+                "Thành thạo bộ công cụ Adobe (Photoshop, Illustrator, InDesign).",
+                "Tư duy thẩm mỹ tốt, sáng tạo.",
+                "Có khả năng vẽ tay là một lợi thế.",
+                "Portfolio đa dạng các sản phẩm thiết kế."
+            ],
+            "benefits": [
+                "Môi trường làm việc nghệ thuật, sáng tạo.",
+                "Tham gia các workshop, triển lãm thiết kế.",
+                "Thưởng theo dự án."
+            ]
+        },
+        {
+            "id": "logistics-specialist-15",
+            "title": "Chuyên viên Logistics",
+            "company": "Global Trans",
+            "location": "Hải Phòng",
+            "salary": "13-19 triệu VND",
+            "type": "Toàn thời gian",
+            "posted_date": "2025-09-17",
+            "description": "Quản lý chuỗi cung ứng, điều phối vận tải, làm thủ tục hải quan và theo dõi đơn hàng.",
+            "requirements": [
+                "Kinh nghiệm trong lĩnh vực logistics, xuất nhập khẩu.",
+                "Nắm vững quy trình và chứng từ xuất nhập khẩu.",
+                "Kỹ năng đàm phán và làm việc với các nhà cung cấp.",
+                "Tiếng Anh chuyên ngành tốt."
+            ],
+            "benefits": [
+                "Phụ cấp đi lại, điện thoại.",
+                "Thưởng năng suất, hiệu quả công việc.",
+                "Cơ hội làm việc trong môi trường quốc tế."
+            ]
+        },
+        {
+            "id": "teacher-english-16",
+            "title": "Giáo viên Tiếng Anh",
+            "company": "English Center",
+            "location": "TP. Hồ Chí Minh",
+            "salary": "Thỏa thuận",
+            "type": "Bán thời gian",
+            "posted_date": "2025-09-18",
+            "description": "Giảng dạy Tiếng Anh cho các lớp ở nhiều cấp độ khác nhau (trẻ em, người lớn, luyện thi IELTS).",
+            "requirements": [
+                "Chứng chỉ giảng dạy (TESOL, CELTA) là bắt buộc.",
+                "Phát âm chuẩn, kỹ năng sư phạm tốt.",
+                "Yêu thích công việc giảng dạy, năng động và nhiệt huyết.",
+                "Có kinh nghiệm đứng lớp ít nhất 1 năm."
+            ],
+            "benefits": [
+                "Mức lương theo giờ cạnh tranh.",
+                "Lịch dạy linh hoạt.",
+                "Môi trường làm việc chuyên nghiệp, hiện đại.",
+                "Được đào tạo về phương pháp giảng dạy."
+            ]
+        },
+        {
+            "id": "chef-17",
+            "title": "Bếp trưởng Bếp Âu",
+            "company": "The Grand Hotel",
+            "location": "Đà Nẵng",
+            "salary": "25-35 triệu VND",
+            "type": "Toàn thời gian",
+            "posted_date": "2025-09-19",
+            "description": "Chịu trách nhiệm điều hành toàn bộ hoạt động của bếp Âu, lên thực đơn, quản lý nhân sự và đảm bảo chất lượng món ăn.",
+            "requirements": [
+                "Ít nhất 5 năm kinh nghiệm ở vị trí tương đương tại các khách sạn 4-5 sao.",
+                "Am hiểu sâu sắc về ẩm thực châu Âu.",
+                "Kỹ năng quản lý, lãnh đạo và đào tạo nhân viên.",
+                "Sáng tạo trong việc phát triển món ăn mới."
+            ],
+            "benefits": [
+                "Service charge hàng tháng.",
+                "Bữa ăn theo ca, đồng phục.",
+                "Chế độ nghỉ dưỡng tại các khách sạn trong chuỗi."
+            ]
+        },
+        {
+            "id": "architect-18",
+            "title": "Kiến trúc sư",
+            "company": "Arch Design",
+            "location": "Hà Nội",
+            "salary": "20-30 triệu VND",
+            "type": "Toàn thời gian",
+            "posted_date": "2025-09-20",
+            "description": "Thiết kế ý tưởng, triển khai bản vẽ kỹ thuật cho các công trình dân dụng và công nghiệp.",
+            "requirements": [
+                "Tốt nghiệp Đại học chuyên ngành Kiến trúc.",
+                "Sử dụng thành thạo AutoCAD, SketchUp, Revit.",
+                "Có kinh nghiệm thiết kế các công trình thực tế.",
+                "Tư duy sáng tạo, thẩm mỹ và am hiểu kỹ thuật."
+            ],
+            "benefits": [
+                "Thưởng theo tiến độ và chất lượng dự án.",
+                "Tham gia các dự án lớn, đa dạng.",
+                "Môi trường làm việc chuyên nghiệp, cơ hội học hỏi cao."
+            ]
+        },
+        {
+            "id": "pharmacist-19",
+            "title": "Dược sĩ Nhà thuốc",
+            "company": "PharmaCare",
+            "location": "TP. Hồ Chí Minh",
+            "salary": "10-15 triệu VND",
+            "type": "Toàn thời gian",
+            "posted_date": "2025-09-21",
+            "description": "Tư vấn, hướng dẫn sử dụng thuốc cho khách hàng. Quản lý thuốc và hoạt động của nhà thuốc.",
+            "requirements": [
+                "Tốt nghiệp Cao đẳng/Đại học Dược.",
+                "Có chứng chỉ hành nghề dược.",
+                "Kỹ năng giao tiếp tốt, cẩn thận và có trách nhiệm.",
+                "Ưu tiên có kinh nghiệm bán hàng tại nhà thuốc."
+            ],
+            "benefits": [
+                "Lương cứng + thưởng doanh số.",
+                "Được đào tạo kiến thức sản phẩm và kỹ năng bán hàng.",
+                "Môi trường làm việc thân thiện."
+            ]
+        },
+        {
+            "id": "it-support-20",
+            "title": "Nhân viên IT Support",
+            "company": "TechHelp",
+            "location": "Đà Nẵng",
+            "salary": "10-16 triệu VND",
+            "type": "Toàn thời gian",
+            "posted_date": "2025-10-02",
+            "description": "Hỗ trợ người dùng cuối về các vấn đề phần cứng, phần mềm, mạng. Quản trị hệ thống máy tính và thiết bị văn phòng.",
+            "requirements": [
+                "Có kiến thức tốt về hệ điều hành Windows, MacOS.",
+                "Hiểu biết về mạng LAN, WAN, TCP/IP.",
+                "Kỹ năng xử lý sự cố và hỗ trợ người dùng.",
+                "Kiên nhẫn, nhiệt tình và có tinh thần phục vụ."
+            ],
+            "benefits": [
+                "Phụ cấp ăn trưa, gửi xe.",
+                "Được trang bị các công cụ làm việc hiện đại.",
+                "Lương tháng 13, du lịch hàng năm."
+            ]
+        },
+        {
+            "id": "video-editor-21",
+            "title": "Video Editor",
+            "company": "Media Pro",
+            "location": "TP. Hồ Chí Minh",
+            "salary": "15-25 triệu VND",
+            "type": "Hybrid",
+            "posted_date": "2025-09-23",
+            "description": "Dựng phim, chỉnh sửa video cho các sản phẩm quảng cáo, video sự kiện, và nội dung social media.",
+            "requirements": [
+                "Thành thạo Adobe Premiere, After Effects.",
+                "Tư duy hình ảnh, nhịp điệu và kể chuyện tốt.",
+                "Có kinh nghiệm về chỉnh màu, âm thanh.",
+                "Portfolio các sản phẩm video đã thực hiện."
+            ],
+            "benefits": [
+                "Làm việc trong môi trường media năng động.",
+                "Thời gian làm việc linh hoạt.",
+                "Thưởng sáng tạo và hiệu quả công việc."
+            ]
+        },
+        {
+            "id": "legal-advisor-22",
+            "title": "Chuyên viên Pháp lý",
+            "company": "Law Firm",
+            "location": "Hà Nội",
+            "salary": "18-25 triệu VND",
+            "type": "Toàn thời gian",
+            "posted_date": "2025-09-24",
+            "description": "Tư vấn pháp lý cho doanh nghiệp về các vấn đề hợp đồng, đầu tư, lao động. Soạn thảo và rà soát các văn bản pháp lý.",
+            "requirements": [
+                "Tốt nghiệp Đại học Luật, có chứng chỉ hành nghề luật sư là lợi thế.",
+                "Ít nhất 3 năm kinh nghiệm tư vấn pháp lý doanh nghiệp.",
+                "Kỹ năng nghiên cứu, phân tích và lập luận pháp lý.",
+                "Cẩn trọng, chính xác và bảo mật thông tin."
+            ],
+            "benefits": [
+                "Mức lương cạnh tranh.",
+                "Cơ hội phát triển chuyên môn sâu.",
+                "Môi trường làm việc chuyên nghiệp, thách thức."
+            ]
+        },
+        {
+            "id": "event-planner-23",
+            "title": "Chuyên viên Tổ chức Sự kiện",
+            "company": "EventMakers",
+            "location": "TP. Hồ Chí Minh",
+            "salary": "14-22 triệu VND",
+            "type": "Toàn thời gian",
+            "posted_date": "2025-09-25",
+            "description": "Lên ý tưởng, lập kế hoạch và điều phối tổ chức các sự kiện cho khách hàng (hội nghị, ra mắt sản phẩm, tiệc cuối năm).",
+            "requirements": [
+                "Có kinh nghiệm tổ chức sự kiện thực tế.",
+                "Kỹ năng lập kế hoạch, quản lý ngân sách và điều phối.",
+                "Năng động, sáng tạo và có khả năng chịu áp lực cao.",
+                "Mạng lưới quan hệ tốt với các nhà cung cấp."
+            ],
+            "benefits": [
+                "Thưởng theo dự án.",
+                "Môi trường làm việc không nhàm chán, luôn có sự mới mẻ.",
+                "Cơ hội đi công tác và mở rộng mối quan hệ."
+            ]
+        },
+        {
+            "id": "copywriter-24",
+            "title": "Copywriter",
+            "company": "AdWords Creative",
+            "location": "Remote",
+            "salary": "15-25 triệu VND",
+            "type": "Remote",
+            "posted_date": "2025-09-26",
+            "description": "Viết nội dung quảng cáo sáng tạo cho các chiến dịch digital, website, email marketing và các ấn phẩm truyền thông.",
+            "requirements": [
+                "Khả năng chơi chữ, viết lách sắc sảo và thuyết phục.",
+                "Hiểu biết về marketing và tâm lý người tiêu dùng.",
+                "Portfolio các bài viết quảng cáo, slogan, tagline ấn tượng.",
+                "Kỷ luật và khả năng quản lý thời gian tốt khi làm việc từ xa."
+            ],
+            "benefits": [
+                "Làm việc tự do, linh hoạt về thời gian và không gian.",
+                "Thu nhập hấp dẫn dựa trên năng lực.",
+                "Cơ hội làm việc với các thương hiệu lớn."
+            ]
+        },
+        {
+            "id": "qa-qc-25",
+            "title": "Kỹ sư QA/QC (Phần mềm)",
+            "company": "Test Solutions",
+            "location": "Đà Nẵng",
+            "salary": "18-28 triệu VND",
+            "type": "Toàn thời gian",
+            "posted_date": "2025-09-27",
+            "description": "Lập kế hoạch test, viết test case, thực hiện test (manual & automation) để đảm bảo chất lượng sản phẩm phần mềm.",
+            "requirements": [
+                "Có kinh nghiệm về kiểm thử phần mềm.",
+                "Hiểu biết về quy trình test và các loại test.",
+                "Kinh nghiệm với các công cụ test (Selenium, Jira) là một lợi thế.",
+                "Tư duy logic, tỉ mỉ và cẩn thận."
+            ],
+            "benefits": [
+                "Môi trường làm việc chuyên nghiệp, quy trình rõ ràng.",
+                "Được đào tạo về automation test.",
+                "Thưởng chất lượng sản phẩm."
+            ]
+        },
+        {
+            "id": "ecommerce-manager-26",
+            "title": "Trưởng phòng Thương mại Điện tử",
+            "company": "Retail Online",
+            "location": "TP. Hồ Chí Minh",
+            "salary": "35-50 triệu VND",
+            "type": "Toàn thời gian",
+            "posted_date": "2025-09-28",
+            "description": "Quản lý và phát triển hoạt động kinh doanh trên các sàn thương mại điện tử (Shopee, Lazada, Tiki). Xây dựng chiến lược và quản lý đội ngũ.",
+            "requirements": [
+                "Kinh nghiệm quản lý gian hàng trên các sàn TMĐT lớn.",
+                "Hiểu biết sâu về các công cụ marketing trên sàn.",
+                "Kỹ năng phân tích số liệu và lập kế hoạch kinh doanh.",
+                "Kỹ năng lãnh đạo và quản lý đội nhóm."
+            ],
+            "benefits": [
+                "Lương + thưởng doanh số hấp dẫn.",
+                "Quyền quyết định và không gian để phát triển chiến lược.",
+                "Môi trường TMĐT năng động, cạnh tranh."
+            ]
+        },
+        {
+            "id": "cad-designer-27",
+            "title": "Nhân viên thiết kế CAD/CAM",
+            "company": "Precision Mechanics",
+            "location": "Bình Dương",
+            "salary": "15-22 triệu VND",
+            "type": "Toàn thời gian",
+            "posted_date": "2025-09-29",
+            "description": "Thiết kế và lập trình gia công trên các phần mềm CAD/CAM (AutoCAD, SolidWorks, Mastercam) cho các chi tiết cơ khí chính xác.",
+            "requirements": [
+                "Thành thạo ít nhất một phần mềm CAD/CAM.",
+                "Hiểu biết về vật liệu và quy trình gia công cơ khí.",
+                "Đọc hiểu bản vẽ kỹ thuật tốt.",
+                "Cẩn thận, tỉ mỉ và có trách nhiệm."
+            ],
+            "benefits": [
+                "Làm việc trong môi trường sản xuất công nghệ cao.",
+                "Được đào tạo và nâng cao tay nghề.",
+                "Phụ cấp ăn ở, đi lại."
+            ]
+        },
+        {
+            "id": "hr-manager-28",
+            "title": "Trưởng phòng Nhân sự",
+            "company": "Growth Corp",
+            "location": "Hà Nội",
+            "salary": "40-60 triệu VND",
+            "type": "Toàn thời gian",
+            "posted_date": "2025-09-30",
+            "description": "Xây dựng chiến lược nhân sự, quản lý toàn bộ các mảng (Tuyển dụng, C&B, Đào tạo, Văn hóa doanh nghiệp) để thu hút và giữ chân nhân tài.",
+            "requirements": [
+                "Trên 5 năm kinh nghiệm ở vị trí quản lý nhân sự.",
+                "Tầm nhìn chiến lược và tư duy kinh doanh.",
+                "Kỹ năng lãnh đạo, truyền cảm hứng và xây dựng đội ngũ.",
+                "Am hiểu sâu sắc về luật lao động và thị trường nhân sự."
+            ],
+            "benefits": [
+                "Gói thu nhập và phúc lợi cạnh tranh.",
+                "Cơ hội trở thành thành viên ban lãnh đạo công ty.",
+                "Môi trường làm việc chuyên nghiệp, trao quyền."
+            ]
+        },
+        {
+            "id": "tour-guide-29",
+            "title": "Hướng dẫn viên Du lịch (Tiếng Anh)",
+            "company": "Vietnam Tours",
+            "location": "Hà Nội",
+            "salary": "Lương cứng + Tip",
+            "type": "Linh hoạt",
+            "posted_date": "2025-10-01",
+            "description": "Dẫn tour, giới thiệu văn hóa, lịch sử và các điểm tham quan cho du khách nước ngoài tại Hà Nội và các vùng lân cận.",
+            "requirements": [
+                "Có thẻ hướng dẫn viên du lịch quốc tế.",
+                "Tiếng Anh lưu loát, tự tin giao tiếp.",
+                "Kiến thức sâu rộng về văn hóa, lịch sử Việt Nam.",
+                "Năng động, nhiệt tình và có kỹ năng xử lý tình huống tốt."
+            ],
+            "benefits": [
+                "Thu nhập hấp dẫn từ lương và tiền tip.",
+                "Cơ hội đi nhiều nơi và gặp gỡ nhiều người.",
+                "Công việc năng động, không gò bó."
+            ]
+        },
+        {
+            "id": "system-admin-30",
+            "title": "System Administrator",
+            "company": "Infra Solutions",
+            "location": "TP. Hồ Chí Minh",
+            "salary": "20-35 triệu VND",
+            "type": "Toàn thời gian",
+            "posted_date": "2025-10-02",
+            "description": "Quản trị, vận hành và bảo trì hệ thống máy chủ (Windows, Linux), hệ thống mạng và các dịch vụ liên quan.",
+            "requirements": [
+                "Kinh nghiệm quản trị hệ thống Windows Server, Linux.",
+                "Có kiến thức về ảo hóa (VMware, Hyper-V).",
+                "Hiểu biết về các dịch vụ mạng (DNS, DHCP, VPN).",
+                "Chứng chỉ MCSA, LPI là một lợi thế."
+            ],
+            "benefits": [
+                "Làm việc với hệ thống lớn, phức tạp.",
+                "Được đào tạo và thi các chứng chỉ quốc tế.",
+                "Chế độ đãi ngộ tốt, bảo hiểm sức khỏe đầy đủ."
+            ]
+        }
+    ],
+    "stats": {
+        "total_jobs": 30,
+        "total_companies": 24,
+        "total_industries": 25
+    }
+}

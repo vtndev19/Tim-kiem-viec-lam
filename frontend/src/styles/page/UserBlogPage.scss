@@ -1,0 +1,170 @@
+.user-blog-page {
+  max-width: 600px;
+  margin: 30px auto;
+  padding: 0 16px;
+  font-family: "Inter", sans-serif;
+  background-color: #f0f2f5;
+
+  .page-title {
+    text-align: center;
+    font-size: 24px;
+    margin-bottom: 20px;
+    color: #1877f2;
+  }
+
+  .card {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    margin-bottom: 16px;
+    padding: 16px;
+  }
+
+  /* ===== Form đăng bài ===== */
+  .post-form {
+    .form-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+
+      .avatar {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+      }
+
+      .username {
+        font-weight: 600;
+        color: #333;
+      }
+    }
+
+    textarea {
+      width: 100%;
+      border: none;
+      resize: none;
+      font-size: 15px;
+      outline: none;
+      background: #f5f6f7;
+      border-radius: 10px;
+      padding: 10px;
+      margin-bottom: 8px;
+    }
+
+    .image-preview {
+      margin-top: 10px;
+      position: relative;
+
+      img {
+        width: 100%;
+        border-radius: 10px;
+      }
+
+      .remove-image {
+        position: absolute;
+        top: 6px;
+        right: 6px;
+        background: rgba(0, 0, 0, 0.5);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 24px;
+        height: 24px;
+        cursor: pointer;
+      }
+    }
+
+    .form-actions {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 10px;
+      align-items: center;
+
+      .upload-btn {
+        cursor: pointer;
+        color: #1877f2;
+        font-weight: 500;
+      }
+
+      .submit-btn {
+        background-color: #1877f2;
+        color: white;
+        border: none;
+        border-radius: 20px;
+        padding: 6px 18px;
+        cursor: pointer;
+        font-weight: 600;
+
+        &:hover {
+          background-color: darken(#1877f2, 5%);
+        }
+      }
+    }
+  }
+
+  /* ===== Bài đăng ===== */
+  .post-card {
+    .post-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+
+      .avatar {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+      }
+
+      h4 {
+        margin: 0;
+        font-size: 15px;
+      }
+
+      small {
+        color: gray;
+      }
+    }
+
+    .post-content {
+      margin-top: 10px;
+
+      p {
+        margin-bottom: 8px;
+        font-size: 15px;
+      }
+
+      .post-image {
+        width: 100%;
+        border-radius: 10px;
+      }
+    }
+
+    .post-actions {
+      display: flex;
+      justify-content: space-around;
+      margin-top: 10px;
+      border-top: 1px solid #eee;
+      padding-top: 8px;
+
+      button {
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: #555;
+        font-weight: 500;
+        transition: color 0.2s;
+
+        &:hover {
+          color: #1877f2;
+        }
+      }
+    }
+  }
+
+  .no-posts {
+    text-align: center;
+    color: #888;
+    padding: 10px 0;
+  }
+}

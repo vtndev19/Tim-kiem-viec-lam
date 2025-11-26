@@ -1,0 +1,193 @@
+// ✅ src/styles/Register.scss
+@import "../global.scss";
+// ✅ Khai báo thủ công để tránh lỗi
+$spacing-2xs: 4px;
+$spacing-xs: 8px;
+$spacing-sm: 12px;
+$spacing-md: 16px;
+$spacing-lg: 24px;
+$radius-lg: 12px;
+
+// ===============================
+// 🎨 Trang đăng ký tài khoản
+// ===============================
+
+.register-page {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 100vh;
+  padding: 60px 0;
+  /* changed code */
+  background: url("../../assets/images/registerBack.png") no-repeat center
+    center;
+  background-size: cover;
+  background-attachment: scroll;
+}
+
+// ===============================
+// 📦 Hộp đăng ký
+// ===============================
+.register-container {
+  width: 85%;
+  max-width: 520px; // ✅ rộng hơn để thoáng hơn
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(6px);
+  border-radius: 18px;
+  padding: 30px 36px; // ✅ padding gọn vừa đủ
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+  animation: fadeIn 0.6s ease both;
+}
+
+// ===============================
+// 🏷️ Phần tiêu đề
+// ===============================
+.register-header {
+  text-align: center;
+  margin-bottom: 20px;
+
+  h2 {
+    font-size: 28px;
+    font-weight: 700;
+    color: #222;
+    margin-bottom: 6px;
+  }
+
+  p {
+    font-size: 15px;
+    color: #555;
+    margin-bottom: 0;
+  }
+}
+
+// ===============================
+// 📝 Biểu mẫu
+// ===============================
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px; // ✅ khoảng cách nhỏ hơn cho gọn
+}
+
+.form-row {
+  display: flex;
+  gap: 10px;
+
+  .form-group {
+    flex: 1;
+  }
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+
+  label {
+    font-size: 14px;
+    font-weight: 500;
+    color: #333;
+    margin-bottom: 3px;
+  }
+
+  input {
+    padding: 8px 12px;
+    font-size: 15px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    outline: none;
+    transition: all 0.25s ease;
+
+    &:focus {
+      border-color: #007bff;
+      box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+    }
+  }
+}
+
+// ===============================
+// ✅ Điều khoản
+// ===============================
+.terms {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  color: #444;
+  margin-top: 4px;
+
+  input {
+    margin-right: 8px;
+  }
+
+  a {
+    color: #007bff;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+// ===============================
+// 🔘 Nút đăng ký
+// ===============================
+.register-button {
+  margin-top: 14px;
+  padding: 10px;
+  background: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s ease;
+
+  &:hover {
+    background: #0056b3;
+  }
+}
+
+// ===============================
+// 🔗 Liên kết đăng nhập
+// ===============================
+.login-link {
+  text-align: center;
+  margin-top: 10px;
+  font-size: 14px;
+
+  a {
+    color: #007bff;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+// ===============================
+// ✨ Hiệu ứng xuất hiện box
+// ===============================
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// ✨ Hiệu ứng xuất hiện nhẹ nhàng
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

@@ -1,0 +1,68 @@
+.search-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px; // khoảng cách giữa input và button
+  width: 100%;
+  max-width: 850px;
+  margin: 20px auto;
+  padding: 10px 16px;
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+
+  input {
+    flex: 1; // input chiếm hết chiều rộng còn lại
+    padding: 10px 14px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+
+    &::placeholder {
+      color: #777;
+    }
+
+    &:focus {
+      outline: none;
+      border-color: #007bff; // xanh dương khi focus
+    }
+  }
+
+  .search-bar__button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+
+    &:hover {
+      background: linear-gradient(135deg, #3399ff, #007bff);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+    }
+
+    &:active {
+      transform: translateY(1px);
+    }
+  }
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .search-bar {
+    flex-direction: column;
+    gap: 10px;
+
+    input {
+      width: 100%;
+    }
+
+    .search-bar__button {
+      width: 100%;
+    }
+  }
+}

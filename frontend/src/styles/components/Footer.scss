@@ -1,0 +1,221 @@
+@import '../global.scss';
+
+.footer {
+  width: 100vw; // Sử dụng viewport width để full màn hình
+  margin: 0;
+  padding: 0; // Bỏ padding wrapper
+  background-color: #0a192f;
+  color: $text-light;
+  box-sizing: border-box;
+  position: relative;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw; // Trick để break out khỏi container parent
+
+  .container {
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: $spacing-lg $spacing-md; // Di chuyển padding vào container
+  }
+
+  // ---------------------------
+  // Footer Top
+  // ---------------------------
+  .footer-top {
+    text-align: center;
+    margin-bottom: $spacing-lg;
+    padding-bottom: $spacing-lg;
+    border-bottom: 1px solid rgba($white, 0.1);
+
+    h2 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: $spacing-sm;
+    }
+
+    p {
+      color: $text-light;
+      font-size: 0.95rem;
+      max-width: 700px;
+      margin: 0 auto $spacing-md;
+    }
+
+    .subscribe-form {
+      display: flex;
+      justify-content: center;
+      max-width: 450px;
+      margin: 0 auto;
+      border-radius: $radius-md;
+      overflow: hidden;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+
+      input {
+        flex: 1;
+        padding: $spacing-sm $spacing-md;
+        border: none;
+        outline: none;
+        font-size: 0.9rem;
+        background-color: rgba($white, 0.9);
+        color: $text-dark;
+      }
+
+      button {
+        background: $primary;
+        color: $white;
+        padding: $spacing-sm $spacing-lg;
+        border: none;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+
+        &:hover {
+          background: darken($primary, 10%);
+        }
+      }
+    }
+  }
+
+  // ---------------------------
+  // Footer Main
+  // ---------------------------
+  .footer-main {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: $spacing-lg;
+    margin-bottom: $spacing-lg;
+  }
+
+  .footer-col {
+    h3,
+    h4 {
+      font-weight: 600;
+      font-size: 1.1rem;
+      margin-bottom: $spacing-md;
+      color: $white;
+      position: relative;
+      padding-bottom: $spacing-xs;
+
+      &::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 25px;
+        height: 2px;
+        background-color: $primary;
+      }
+    }
+
+    p {
+      font-size: 0.9rem;
+      line-height: 1.5;
+      color: $text-light;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+
+      li {
+        margin-bottom: $spacing-xs;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: $spacing-sm;
+
+        a {
+          color: $text-light;
+          text-decoration: none;
+          transition: color 0.3s ease, transform 0.3s ease;
+          display: inline-block;
+
+          &:hover {
+            color: $primary;
+            transform: translateX(4px);
+          }
+        }
+      }
+    }
+
+    .social-links {
+      display: flex;
+      gap: $spacing-sm;
+      margin-top: $spacing-sm;
+
+      a {
+        color: $white;
+        font-size: 1.1rem;
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background-color: rgba($white, 0.1);
+        transition: background-color 0.3s ease, color 0.3s ease;
+
+        &:hover {
+          background-color: $primary;
+          color: $white;
+        }
+      }
+    }
+  }
+
+  // ---------------------------
+  // Footer Bottom
+  // ---------------------------
+  .footer-bottom {
+    border-top: 1px solid rgba($white, 0.1);
+    padding-top: $spacing-md;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: $spacing-sm;
+    font-size: 0.85rem;
+    color: darken($text-light, 20%);
+
+    @include tablet {
+      flex-direction: row;
+      justify-content: space-between;
+    }
+
+    .footer-legal-links {
+      display: flex;
+      gap: $spacing-md;
+
+      a {
+        color: darken($text-light, 20%);
+        text-decoration: none;
+        transition: color 0.3s ease;
+
+        &:hover {
+          color: $primary;
+        }
+      }
+    }
+  }
+}
+
+// Alternative approach - nếu cách trên không hoạt động
+.footer-fullwidth {
+  width: 100%;
+  min-width: 100vw;
+  margin: 0;
+  padding: 0;
+  background-color: #0a192f;
+  color: $text-light;
+  box-sizing: border-box;
+  
+  .container {
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: $spacing-lg $spacing-md;
+  }
+  
+  // ... (rest of the styles remain the same)
+}

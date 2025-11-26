@@ -1,0 +1,22 @@
+# Thư mục không cần push
+node_modules/
+.env
+*.env
+
+# File build output
+build/
+dist/
+
+# File hệ thống
+.DS_Store
+Thumbs.db
+
+# File log
+*.log
+
+# File nén
+*.rar
+*.zip
+
+# VSCode
+.vscode/

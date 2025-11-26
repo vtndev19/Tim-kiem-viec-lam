@@ -1,0 +1,172 @@
+/* ======================
+      ICON FLOATING
+====================== */
+.recommend-icon {
+  position: fixed;
+  bottom: 245px;
+  right: 30px;
+  background: #2564ebb7;
+  color: #fff;
+  width: 65px;
+  height: 65px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+  z-index: 888;
+  transition: 0.2s;
+
+  &:hover {
+    transform: scale(1.08);
+    background: #1d4ed8;
+  }
+}
+
+/* ======================
+      TOAST THÔNG BÁO
+====================== */
+.recommend-toast {
+  position: fixed;
+  bottom: 320px;
+  right: 35px;
+  background: #1e40af;
+  padding: 12px 18px;
+  border-radius: 10px;
+  color: white;
+  font-size: 14px;
+  animation: fadeInOut 3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  z-index: 999;
+}
+
+@keyframes fadeInOut {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  10% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+/* ======================
+       PANEL JOB LIST
+====================== */
+.recommend-panel {
+  position: fixed;
+  bottom: 310px;
+  right: 45px;
+
+  /* tăng chiều rộng panel lên cho đẹp */
+  width: 420px;
+  max-height: 300px;
+
+  background: #ffffff;
+  border-radius: 18px;
+  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.25);
+
+  padding: 20px;
+  z-index: 999;
+  transform: translateY(20px);
+  opacity: 0;
+  pointer-events: none;
+  transition: 0.25s ease;
+  overflow-y: auto;
+
+  &.open {
+    transform: translateY(0);
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  /* Thanh cuộn đẹp */
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+  }
+
+  .panel-title {
+    margin-bottom: 15px;
+    font-size: 20px;
+    font-weight: 700;
+    color: #1e293b;
+  }
+
+  /* ======================
+         JOB ITEM
+  ====================== */
+  .panel-item {
+    display: block;
+    padding: 15px 18px;
+    border-radius: 14px;
+
+    /* BG nhẹ + shadow đẹp */
+    background: #f8fafc;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+
+    margin-bottom: 15px;
+    border: 1px solid #e2e8f0;
+
+    transition: 0.2s ease;
+
+    &:hover {
+      transform: translateY(-3px);
+      background: #eef2ff;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+    }
+
+    .header {
+      display: flex;
+      flex-direction: column;
+      margin-bottom: 8px;
+
+      h4 {
+        font-size: 17px;
+        margin: 0;
+        font-weight: 600;
+        color: #0f172a;
+      }
+
+      .company {
+        margin-top: 3px;
+        font-size: 14px;
+        font-weight: 500;
+        color: #475569;
+      }
+    }
+
+    .desc {
+      font-size: 14px;
+      margin: 10px 0;
+      color: #475569;
+      line-height: 1.45;
+    }
+
+    .meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 14px;
+      font-weight: 500;
+      color: #334155;
+
+      span {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+    }
+  }
+}

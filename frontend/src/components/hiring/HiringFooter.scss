@@ -1,0 +1,200 @@
+@import "../../styles/hiring/variables.scss";
+
+.hiring-footer {
+  background: linear-gradient(135deg, $text-dark 0%, #1a1a1a 100%);
+  color: $white;
+  padding-top: 60px;
+
+  @media (max-width: $tablet) {
+    padding-top: 40px;
+  }
+
+  .footer-content {
+    padding-bottom: 40px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .footer-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 32px;
+    margin-bottom: 40px;
+
+    @media (max-width: $tablet) {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+    }
+
+    @media (max-width: $mobile) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .footer-section {
+    .footer-logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 16px;
+
+      .logo-icon {
+        font-size: 28px;
+      }
+
+      h3 {
+        font-size: 18px;
+        font-weight: 700;
+        margin: 0;
+        background: linear-gradient(
+          135deg,
+          $light-blue 0%,
+          $extra-light-blue 100%
+        );
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+    }
+
+    > p {
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.7);
+      line-height: 1.6;
+      margin: 0 0 16px 0;
+    }
+
+    h4 {
+      font-size: 14px;
+      font-weight: 600;
+      margin: 0 0 12px 0;
+      color: $light-blue;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+
+      li {
+        a {
+          color: rgba(255, 255, 255, 0.7);
+          text-decoration: none;
+          font-size: 13px;
+          transition: all $transition-normal;
+
+          &:hover {
+            color: $light-blue;
+            padding-left: 4px;
+          }
+        }
+      }
+    }
+
+    .social-links {
+      display: flex;
+      gap: 12px;
+      margin-top: 16px;
+
+      .social-link {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        background-color: rgba(255, 255, 255, 0.1);
+        color: $light-blue;
+        text-decoration: none;
+        border-radius: 50%;
+        font-weight: 700;
+        font-size: 14px;
+        transition: all $transition-normal;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+
+        &:hover {
+          background-color: $primary-blue;
+          border-color: $primary-blue;
+          color: $white;
+          transform: translateY(-3px);
+        }
+      }
+    }
+  }
+
+  .newsletter-section {
+    background: rgba(30, 136, 229, 0.1);
+    border: 1px solid rgba(30, 136, 229, 0.3);
+    padding: 24px;
+    border-radius: $border-radius-large;
+    margin-bottom: 40px;
+
+    .newsletter-content {
+      h3 {
+        font-size: 18px;
+        font-weight: 700;
+        margin: 0 0 8px 0;
+        color: $light-blue;
+      }
+
+      p {
+        font-size: 13px;
+        color: rgba(255, 255, 255, 0.7);
+        margin: 0 0 16px 0;
+      }
+    }
+
+    .newsletter-form {
+      display: flex;
+      gap: 8px;
+
+      @media (max-width: $mobile) {
+        flex-direction: column;
+      }
+
+      .newsletter-input {
+        flex: 1;
+        padding: 10px 12px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: $border-radius-medium;
+        background-color: rgba(255, 255, 255, 0.1);
+        color: $white;
+        font-size: 13px;
+        transition: all $transition-normal;
+
+        &::placeholder {
+          color: rgba(255, 255, 255, 0.5);
+        }
+
+        &:focus {
+          outline: none;
+          border-color: $light-blue;
+          background-color: rgba(30, 136, 229, 0.2);
+        }
+      }
+
+      .button {
+        white-space: nowrap;
+      }
+    }
+  }
+
+  .footer-bottom {
+    padding: 24px 0;
+    text-align: center;
+
+    .copyright {
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.6);
+      margin: 0;
+
+      .highlight {
+        color: $light-blue;
+        font-weight: 600;
+      }
+    }
+  }
+}

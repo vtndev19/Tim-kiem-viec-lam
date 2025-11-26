@@ -1,0 +1,72 @@
+.carousel-wrapper {
+  width: 100%;
+  max-width: 1200px; // giới hạn chiều rộng banner
+  margin: 0 auto;
+  position: relative;
+
+  .slide-item {
+    width: 100%;
+    position: relative;
+  }
+
+  // ✅ Tỉ lệ 1920x675 = ~2.84 : 1
+  .slide-ratio {
+    aspect-ratio: 1920 / 675; // chính xác tỉ lệ ảnh
+    width: 100%;
+    max-height: 675px; // giới hạn chiều cao tối đa (tỉ lệ chuẩn)
+    min-height: 250px; // tránh quá thấp ở màn nhỏ
+    overflow: hidden;
+    border-radius: 16px;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover; // ảnh phủ kín khung mà không bị méo
+      display: block;
+      border-radius: 16px;
+    }
+  }
+
+  // ✅ Fallback cho trình duyệt cũ không hỗ trợ aspect-ratio
+  .slide-ratio-fallback {
+    position: relative;
+    width: 100%;
+    padding-top: calc((675 / 1920) * 100%); // tương đương ~35.15%
+    overflow: hidden;
+    border-radius: 10px;
+
+    img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 16px;
+    }
+  }
+}
+
+/* ============================
+   📱 Responsive cho Mobile
+============================ */
+@media (max-width: 992px) {
+  .carousel-wrapper {
+    max-width: 100%;
+
+    .slide-ratio {
+      aspect-ratio: 16 / 9; // đổi sang tỉ lệ video phổ biến
+      max-height: 400px;
+    }
+  }
+}
+
+@media (max-width: 576px) {
+  .carousel-wrapper {
+    .slide-ratio {
+      aspect-ratio: 4 / 3;
+      max-height: 280px;
+      min-height: 200px;
+    }
+  }
+}

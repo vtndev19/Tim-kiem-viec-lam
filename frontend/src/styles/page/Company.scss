@@ -1,0 +1,146 @@
+// src/styles/page/Company.scss
+@import "../global.scss";
+
+.company-page {
+  padding: $spacing-2xl 0;
+
+  .page-title {
+    text-align: center;
+    font-size: $font-size-3xl;
+    color: $text-dark;
+    margin-bottom: $spacing-xl;
+  }
+
+  /* ===== Giữ dạng lưới ===== */
+  .company-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: $spacing-xl;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  /* ===== Card công ty ===== */
+  .company-card {
+    display: flex;
+    align-items: center;
+    background: $white;
+    border-radius: $radius-lg;
+    box-shadow: $shadow-md;
+    padding: $spacing-md;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    height: 150px;
+
+    &:hover {
+      transform: translateY(-4px);
+      box-shadow: $shadow-lg;
+    }
+
+    /* Logo bên trái */
+    .company-logo {
+      flex: 0 0 80px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100px;
+
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        border-radius: $radius-md;
+      }
+    }
+
+    /* Thông tin giữa */
+    .company-info {
+      flex: 1;
+      padding: 0 $spacing-md;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+
+      h2 {
+        font-size: $font-size-md;
+        color: $primary;
+        margin-bottom: 4px;
+        font-weight: 600;
+      }
+
+      .company-industry {
+        font-size: $font-size-sm;
+        color: $text-muted;
+        margin-bottom: 2px;
+      }
+
+      .company-location {
+        font-size: $font-size-sm;
+        color: $text-light;
+      }
+    }
+
+    /* Nút hành động bên phải */
+    .company-actions {
+      display: flex;
+      flex-wrap: wrap; /* Cho phép xuống dòng khi hẹp */
+      justify-content: flex-end;
+      gap: 6px;
+
+      .btn {
+        flex: 1 1 45%; /* Mỗi nút chiếm khoảng 45% chiều rộng */
+        min-width: 90px;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        text-decoration: none;
+        text-align: center;
+        transition: all 0.2s ease;
+        cursor: pointer;
+        font-weight: 500;
+      }
+
+      .company-detail-btn {
+        background-color: #007bff;
+        color: white;
+
+        &:hover {
+          background-color: #0056b3;
+        }
+      }
+
+      .company-link-btn {
+        border: 1px solid #007bff;
+        color: #007bff;
+        background-color: transparent;
+
+        &:hover {
+          background-color: #007bff;
+          color: white;
+        }
+      }
+    }
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .company-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .company-card {
+      flex-direction: column;
+      height: auto;
+      text-align: center;
+
+      .company-logo {
+        margin-bottom: $spacing-sm;
+      }
+
+      .company-actions {
+        flex-direction: row;
+        justify-content: center;
+        margin-top: $spacing-sm;
+      }
+    }
+  }
+}
