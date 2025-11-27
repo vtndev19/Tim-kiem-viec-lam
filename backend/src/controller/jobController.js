@@ -214,54 +214,52 @@ export const predictJobSalaries = async (req, res) => {
 };
 
 // ============================================================
-// THEM JOB MOI (SU DUNG PROCEDURE createNewJob)
+// THEM JOB MOI (TỰ ĐỘNG LẤY COMPANY THEO USER)
 // ============================================================
 export const createJobUsingProcedure = async (req, res) => {
   try {
     const user_id = req.user?.user_id;
 
-    // Luu y: Frontend can gui company_id va industry_id thay vi ten
+    // 1. Lấy dữ liệu từ Frontend (Lưu ý: KHÔNG CẦN company_id nữa)
     const {
       title,
-      company_id,
       industry_id,
-      city, // Tuong ung voi location
+      city, // Tương ứng p_location
       salary_range,
-      type_name, // Tuong ung voi job_type
+      type_name, // Tương ứng p_job_type
       description,
+      requirements, // Thêm trường này
+      benefits, // Thêm trường này
     } = req.body;
 
-    if (
-      !user_id ||
-      !title ||
-      !company_id ||
-      !industry_id ||
-      !city ||
-      !type_name
-    ) {
+    // 2. Validate dữ liệu
+    if (!user_id || !title || !industry_id || !city || !type_name) {
       return res.status(400).json({
+        success: false,
         message:
-          "Thiếu dữ liệu bắt buộc (User, Title, Company ID, Industry ID, City, Type)",
+          "Thiếu dữ liệu bắt buộc (Tiêu đề, Ngành nghề, Địa điểm, Loại hình)",
       });
     }
 
-    // Goi Procedure: createNewJob(user_id, company_id, industry_id, title, salary, location, job_type, description)
-    const sql = `CALL createNewJob(?, ?, ?, ?, ?, ?, ?, ?)`;
+    // 3. Gọi Procedure Mới: createJobByUser
+    // Thứ tự tham số: user_id, industry_id, title, salary, location, type, desc, req, ben
+    const sql = `CALL createJobByUser(?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 
     const params = [
       user_id,
-      company_id,
       industry_id,
       title,
       salary_range || "Thỏa thuận",
       city,
       type_name,
       description || "",
+      requirements || "",
+      benefits || "",
     ];
 
     const [resultSets] = await db.query(sql, params);
 
-    // Lay ID cua job vua tao tu ket qua tra ve
+    // 4. Lấy kết quả trả về
     const newJobData = resultSets[0] ? resultSets[0][0] : null;
     const newJobId = newJobData ? newJobData.new_job_id : null;
 
@@ -271,16 +269,25 @@ export const createJobUsingProcedure = async (req, res) => {
 
     return res.status(201).json({
       success: true,
-      message: "Thêm công việc thành công!",
+      message: "🎉 Đăng tin tuyển dụng thành công!",
       job_id: newJobId,
-      data: { job_id: newJobId, ...req.body, user_id },
+      // Trả về data để frontend cập nhật UI nếu cần
+      data: {
+        job_id: newJobId,
+        user_id,
+        title,
+        city,
+      },
     });
   } catch (error) {
     console.error("Error creating job:", error.message);
 
-    // Xu ly loi cu the tu Trigger hoac Procedure
+    // Xử lý lỗi từ Procedure (Ví dụ: User chưa có công ty -> 45000)
     if (error.sqlState === "45000") {
-      return res.status(403).json({ success: false, message: error.message });
+      return res.status(403).json({
+        success: false,
+        message: error.message, // "Lỗi: Bạn chưa tạo hồ sơ công ty..."
+      });
     }
 
     return res.status(500).json({
@@ -290,7 +297,6 @@ export const createJobUsingProcedure = async (req, res) => {
     });
   }
 };
-
 // ============================================================
 // LAY DANH SACH JOB CUA NGUOI DUNG (RECRUITER)
 // ============================================================

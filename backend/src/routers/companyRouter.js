@@ -2,14 +2,15 @@ import express from "express";
 import {
   getAllCompanies,
   getCompanyById,
+  getMyCompany,
+  getAllIndustries,
 } from "../controller/companyController.js";
+import { verifyToken } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-// ✅ Lấy danh sách tất cả công ty
 router.get("/", getAllCompanies);
-
-// ✅ Lấy chi tiết 1 công ty theo ID
+router.get("/industries", getAllIndustries);
+router.get("/mine", verifyToken, getMyCompany); // 🔥 Route mới
 router.get("/:id", getCompanyById);
-
 export default router;

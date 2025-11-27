@@ -9,12 +9,11 @@ import HomeFilters from "../components/HomeFilters";
 import HomeJobs from "../components/HomeJobs";
 import Footer from "../components/Footer";
 import Chat from "../components/Chat";
-import AdminPostBox from "../components/AdminPostBox";
 import FeaturedIndustries from "../components/FeaturedIndustries";
 import AdminPostItem from "../components/adminPostItem";
 import RecommendJobs from "../components/RecommendJobs";
 import Hiring from "../components/hiring";
-import EmployerRegistration from "../Page/employerRegistration.js";
+import EmployerRegistration from "../components/employerRegistration.js";
 /* 🧭 Pages */
 import Login from "../Page/Login";
 import Register from "../Page/Register";

@@ -1,16 +1,16 @@
-import db from "../config/db.js";
+import db from "../configs/data.js";
 import nodemailer from "nodemailer";
 import crypto from "crypto";
 
 // Cấu hình gửi mail (Thay bằng email thật của bạn)
+// Cấu hình gửi mail
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
-    user: "YOUR_EMAIL@gmail.com",
-    pass: "YOUR_APP_PASSWORD",
+    user: "viettienpro198@gmail.com", // Email thật của bạn
+    pass: "ztrj flhm chhu heym", // 👈 Dán 16 ký tự App Password vào đây (KHÔNG PHẢI PASS GMAIL)
   },
 });
-
 // =======================================================
 // 🟢 API 1: GỬI OTP XÁC THỰC (Đến email công ty)
 // =======================================================
@@ -27,7 +27,6 @@ export const sendRecruiterOtp = async (req, res) => {
     const otp = crypto.randomInt(100000, 999999).toString();
 
     // 2. Set thời gian hết hạn (Hiện tại + 5 phút)
-    // Lưu ý: MySQL datetime format 'YYYY-MM-DD HH:mm:ss'
     const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
 
     // 3. Cập nhật OTP vào bảng users
@@ -65,6 +64,7 @@ export const sendRecruiterOtp = async (req, res) => {
     return res.status(500).json({ message: "Lỗi server khi gửi email." });
   }
 };
+
 // =======================================================
 // 🟢 API 2: XÁC THỰC OTP & GÁN CÔNG TY & NÂNG CẤP
 // =======================================================
@@ -73,12 +73,18 @@ export const verifyAndUpgrade = async (req, res) => {
   const connection = await db.getConnection();
 
   try {
-    // Bắt đầu giao dịch (Mọi thay đổi chỉ được lưu khi commit)
+    // Bắt đầu giao dịch
     await connection.beginTransaction();
 
-    const user_id = req.user.user_id; // Lấy ID user từ Token (Middleware auth)
-    const { otp, company_name, company_email, company_address, industry_id } =
-      req.body;
+    const user_id = req.user.user_id;
+    // 📌 Lấy industry_input thay vì industry_id
+    const {
+      otp,
+      company_name,
+      company_email,
+      company_address,
+      industry_input,
+    } = req.body;
 
     // ---------------------------------------------------
     // BƯỚC 1: KIỂM TRA NGƯỜI DÙNG & OTP
@@ -88,54 +94,82 @@ export const verifyAndUpgrade = async (req, res) => {
       [user_id]
     );
 
-    if (users.length === 0) {
-      throw new Error("Người dùng không tồn tại.");
-    }
+    if (users.length === 0) throw new Error("Người dùng không tồn tại.");
 
     const user = users[0];
 
-    // Kiểm tra User đã là Recruiter chưa?
-    if (user.role === "recruiter") {
+    if (user.role === "recruiter")
       throw new Error("Tài khoản này đã là Nhà tuyển dụng rồi.");
-    }
 
-    // Kiểm tra OTP có khớp không
-    if (!user.otp_code || String(user.otp_code) !== String(otp)) {
+    if (!user.otp_code || String(user.otp_code) !== String(otp))
       throw new Error("Mã OTP không chính xác.");
-    }
 
-    // Kiểm tra OTP còn hạn không
     const currentTime = new Date();
     const expireTime = new Date(user.otp_expires_at);
-    if (currentTime > expireTime) {
+    if (currentTime > expireTime)
       throw new Error("Mã OTP đã hết hạn. Vui lòng yêu cầu lại.");
+
+    // ---------------------------------------------------
+    // 🔥 BƯỚC 2: XỬ LÝ NGÀNH NGHỀ (Find or Create Logic)
+    // ---------------------------------------------------
+    let finalIndustryId = null;
+
+    if (industry_input) {
+      // Kiểm tra: Nếu input là số => Đã là ID
+      if (!isNaN(industry_input)) {
+        finalIndustryId = industry_input;
+      } else {
+        // Nếu input là chuỗi => Tên ngành mới
+        const sanitizedName = industry_input.trim();
+
+        // Check xem tên này đã có trong DB chưa (tránh tạo trùng)
+        const [existingInd] = await connection.query(
+          "SELECT industry_id FROM industries WHERE name = ?",
+          [sanitizedName]
+        );
+
+        if (existingInd.length > 0) {
+          // Có rồi -> Lấy ID
+          finalIndustryId = existingInd[0].industry_id;
+        } else {
+          // Chưa có -> Tạo mới -> Lấy ID vừa tạo
+          const [newIndResult] = await connection.query(
+            "INSERT INTO industries (name) VALUES (?)",
+            [sanitizedName]
+          );
+          finalIndustryId = newIndResult.insertId;
+        }
+      }
     }
 
     // ---------------------------------------------------
-    // BƯỚC 2: KIỂM TRA CÔNG TY (Tránh trùng lặp)
+    // BƯỚC 3: KIỂM TRA VÀ TẠO/CẬP NHẬT CÔNG TY
     // ---------------------------------------------------
 
-    // Kiểm tra xem User này đã sở hữu công ty nào chưa?
+    // Kiểm tra User đã sở hữu công ty nào chưa
     const [existingOwnCompany] = await connection.query(
       "SELECT company_id FROM companies WHERE user_id = ?",
       [user_id]
     );
 
     if (existingOwnCompany.length > 0) {
-      // Nếu đã có công ty, ta chỉ update thông tin công ty đó
+      // Đã có -> Update thông tin + Ngành nghề mới
       const companyId = existingOwnCompany[0].company_id;
       await connection.query(
         `UPDATE companies 
-         SET company_name = ?, contact_email = ?, address = ? 
+         SET company_name = ?, contact_email = ?, address = ?, industry_id = ? 
          WHERE company_id = ?`,
-        [company_name, company_email, company_address, companyId]
+        [
+          company_name,
+          company_email,
+          company_address,
+          finalIndustryId,
+          companyId,
+        ]
       );
     } else {
-      // ---------------------------------------------------
-      // BƯỚC 3: GÁN CÔNG TY CHO USER (TẠO MỚI)
-      // ---------------------------------------------------
-
-      // (Tùy chọn) Kiểm tra tên công ty đã tồn tại trong hệ thống chưa
+      // Chưa có -> Tạo mới
+      // Check trùng tên công ty
       const [duplicateName] = await connection.query(
         "SELECT company_id FROM companies WHERE company_name = ?",
         [company_name]
@@ -147,7 +181,6 @@ export const verifyAndUpgrade = async (req, res) => {
         );
       }
 
-      // Tạo công ty mới và GÁN user_id làm chủ sở hữu
       await connection.query(
         `INSERT INTO companies (user_id, company_name, contact_email, address, industry_id) 
          VALUES (?, ?, ?, ?, ?)`,
@@ -156,25 +189,23 @@ export const verifyAndUpgrade = async (req, res) => {
           company_name,
           company_email,
           company_address,
-          industry_id || null,
+          finalIndustryId, // ID ngành (cũ hoặc mới tạo)
         ]
       );
     }
 
     // ---------------------------------------------------
-    // BƯỚC 4: NÂNG CẤP ROLE USER -> RECRUITER
+    // BƯỚC 4: NÂNG CẤP ROLE USER
     // ---------------------------------------------------
     await connection.query(
       `UPDATE users 
-       SET role = 'recruiter', 
-           otp_code = NULL, 
-           otp_expires_at = NULL 
+       SET role = 'recruiter', otp_code = NULL, otp_expires_at = NULL 
        WHERE user_id = ?`,
       [user_id]
     );
 
     // ---------------------------------------------------
-    // BƯỚC 5: HOÀN TẤT (COMMIT)
+    // BƯỚC 5: COMMIT GIAO DỊCH
     // ---------------------------------------------------
     await connection.commit();
 
@@ -187,17 +218,14 @@ export const verifyAndUpgrade = async (req, res) => {
       },
     });
   } catch (error) {
-    // Nếu có bất kỳ lỗi nào, hoàn tác tất cả thay đổi DB
     await connection.rollback();
     console.error("❌ Lỗi Verify & Upgrade:", error.message);
 
-    // Trả về lỗi cho Client
     return res.status(400).json({
       success: false,
       message: error.message || "Lỗi hệ thống khi xác thực.",
     });
   } finally {
-    // Luôn giải phóng kết nối
     connection.release();
   }
 };

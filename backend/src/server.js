@@ -19,6 +19,7 @@ import authRoutes from "./routers/authRoutes.js";
 import cvRoutes from "./routers/cvRoutes.js";
 import userPostRoutes from "./routers/userPostRoutes.js"; // 🧩 Bài viết người dùng
 import savedJobRoutes from "./routers/savedJobRoutes.js";
+import recruiterRoutes from "./routers/recruiterRoutes.js";
 
 /* database Connection */
 import db from "./configs/data.js";
@@ -100,6 +101,8 @@ app.use("/api/auth", authRoutes);
 app.use("/api/cv", cvRoutes);
 app.use("/api/user-posts", userPostRoutes); // ✅ Bài viết người dùng (blogs)
 app.use("/api/saved-jobs", savedJobRoutes);
+app.use("/api/employer", recruiterRoutes);
+
 // ===================================================
 // 🚀 KHỞI ĐỘNG SERVER
 // ===================================================
