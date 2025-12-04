@@ -135,36 +135,42 @@ export const getAllIndustries = async (req, res) => {
  * @route GET /api/companies/mine
  * @access Private (Cần Token)
  */
-
 export const getMyCompany = async (req, res) => {
   try {
-    // req.user được gán từ middleware verifyToken
     const user_id = req.user?.user_id;
 
     if (!user_id) {
       return res.status(401).json({ message: "Chưa xác thực người dùng" });
     }
 
+    // 🔴 SỬA LỖI: Join với bảng company_members để tìm công ty
     const sql = `
       SELECT 
         c.company_id,
         c.company_name,
         c.address,
+        c.description,
+        c.website,
         c.contact_email,
         c.logo,
         c.industry_id,
-        i.name AS industry_name
+        i.name AS industry_name,
+        cm.role AS my_role,   -- Lấy thêm vai trò (Manager/Staff)
+        cm.status AS my_status -- Lấy trạng thái (Active/Pending)
       FROM companies c
+      JOIN company_members cm ON c.company_id = cm.company_id
       LEFT JOIN industries i ON c.industry_id = i.industry_id
-      WHERE c.user_id = ?
+      WHERE cm.user_id = ?
       LIMIT 1
     `;
 
     const [rows] = await db.query(sql, [user_id]);
 
     if (rows.length === 0) {
-      // Trả về 404 để Frontend biết user này chưa có công ty (để hiện nút tạo mới)
-      return res.status(404).json({ message: "Bạn chưa tạo hồ sơ công ty." });
+      // Trả về 404 để Frontend biết user này chưa tham gia công ty nào
+      return res
+        .status(404)
+        .json({ message: "Bạn chưa tạo hoặc tham gia công ty nào." });
     }
 
     res.status(200).json(rows[0]);

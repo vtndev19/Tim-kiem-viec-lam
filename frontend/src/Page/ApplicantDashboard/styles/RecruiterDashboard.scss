@@ -1,0 +1,57 @@
+/* =========================================
+   RECRUITER DASHBOARD LAYOUT
+   ========================================= */
+
+$sidebar-width: 320px;
+$border-color: #e2e8f0;
+$bg-color: #f8fafc;
+
+.recruiter-dashboard {
+  display: flex;
+  height: 100vh; // Chiếm toàn bộ chiều cao viewport
+  background-color: $bg-color;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    sans-serif;
+  overflow: hidden; // Tránh scroll chung
+
+  /* --- SIDEBAR (Bên trái) --- */
+  .recruiter-sidebar {
+    width: $sidebar-width;
+    height: 100%;
+    background-color: #ffffff;
+    border-right: 1px solid $border-color;
+    flex-shrink: 0; // Không co lại
+    overflow: hidden; // Overflow được quản lý bởi JobListSidebar
+
+    @media (max-width: 768px) {
+      width: 100%;
+      height: auto;
+      max-height: 250px;
+      border-right: none;
+      border-bottom: 1px solid $border-color;
+    }
+  }
+
+  /* --- MAIN CONTENT (Bên phải) --- */
+  .recruiter-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; // Giữ layout không bị scroll
+
+    @media (max-width: 768px) {
+      min-height: calc(100vh - 250px);
+      overflow-y: auto;
+    }
+  }
+}
+
+/* =========================================
+   RESPONSIVE MOBILE/TABLET
+   ========================================= */
+@media (max-width: 768px) {
+  .recruiter-dashboard {
+    flex-direction: column;
+    height: auto;
+  }
+}

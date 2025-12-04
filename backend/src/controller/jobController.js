@@ -214,25 +214,23 @@ export const predictJobSalaries = async (req, res) => {
 };
 
 // ============================================================
-// THEM JOB MOI (TỰ ĐỘNG LẤY COMPANY THEO USER)
+// THEM JOB MOI (Updated: Sử dụng Procedure mới)
 // ============================================================
 export const createJobUsingProcedure = async (req, res) => {
   try {
     const user_id = req.user?.user_id;
 
-    // 1. Lấy dữ liệu từ Frontend (Lưu ý: KHÔNG CẦN company_id nữa)
     const {
       title,
       industry_id,
-      city, // Tương ứng p_location
+      city,
       salary_range,
-      type_name, // Tương ứng p_job_type
+      type_name,
       description,
-      requirements, // Thêm trường này
-      benefits, // Thêm trường này
+      requirements,
+      benefits,
     } = req.body;
 
-    // 2. Validate dữ liệu
     if (!user_id || !title || !industry_id || !city || !type_name) {
       return res.status(400).json({
         success: false,
@@ -241,8 +239,7 @@ export const createJobUsingProcedure = async (req, res) => {
       });
     }
 
-    // 3. Gọi Procedure Mới: createJobByUser
-    // Thứ tự tham số: user_id, industry_id, title, salary, location, type, desc, req, ben
+    // Procedure mới sẽ tự tìm company_id trong bảng company_members
     const sql = `CALL createJobByUser(?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 
     const params = [
@@ -258,8 +255,6 @@ export const createJobUsingProcedure = async (req, res) => {
     ];
 
     const [resultSets] = await db.query(sql, params);
-
-    // 4. Lấy kết quả trả về
     const newJobData = resultSets[0] ? resultSets[0][0] : null;
     const newJobId = newJobData ? newJobData.new_job_id : null;
 
@@ -271,7 +266,6 @@ export const createJobUsingProcedure = async (req, res) => {
       success: true,
       message: "🎉 Đăng tin tuyển dụng thành công!",
       job_id: newJobId,
-      // Trả về data để frontend cập nhật UI nếu cần
       data: {
         job_id: newJobId,
         user_id,
@@ -282,11 +276,11 @@ export const createJobUsingProcedure = async (req, res) => {
   } catch (error) {
     console.error("Error creating job:", error.message);
 
-    // Xử lý lỗi từ Procedure (Ví dụ: User chưa có công ty -> 45000)
+    // Xử lý lỗi từ Procedure (Nếu user không phải member Active)
     if (error.sqlState === "45000") {
       return res.status(403).json({
         success: false,
-        message: error.message, // "Lỗi: Bạn chưa tạo hồ sơ công ty..."
+        message: error.message,
       });
     }
 
@@ -297,8 +291,9 @@ export const createJobUsingProcedure = async (req, res) => {
     });
   }
 };
+
 // ============================================================
-// LAY DANH SACH JOB CUA NGUOI DUNG (RECRUITER)
+// LAY DANH SACH JOB CUA NGUOI DUNG (Updated: Logic Mới)
 // ============================================================
 export const getJobsByCurrentUser = async (req, res) => {
   try {
@@ -310,7 +305,10 @@ export const getJobsByCurrentUser = async (req, res) => {
         .json({ message: "Không xác định được người dùng." });
     }
 
-    // Logic Moi: Tim job thong qua bang companies ma user so huu
+    // 🔴 UPDATE LOGIC QUAN TRỌNG:
+    // Join với bảng `company_members` để biết user thuộc công ty nào
+    // Sau đó Join `jobs` dựa trên `company_id` tìm được
+    // Và Join `companies` để lấy tên công ty
     const sql = `
       SELECT 
         j.job_id,
@@ -321,11 +319,13 @@ export const getJobsByCurrentUser = async (req, res) => {
         j.job_type,
         j.salary_range,
         j.posted_date,
-        j.description
+        j.description,
+        cm.role AS my_role_in_company  -- Lấy thêm vai trò để hiển thị nếu cần
       FROM jobs j
+      JOIN company_members cm ON j.company_id = cm.company_id
       JOIN companies c ON j.company_id = c.company_id
       LEFT JOIN industries i ON j.industry_id = i.industry_id
-      WHERE c.user_id = ?
+      WHERE cm.user_id = ?
       ORDER BY j.job_id DESC
     `;
 
@@ -344,7 +344,6 @@ export const getJobsByCurrentUser = async (req, res) => {
     });
   }
 };
-
 // ============================================================
 // LAY RECOMMENDATION CACHE
 // ============================================================
@@ -390,5 +389,70 @@ export const getRecommendCache = async (req, res) => {
   } catch (err) {
     console.error("Error get cache:", err.message);
     return res.status(500).json({ error: "Lỗi server khi lấy cache" });
+  }
+};
+// ============================================================
+// LAY CHI TIET JOB + SO LUONG UNG TUYEN (Optimized)
+// ============================================================
+export const getJobDetailWithCount = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    // Chúng ta lấy thêm cột j.application_count
+    const sql = `
+      SELECT 
+        j.job_id AS id,
+        j.title,
+        c.company_name AS company,
+        c.logo AS company_logo,      -- Thêm logo cho đẹp
+        j.location,
+        j.salary_range AS salary,
+        j.job_type AS type,
+        j.posted_date,
+        j.description,
+        j.requirements,
+        j.benefits,
+        j.application_count AS total_applicants-- <--- CỘT QUAN TRỌNG
+      FROM jobs j
+      JOIN companies c ON j.company_id = c.company_id
+      WHERE j.job_id = ?
+    `;
+
+    const [jobs] = await db.query(sql, [id]);
+
+    if (jobs.length === 0) {
+      return res.status(404).json({ message: "Không tìm thấy công việc" });
+    }
+
+    const rawJob = jobs[0];
+
+    // Xử lý dữ liệu thô (String -> Array)
+    const job = {
+      ...rawJob,
+      // Đảm bảo số lượng luôn là số (tránh null)
+      total_applicants: rawJob.total_applicants || 0,
+
+      requirements: rawJob.requirements
+        ? rawJob.requirements
+            .split("\n")
+            .map((r) => r.trim())
+            .filter(Boolean)
+        : [],
+
+      benefits: rawJob.benefits
+        ? rawJob.benefits
+            .split(/[;\n,]+/)
+            .map((b) => b.trim())
+            .filter(Boolean)
+        : [],
+    };
+
+    return res.status(200).json({
+      success: true,
+      data: job,
+    });
+  } catch (error) {
+    console.error("Error fetching job detail with count:", error.message);
+    res.status(500).json({ message: "Lỗi khi truy vấn chi tiết công việc" });
   }
 };

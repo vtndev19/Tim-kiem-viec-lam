@@ -1,10 +1,16 @@
 import React, { useState, useEffect } from "react";
-import JobCard from "./JobCard";
+import JobCard from "./JobCard"; // Giả sử JobCard nằm cùng thư mục hiring
+import JobDetailModal from "./JobDetailModal"; // Giả sử JobDetailModal nằm cùng thư mục hiring
+// ✅ FIX 1: Sửa đường dẫn import (Lùi 1 cấp là ra src/components, sau đó vào Employer)
+import ApplicantsList from "./ApplicantsList.js";
 import "./JobManagementList.scss";
 
-const API_URL = "http://localhost:8080/api/jobs/list-jobs";
+// URL lấy danh sách job của người dùng hiện tại
+const LIST_JOBS_API = "http://localhost:8080/api/jobs/list-jobs";
+// URL lấy chi tiết job (để xem số lượng hồ sơ)
+const JOB_DETAIL_API = "http://localhost:8080/api/jobs";
 
-const JobManagementList = ({ onEdit, onDelete, onViewDetail }) => {
+const JobManagementList = ({ onEdit, onDelete }) => {
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -12,30 +18,26 @@ const JobManagementList = ({ onEdit, onDelete, onViewDetail }) => {
   const [filterLocation, setFilterLocation] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
 
-  // 1. Log khi Component bắt đầu chạy
-  console.log("🎨 Render: JobManagementList đang hiển thị...");
+  // State cho Modal
+  const [selectedJobForDetail, setSelectedJobForDetail] = useState(null);
+  const [selectedJobIdForApplicants, setSelectedJobIdForApplicants] =
+    useState(null);
+  const [detailLoading, setDetailLoading] = useState(false);
 
+  console.log("Render: JobManagementList đang hiển thị...");
+
+  // 1. Fetch Danh sách Job
   useEffect(() => {
     const fetchMyJobs = async () => {
-      console.group("🚀 BẮT ĐẦU GỌI API LẤY JOBS"); // Gom nhóm log cho gọn
       try {
         setLoading(true);
-
-        // 2. Kiểm tra Token
         const token = localStorage.getItem("authToken");
-        console.log(
-          "🔑 Kiểm tra Token:",
-          token ? "✅ Đã tìm thấy Token" : "❌ KHÔNG CÓ TOKEN (Lỗi 1)"
-        );
 
         if (!token) {
           throw new Error("Bạn chưa đăng nhập (Không tìm thấy Token).");
         }
 
-        // 3. Bắt đầu Fetch
-        console.log("📡 Đang gọi tới:", API_URL);
-
-        const response = await fetch(API_URL, {
+        const response = await fetch(LIST_JOBS_API, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -43,54 +45,40 @@ const JobManagementList = ({ onEdit, onDelete, onViewDetail }) => {
           },
         });
 
-        console.log("STATUS CODE:", response.status); // 200 là OK, 401 là Lỗi quyền, 500 là lỗi server
-
         const data = await response.json();
-        console.log("📦 Dữ liệu thô từ Server:", data); // Xem cấu trúc data trả về
 
         if (!response.ok) {
           throw new Error(data.message || `Lỗi API: ${response.status}`);
         }
 
-        // 4. Kiểm tra dữ liệu trước khi set State
-        const listJobs = data.jobs || data || []; // Phòng hờ cấu trúc khác nhau
-        console.log(`✅ Đã lấy được ${listJobs.length} công việc.`);
-
+        // Lấy mảng jobs từ response
+        const listJobs =
+          data.data || data.jobs || (Array.isArray(data) ? data : []) || [];
         setJobs(listJobs);
       } catch (err) {
-        console.error("❌ CÓ LỖI XẢY RA:", err);
+        console.error("LỖI:", err);
         setError(err.message);
       } finally {
         setLoading(false);
-        console.log("🏁 Kết thúc quá trình gọi API.");
-        console.groupEnd(); // Đóng nhóm log
       }
     };
 
     fetchMyJobs();
   }, []);
 
-  // 5. Log quá trình lọc (Filter)
+  // ✅ FIX 2: Khai báo filteredJobs trước khi dùng trong return
   const filteredJobs = jobs.filter((job) => {
-    const title = job.title || job.jobTitle || "";
-    const company = job.company_name || job.companyName || "";
-    const location = job.location || job.city || "";
-    const term = searchTerm.toLowerCase();
+    const title = (job.title || job.jobTitle || "").toLowerCase();
+    const company = (job.company_name || job.companyName || "").toLowerCase();
+    const location = (job.location || job.city || "").toLowerCase();
 
-    const matchesSearch =
-      title.toLowerCase().includes(term) ||
-      company.toLowerCase().includes(term);
-    const matchesLocation = !filterLocation || location === filterLocation;
+    const term = searchTerm.toLowerCase();
+    const matchesSearch = title.includes(term) || company.includes(term);
+    const matchesLocation =
+      !filterLocation || location === filterLocation.toLowerCase();
 
     return matchesSearch && matchesLocation;
   });
-
-  // Log kết quả lọc (Chỉ log khi user nhập tìm kiếm để đỡ spam)
-  if (searchTerm || filterLocation) {
-    console.log(
-      `🔍 Đang lọc: Tìm "${searchTerm}" tại "${filterLocation}" -> Kết quả: ${filteredJobs.length} bài.`
-    );
-  }
 
   const uniqueLocations = [
     ...new Set(
@@ -100,13 +88,39 @@ const JobManagementList = ({ onEdit, onDelete, onViewDetail }) => {
     ),
   ];
 
-  // === PHẦN GIAO DIỆN ===
+  // Hàm gọi API lấy chi tiết (Khi bấm xem chi tiết)
+  const handleViewDetail = async (jobId) => {
+    try {
+      setDetailLoading(true);
+      console.log(`Đang tải chi tiết cho Job ID: ${jobId}`);
 
+      const response = await fetch(`${JOB_DETAIL_API}/${jobId}`);
+      const data = await response.json();
+
+      if (response.ok) {
+        const jobData = data.data || data;
+        setSelectedJobForDetail(jobData);
+      } else {
+        alert("Không thể tải chi tiết công việc");
+      }
+    } catch (error) {
+      console.error("Lỗi tải chi tiết:", error);
+    } finally {
+      setDetailLoading(false);
+    }
+  };
+
+  // Hàm chuyển từ Modal chi tiết sang Modal danh sách
+  const handleOpenApplicants = (jobId) => {
+    setSelectedJobForDetail(null); // Đóng chi tiết
+    setSelectedJobIdForApplicants(jobId); // Mở danh sách
+  };
+
+  // --- GIAO DIỆN ---
   if (loading) {
     return (
-      <div style={{ padding: "50px", textAlign: "center", fontSize: "18px" }}>
-        ⏳ <strong>Đang kết nối Server...</strong> <br />
-        <small>(Vui lòng mở F12 xem Console nếu đợi quá lâu)</small>
+      <div style={{ padding: "50px", textAlign: "center" }}>
+        <strong>Đang tải danh sách công việc...</strong>
       </div>
     );
   }
@@ -114,10 +128,10 @@ const JobManagementList = ({ onEdit, onDelete, onViewDetail }) => {
   if (error) {
     return (
       <div style={{ padding: "50px", textAlign: "center", color: "red" }}>
-        ❌ <strong>Lỗi tải dữ liệu:</strong> {error} <br />
+        <strong>Lỗi:</strong> {error} <br />
         <button
           onClick={() => window.location.reload()}
-          style={{ marginTop: "10px", padding: "5px 10px" }}
+          style={{ marginTop: 10 }}
         >
           Thử lại
         </button>
@@ -128,28 +142,13 @@ const JobManagementList = ({ onEdit, onDelete, onViewDetail }) => {
   return (
     <section id="jobs" className="job-management-section">
       <div className="container">
-        {/* THÊM DÒNG DEBUG TRÊN UI ĐỂ BẠN DỄ THẤY */}
-        <div
-          style={{
-            background: "#f0f0f0",
-            padding: "10px",
-            marginBottom: "20px",
-            borderRadius: "5px",
-            fontSize: "12px",
-            border: "1px dashed #999",
-          }}
-        >
-          🐞 <strong>Debug Info:</strong> Tìm thấy {jobs.length} bài từ API.
-          Đang hiển thị {filteredJobs.length} bài.
-        </div>
-
         <h2 className="section-title">Quản Lý Tin Tuyển Dụng</h2>
 
         <div className="management-header card">
           <div className="search-box">
             <input
               type="text"
-              placeholder="Tìm kiếm..."
+              placeholder="Tìm theo tên bài đăng..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="search-input"
@@ -172,36 +171,56 @@ const JobManagementList = ({ onEdit, onDelete, onViewDetail }) => {
           </div>
 
           <div className="job-stats">
-            <div className="stat">
-              <span className="stat-label">Tổng tin:</span>
-              <span className="stat-value">{jobs.length}</span>
-            </div>
+            <span className="stat-label">Tổng tin: {jobs.length}</span>
           </div>
         </div>
 
         {filteredJobs.length > 0 ? (
           <div className="jobs-grid">
+            {detailLoading && (
+              <div className="loading-overlay">Đang tải...</div>
+            )}
+
             {filteredJobs.map((job) => (
               <JobCard
                 key={job.job_id || job.id}
                 job={job}
                 onEdit={onEdit}
                 onDelete={(id) => {
-                  console.log("🗑️ User yêu cầu xóa Job ID:", id);
                   if (onDelete) onDelete(id);
                   setJobs((prev) =>
                     prev.filter((j) => (j.job_id || j.id) !== id)
                   );
                 }}
-                onViewDetail={onViewDetail}
+                // Bấm vào card -> Gọi API chi tiết rồi mở Modal Detail
+                onViewDetail={() => handleViewDetail(job.job_id || job.id)}
+                // Bấm nút xem ứng viên -> Mở Modal Applicants
+                onViewApplicants={() =>
+                  handleOpenApplicants(job.job_id || job.id)
+                }
               />
             ))}
           </div>
         ) : (
           <div className="empty-state card">
             <h3>Không tìm thấy dữ liệu</h3>
-            <p>API trả về mảng rỗng hoặc bộ lọc đã ẩn hết kết quả.</p>
           </div>
+        )}
+
+        {/* --- 1. MODAL CHI TIẾT --- */}
+        <JobDetailModal
+          job={selectedJobForDetail}
+          isOpen={!!selectedJobForDetail}
+          onClose={() => setSelectedJobForDetail(null)}
+          onViewApplicants={handleOpenApplicants}
+        />
+
+        {/* --- 2. MODAL DANH SÁCH ỨNG VIÊN --- */}
+        {selectedJobIdForApplicants && (
+          <ApplicantsList
+            jobId={selectedJobIdForApplicants}
+            onClose={() => setSelectedJobIdForApplicants(null)}
+          />
         )}
       </div>
     </section>

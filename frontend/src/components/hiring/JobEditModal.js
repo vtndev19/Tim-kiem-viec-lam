@@ -1,292 +1,94 @@
-import React, { useState, useEffect } from "react";
-import "./JobEditModal.scss";
+import React from "react";
+import "./JobDetailModal.scss";
 
-const JobEditModal = ({ job, isOpen, onClose, onSave }) => {
-  const [formData, setFormData] = useState({});
-  const [errors, setErrors] = useState({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
+const JobDetailModal = ({ job, isOpen, onClose }) => {
+  if (!isOpen || !job) return null;
 
-  useEffect(() => {
-    if (job) {
-      setFormData({
-        jobTitle: job.jobTitle || "",
-        companyName: job.companyName || "",
-        salary: job.salary || "",
-        location: job.location || "",
-        description: job.description || "",
-        requirements: job.requirements || "",
-        benefits: job.benefits || "",
-        deadline: job.deadline || "",
-      });
-      setErrors({});
-    }
-  }, [job, isOpen]);
-
-  const validateForm = () => {
-    const newErrors = {};
-
-    if (!formData.jobTitle.trim()) {
-      newErrors.jobTitle = "Vui lòng nhập tên vị trí công việc";
-    }
-
-    if (!formData.companyName.trim()) {
-      newErrors.companyName = "Vui lòng nhập tên công ty";
-    }
-
-    if (!formData.salary.trim()) {
-      newErrors.salary = "Vui lòng nhập mức lương";
-    }
-
-    if (!formData.location.trim()) {
-      newErrors.location = "Vui lòng nhập địa điểm công việc";
-    }
-
-    if (!formData.description.trim()) {
-      newErrors.description = "Vui lòng nhập mô tả công việc";
-    } else if (formData.description.length < 20) {
-      newErrors.description = "Mô tả công việc phải có ít nhất 20 ký tự";
-    }
-
-    if (!formData.requirements.trim()) {
-      newErrors.requirements = "Vui lòng nhập yêu cầu công việc";
-    } else if (formData.requirements.length < 20) {
-      newErrors.requirements = "Yêu cầu công việc phải có ít nhất 20 ký tự";
-    }
-
-    if (!formData.benefits.trim()) {
-      newErrors.benefits = "Vui lòng nhập lợi ích công việc";
-    } else if (formData.benefits.length < 10) {
-      newErrors.benefits = "Lợi ích công việc phải có ít nhất 10 ký tự";
-    }
-
-    if (!formData.deadline) {
-      newErrors.deadline = "Vui lòng chọn hạn chót ứng tuyển";
-    } else {
-      const selectedDate = new Date(formData.deadline);
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      if (selectedDate <= today) {
-        newErrors.deadline = "Hạn chót phải là ngày trong tương lai";
-      }
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+  // Helper format ngày tháng
+  const formatDate = (dateString) => {
+    if (!dateString) return "Không xác định";
+    return new Date(dateString).toLocaleDateString("vi-VN");
   };
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-    if (errors[name]) {
-      setErrors((prev) => ({
-        ...prev,
-        [name]: "",
-      }));
-    }
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-
-    if (!validateForm()) {
-      return;
-    }
-
-    setIsSubmitting(true);
-
-    setTimeout(() => {
-      onSave({
-        ...job,
-        ...formData,
-      });
-      setIsSubmitting(false);
-    }, 600);
-  };
-
-  if (!isOpen) return null;
 
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div
-        className="modal job-edit-modal"
+        className="modal job-detail-modal"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="modal-header">
-          <h2>Chỉnh Sửa Tin Tuyển Dụng</h2>
+          <div>
+            {/* ✅ SỬA: job.title */}
+            <h2>{job.title || "Tiêu đề công việc"}</h2>
+            {/* ✅ SỬA: job.company_name nếu join bảng, hoặc fallback */}
+            <p className="modal-subtitle">
+              @ {job.company_name || job.company || "Công ty của bạn"}
+            </p>
+          </div>
           <button type="button" className="close-button" onClick={onClose}>
             ✕
           </button>
         </div>
 
         <div className="modal-body">
-          <form onSubmit={handleSubmit}>
-            <div className="form-row">
-              <div className="form-group">
-                <label htmlFor="edit-jobTitle">Vị Trí Công Việc *</label>
-                <input
-                  type="text"
-                  id="edit-jobTitle"
-                  name="jobTitle"
-                  value={formData.jobTitle}
-                  onChange={handleChange}
-                  maxLength="100"
-                />
-                {errors.jobTitle && (
-                  <div className="form-error">{errors.jobTitle}</div>
-                )}
+          <div className="detail-section">
+            <div className="detail-grid">
+              <div className="detail-item">
+                <label>💰 Mức Lương</label>
+                {/* ✅ SỬA: salary_range */}
+                <p>{job.salary_range || job.salary || "Thỏa thuận"}</p>
               </div>
-
-              <div className="form-group">
-                <label htmlFor="edit-companyName">Tên Công Ty *</label>
-                <input
-                  type="text"
-                  id="edit-companyName"
-                  name="companyName"
-                  value={formData.companyName}
-                  onChange={handleChange}
-                  maxLength="100"
-                />
-                {errors.companyName && (
-                  <div className="form-error">{errors.companyName}</div>
-                )}
+              <div className="detail-item">
+                <label>📍 Địa Điểm</label>
+                <p>{job.location}</p>
+              </div>
+              <div className="detail-item">
+                <label>📅 Hạn Chót</label>
+                <p>{formatDate(job.deadline)}</p>
+              </div>
+              <div className="detail-item">
+                <label>📝 Loại hình</label>
+                <p>{job.job_type || "Toàn thời gian"}</p>
               </div>
             </div>
+          </div>
 
-            <div className="form-row">
-              <div className="form-group">
-                <label htmlFor="edit-salary">Mức Lương *</label>
-                <input
-                  type="text"
-                  id="edit-salary"
-                  name="salary"
-                  value={formData.salary}
-                  onChange={handleChange}
-                  maxLength="100"
-                />
-                {errors.salary && (
-                  <div className="form-error">{errors.salary}</div>
-                )}
-              </div>
+          <div className="detail-section">
+            <h3>📋 Mô Tả Công Việc</h3>
+            <p className="detail-text">{job.description || "Chưa có mô tả"}</p>
+          </div>
 
-              <div className="form-group">
-                <label htmlFor="edit-location">Địa Điểm *</label>
-                <input
-                  type="text"
-                  id="edit-location"
-                  name="location"
-                  value={formData.location}
-                  onChange={handleChange}
-                  maxLength="100"
-                />
-                {errors.location && (
-                  <div className="form-error">{errors.location}</div>
-                )}
-              </div>
-            </div>
+          <div className="detail-section">
+            <h3>⭐ Yêu Cầu Công Việc</h3>
+            <p className="detail-text">
+              {job.requirements || "Không có yêu cầu cụ thể"}
+            </p>
+          </div>
 
-            <div className="form-row full-width">
-              <div className="form-group">
-                <label htmlFor="edit-description">Mô Tả Công Việc *</label>
-                <textarea
-                  id="edit-description"
-                  name="description"
-                  value={formData.description}
-                  onChange={handleChange}
-                  maxLength="2000"
-                />
-                <div className="char-count">
-                  {formData.description.length} / 2000
-                </div>
-                {errors.description && (
-                  <div className="form-error">{errors.description}</div>
-                )}
-              </div>
-            </div>
+          <div className="detail-section">
+            <h3>🎁 Quyền Lợi</h3>
+            {/* ✅ SỬA: benefits */}
+            <p className="detail-text">
+              {job.benefits || "Theo quy định công ty"}
+            </p>
+          </div>
 
-            <div className="form-row full-width">
-              <div className="form-group">
-                <label htmlFor="edit-requirements">Yêu Cầu *</label>
-                <textarea
-                  id="edit-requirements"
-                  name="requirements"
-                  value={formData.requirements}
-                  onChange={handleChange}
-                  maxLength="2000"
-                />
-                <div className="char-count">
-                  {formData.requirements.length} / 2000
-                </div>
-                {errors.requirements && (
-                  <div className="form-error">{errors.requirements}</div>
-                )}
-              </div>
-            </div>
+          <div className="detail-section info-section">
+            <p>
+              <strong>Ngày đăng:</strong>{" "}
+              {formatDate(job.posted_date || job.created_at)}
+            </p>
+          </div>
+        </div>
 
-            <div className="form-row full-width">
-              <div className="form-group">
-                <label htmlFor="edit-benefits">Lợi Ích *</label>
-                <textarea
-                  id="edit-benefits"
-                  name="benefits"
-                  value={formData.benefits}
-                  onChange={handleChange}
-                  maxLength="1500"
-                />
-                <div className="char-count">
-                  {formData.benefits.length} / 1500
-                </div>
-                {errors.benefits && (
-                  <div className="form-error">{errors.benefits}</div>
-                )}
-              </div>
-            </div>
-
-            <div className="form-row">
-              <div className="form-group">
-                <label htmlFor="edit-deadline">Hạn Chót *</label>
-                <input
-                  type="date"
-                  id="edit-deadline"
-                  name="deadline"
-                  value={formData.deadline}
-                  onChange={handleChange}
-                />
-                {errors.deadline && (
-                  <div className="form-error">{errors.deadline}</div>
-                )}
-              </div>
-            </div>
-
-            <div className="modal-footer">
-              <button
-                type="button"
-                onClick={onClose}
-                className="button button-secondary"
-              >
-                Hủy
-              </button>
-              <button
-                type="submit"
-                className="button button-primary"
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? (
-                  <>
-                    <span className="spinner"></span> Đang lưu...
-                  </>
-                ) : (
-                  <>✓ Lưu Thay Đổi</>
-                )}
-              </button>
-            </div>
-          </form>
+        <div className="modal-footer">
+          <button onClick={onClose} className="button button-primary">
+            ✓ Đóng
+          </button>
         </div>
       </div>
     </div>
   );
 };
 
-export default JobEditModal;
+export default JobDetailModal;

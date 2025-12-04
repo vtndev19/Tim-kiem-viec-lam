@@ -1,0 +1,447 @@
+// ==========================================
+// 🎨 VARIABLES & THEME
+// ==========================================
+$primary-color: #2563eb; // Xanh dương hiện đại
+$primary-hover: #1d4ed8;
+$text-main: #1f2937;
+$text-secondary: #6b7280;
+$bg-white: #ffffff;
+$border-color: #e5e7eb;
+$danger-color: #ef4444;
+$radius-md: 12px;
+$radius-sm: 8px;
+$shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.1),
+  0 8px 10px -6px rgba(0, 0, 0, 0.1);
+$transition-base: all 0.2s ease-in-out;
+
+// ==========================================
+// 🚀 ANIMATIONS
+// ==========================================
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUpFade {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+// ==========================================
+// 🛠 MODAL STYLES
+// ==========================================
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); // Nền tối
+  backdrop-filter: blur(4px); // Hiệu ứng làm mờ nền phía sau (Glassmorphism)
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease-out forwards;
+  padding: 1rem; // Padding an toàn cho mobile
+
+  .modal-content {
+    background: $bg-white;
+    width: 100%;
+    max-width: 550px; // Độ rộng tối đa chuẩn cho form
+    border-radius: $radius-md;
+    box-shadow: $shadow-lg;
+    display: flex;
+    flex-direction: column;
+    animation: slideUpFade 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; // Animation nảy nhẹ
+    max-height: 90vh; // Tránh modal cao quá màn hình
+    overflow-y: auto; // Cho phép scroll nếu nội dung dài
+
+    // --- Header ---
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid $border-color;
+
+      h3 {
+        margin: 0;
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: $text-main;
+
+        // Cắt chữ nếu tên job quá dài
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 85%;
+      }
+
+      button {
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        color: $text-secondary;
+        padding: 4px;
+        border-radius: 50%;
+        transition: $transition-base;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        &:hover {
+          background-color: #f3f4f6;
+          color: $danger-color;
+          transform: rotate(90deg); // Xoay nút đóng khi hover
+        }
+      }
+    }
+
+    // --- Form Body ---
+    form {
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+
+      // Label chung
+      label {
+        display: block;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: $text-main;
+        margin-bottom: 0.5rem;
+
+        span {
+          color: $danger-color; // Dấu sao (*) màu đỏ
+        }
+      }
+
+      // Input, Select, Textarea chung
+      input,
+      select,
+      textarea {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 1px solid $border-color;
+        border-radius: $radius-sm;
+        font-size: 0.95rem;
+        color: $text-main;
+        background-color: #f9fafb;
+        transition: $transition-base;
+        font-family: inherit;
+
+        &:hover {
+          background-color: $bg-white;
+          border-color: darken($border-color, 10%);
+        }
+
+        &:focus {
+          outline: none;
+          background-color: $bg-white;
+          border-color: $primary-color;
+          box-shadow: 0 0 0 4px rgba($primary-color, 0.1); // Hiệu ứng focus ring chuyên nghiệp
+        }
+
+        &::placeholder {
+          color: #9ca3af;
+        }
+      }
+
+      textarea {
+        resize: vertical; // Chỉ cho phép kéo dãn chiều dọc
+        min-height: 100px;
+      }
+
+      // Layout 2 cột cho Email & Phone
+      .form-row {
+        display: flex;
+        gap: 1rem;
+
+        .form-group {
+          flex: 1; // Chia đều không gian
+        }
+      }
+
+      // Thông báo lỗi nhỏ
+      small {
+        display: block;
+        margin-top: 0.5rem;
+        font-size: 0.8rem;
+        color: $danger-color;
+      }
+
+      // --- Submit Button ---
+      .submit-btn {
+        margin-top: 0.5rem;
+        padding: 0.875rem;
+        background-color: $primary-color;
+        color: white;
+        font-weight: 600;
+        font-size: 1rem;
+        border: none;
+        border-radius: $radius-sm;
+        cursor: pointer;
+        transition: $transition-base;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        box-shadow: 0 4px 6px -1px rgba($primary-color, 0.3);
+
+        &:hover:not(:disabled) {
+          background-color: $primary-hover;
+          transform: translateY(-1px);
+          box-shadow: 0 6px 8px -1px rgba($primary-color, 0.4);
+        }
+
+        &:active:not(:disabled) {
+          transform: translateY(0);
+        }
+
+        &:disabled {
+          background-color: #9ca3af;
+          cursor: not-allowed;
+          box-shadow: none;
+          opacity: 0.7;
+        }
+      }
+    }
+  }
+}
+
+// ==========================================
+// 📱 RESPONSIVE (MOBILE)
+// ==========================================
+@media (max-width: 640px) {
+  .modal-overlay {
+    align-items: flex-end; // Trên mobile modal trượt từ dưới lên
+    padding: 0;
+
+    .modal-content {
+      max-width: 100%;
+      border-radius: $radius-md $radius-md 0 0; // Chỉ bo tròn góc trên
+      animation: slideUpFade 0.3s ease-out forwards;
+      max-height: 85vh;
+
+      .modal-header {
+        position: sticky;
+        top: 0;
+        background: white;
+        z-index: 10;
+      }
+
+      form {
+        // Chuyển layout 2 cột thành 1 cột trên mobile
+        .form-row {
+          flex-direction: column;
+          gap: 1.25rem;
+        }
+      }
+    }
+  }
+}
+// --- Variables ---
+$primary-color: #3b82f6;
+$success-color: #10b981;
+$error-color: #ef4444;
+$text-color: #1f2937;
+$bg-overlay: rgba(0, 0, 0, 0.5);
+
+// --- Animation ---
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+// --- Main Modal Styles ---
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: $bg-overlay;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(3px);
+
+  // --- TOAST NOTIFICATION STYLES ---
+  .custom-toast {
+    position: fixed;
+    top: 24px;
+    right: 24px;
+    z-index: 9999; // Đảm bảo luôn nằm trên Modal Overlay
+
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    min-width: 300px;
+    max-width: 450px;
+    padding: 16px 20px;
+
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+      0 4px 6px -2px rgba(0, 0, 0, 0.05);
+
+    // Animation
+    animation: slideInRight 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)
+      forwards;
+
+    // Left Border Accent
+    border-left: 5px solid transparent;
+
+    &.success {
+      border-left-color: $success-color;
+      .toast-icon {
+        color: $success-color;
+        background-color: rgba($success-color, 0.1);
+      }
+    }
+
+    &.error {
+      border-left-color: $error-color;
+      .toast-icon {
+        color: $error-color;
+        background-color: rgba($error-color, 0.1);
+      }
+    }
+
+    .toast-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .toast-text {
+      font-size: 14px;
+      font-weight: 500;
+      color: $text-color;
+      line-height: 1.4;
+    }
+  }
+
+  // --- Modal Content (Giữ nguyên cấu trúc của bạn) ---
+  .modal-content {
+    background: white;
+    padding: 24px;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 550px;
+    position: relative;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+
+      h3 {
+        font-size: 20px;
+        font-weight: 700;
+        color: $text-color;
+      }
+
+      .close-btn {
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        color: #9ca3af;
+        transition: color 0.2s;
+
+        &:hover {
+          color: $text-color;
+        }
+      }
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+
+      label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+        font-size: 14px;
+        color: $text-color;
+      }
+
+      select,
+      input,
+      textarea {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid #e5e7eb;
+        border-radius: 6px;
+        font-size: 14px;
+        transition: border-color 0.2s;
+
+        &:focus {
+          outline: none;
+          border-color: $primary-color;
+          box-shadow: 0 0 0 3px rgba($primary-color, 0.1);
+        }
+      }
+
+      .error-hint {
+        color: $error-color;
+        font-size: 12px;
+        margin-top: 4px;
+        display: block;
+      }
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .submit-btn {
+      width: 100%;
+      padding: 12px;
+      background-color: $primary-color;
+      color: white;
+      font-weight: 600;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: background-color 0.2s;
+
+      &:hover {
+        background-color: darken($primary-color, 10%);
+      }
+
+      &:disabled {
+        background-color: #9ca3af;
+        cursor: not-allowed;
+      }
+    }
+  }
+}

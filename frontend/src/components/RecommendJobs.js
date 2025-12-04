@@ -2,12 +2,12 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import "../styles/components/recommendJobs.scss";
-import { Sparkles } from "lucide-react";
+import { Sparkles, X } from "lucide-react"; // Thêm icon đóng nếu cần
 
 const RecommendJobs = () => {
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [fromCache, setFromCache] = useState(false);
+  const [isCache, setIsCache] = useState(false); // Đổi tên biến cho rõ nghĩa
   const [open, setOpen] = useState(false);
   const [showToast, setShowToast] = useState(false);
 
@@ -23,16 +23,23 @@ const RecommendJobs = () => {
           return;
         }
 
-        // Gọi API đúng backend route
+        // ✅ 1. SỬA URL CHO KHỚP BACKEND MỚI
         const res = await axios.get(
-          `http://localhost:8080/api/gemini/recommend-jobs`,
+          `http://localhost:8080/api/recommendations`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
         );
 
-        setJobs(res.data.recommendations || []);
-        setFromCache(res.data.fromCache || false);
+        console.log("API Response:", res.data); // Log để debug
+
+        // ✅ 2. SỬA CÁCH LẤY DỮ LIỆU
+        // Backend trả về: { success: true, source: "...", data: [...] }
+        if (res.data.success) {
+          setJobs(res.data.data || []);
+          // Kiểm tra nguồn dữ liệu (cache hay ai_generated)
+          setIsCache(res.data.source === "cache");
+        }
       } catch (error) {
         console.error("Lỗi khi lấy gợi ý việc làm:", error);
       } finally {
@@ -43,14 +50,15 @@ const RecommendJobs = () => {
     fetchRecommendations();
   }, []);
 
-  // ---------------- AUTO-TOAST EVERY 5 SECONDS ----------------
+  // ---------------- AUTO-TOAST EVERY 10 SECONDS ----------------
+  // (Tăng lên 10s để đỡ phiền user)
   useEffect(() => {
     if (open || jobs.length === 0) return;
 
     const interval = setInterval(() => {
       setShowToast(true);
       setTimeout(() => setShowToast(false), 3000);
-    }, 5000);
+    }, 10000);
 
     return () => clearInterval(interval);
   }, [jobs, open]);
@@ -59,26 +67,37 @@ const RecommendJobs = () => {
     <>
       {/* Icon mở panel */}
       <div className="recommend-icon" onClick={() => setOpen(!open)}>
-        <Sparkles size={26} />
+        <Sparkles size={26} color="#fff" />
+        {jobs.length > 0 && <span className="badge">{jobs.length}</span>}
       </div>
 
-      {/* Toast thông báo */}
-      {showToast && (
-        <div className="recommend-toast">
-          ✨ Có {jobs.length} việc làm gợi ý cho bạn!
+      {/* Toast thông báo (chỉ hiện khi panel đóng) */}
+      {!open && showToast && (
+        <div className="recommend-toast" onClick={() => setOpen(true)}>
+          ✨ Có {jobs.length} việc làm phù hợp với bạn!
         </div>
       )}
 
       {/* Panel danh sách job */}
       <div className={`recommend-panel ${open ? "open" : ""}`}>
-        <h3 className="panel-title">
-          Gợi ý việc làm {fromCache ? "(từ AI)" : ""}
-        </h3>
+        <div className="panel-header">
+          <h3 className="panel-title">
+            Gợi ý cho bạn{" "}
+            {isCache ? (
+              <span style={{ fontSize: "0.8em", color: "#888" }}>(Cache)</span>
+            ) : (
+              <Sparkles size={16} color="gold" />
+            )}
+          </h3>
+          <button className="close-btn" onClick={() => setOpen(false)}>
+            ×
+          </button>
+        </div>
 
         {loading ? (
-          <div className="panel-loading">Đang tải...</div>
+          <div className="panel-loading">Đang phân tích hồ sơ...</div>
         ) : jobs.length === 0 ? (
-          <div className="panel-empty">Không có gợi ý nào!</div>
+          <div className="panel-empty">Chưa có gợi ý phù hợp!</div>
         ) : (
           <div className="panel-list">
             {jobs.map((job) => (
@@ -86,21 +105,18 @@ const RecommendJobs = () => {
                 to={`/job/${job.job_id}`}
                 key={job.job_id}
                 className="panel-item"
+                onClick={() => setOpen(false)} // Đóng khi click vào job
               >
-                <div className="header">
-                  <h4>{job.title || "Không có tiêu đề"}</h4>
-                  <span className="company">
-                    {job.company || "Không rõ công ty"}
-                  </span>
+                <div className="item-header">
+                  <h4 className="job-title">{job.title}</h4>
+                  <span className="job-salary">{job.salary}</span>
                 </div>
 
-                <p className="desc">
-                  {(job.description || "Không có mô tả").substring(0, 80)}...
-                </p>
+                {/* Hiển thị lý do gợi ý nếu có */}
+                {job.reason && <p className="ai-reason">💡 {job.reason}</p>}
 
-                <div className="meta">
-                  <span>{job.location || "Không rõ địa điểm"}</span>
-                  <span>{job.salary || "Thoả thuận"}</span>
+                <div className="item-meta">
+                  <span className="location">📍 {job.location}</span>
                 </div>
               </Link>
             ))}

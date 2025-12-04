@@ -1,0 +1,240 @@
+/* =========================================
+   VARIABLES & THEME CONFIG
+   ========================================= */
+$primary-color: #2563eb; // Xanh dương chuyên nghiệp
+$secondary-color: #64748b; // Xám trung tính cho text phụ
+$success-color: #10b981; // Xanh lá
+$danger-color: #ef4444; // Đỏ
+$bg-color: #f8fafc; // Màu nền tổng thể nhạt
+$card-bg: #ffffff; // Màu nền card
+$border-color: #e2e8f0; // Màu viền nhẹ
+$text-main: #1e293b; // Màu chữ chính
+$shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+$shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+  0 2px 4px -1px rgba(0, 0, 0, 0.06);
+$radius: 12px;
+
+/* =========================================
+   MIXINS
+   ========================================= */
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin mobile {
+  @media (max-width: 768px) {
+    @content;
+  }
+}
+
+/* =========================================
+   MAIN STYLES
+   ========================================= */
+.applicant-manager {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  background-color: $bg-color;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    sans-serif;
+  color: $text-main;
+  overflow: hidden; // Giữ layout không bị scroll body
+  position: relative;
+
+  /* --- HEADER SECTION --- */
+  .manager-header {
+    background-color: $card-bg;
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid $border-color;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: $shadow-sm;
+    z-index: 10;
+    transition: all 0.3s ease;
+
+    @include mobile {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1rem;
+      padding: 1rem;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: $text-main;
+      line-height: 1.2;
+    }
+
+    .sub-text {
+      margin: 0.5rem 0 0;
+      font-size: 0.875rem;
+      color: $secondary-color;
+      font-weight: 500;
+    }
+
+    .stats-quick {
+      background-color: rgba($primary-color, 0.1);
+      color: $primary-color;
+      padding: 0.5rem 1rem;
+      border-radius: 99px; // Pill shape
+      font-size: 0.875rem;
+      font-weight: 500;
+      white-space: nowrap;
+      border: 1px solid rgba($primary-color, 0.2);
+
+      strong {
+        font-weight: 700;
+        font-size: 1rem;
+        margin-left: 4px;
+      }
+    }
+  }
+
+  /* --- CONTENT SECTION --- */
+  .manager-content {
+    flex: 1;
+    overflow-y: auto; // Scroll nội dung bên trong thay vì cả trang
+    padding: 1.5rem 2rem;
+    position: relative;
+
+    @include mobile {
+      padding: 1rem;
+    }
+  }
+
+  /* --- EMPTY STATE --- */
+  .empty-state {
+    @include flex-center;
+    height: 100%;
+    flex-direction: column;
+    color: $secondary-color;
+    background-color: $bg-color;
+    text-align: center;
+    padding: 2rem;
+    font-size: 1.1rem;
+    border: 2px dashed $border-color;
+    border-radius: $radius;
+    margin: 1rem;
+
+    &::before {
+      content: "👈"; // Visual cue
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      display: block;
+      animation: bounce 2s infinite;
+    }
+  }
+
+  /* --- LOADING STATE --- */
+  .loading {
+    @include flex-center;
+    width: 100%;
+    height: 200px;
+    font-size: 1rem;
+    color: $secondary-color;
+    font-weight: 500;
+
+    &::after {
+      content: "";
+      width: 20px;
+      height: 20px;
+      border: 2px solid $border-color;
+      border-top-color: $primary-color;
+      border-radius: 50%;
+      margin-left: 10px;
+      animation: spin 0.8s linear infinite;
+    }
+  }
+}
+
+/* =========================================
+   GLOBAL OVERRIDES (Cho Table & Modal con)
+   ========================================= */
+
+/* Tinh chỉnh ApplicantTable bên trong Manager */
+.applicant-manager {
+  // Can thiệp style của bảng con để đồng bộ
+  .table-container {
+    background: $card-bg;
+    border-radius: $radius;
+    box-shadow: $shadow-sm;
+    border: 1px solid $border-color;
+    overflow: hidden;
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+
+      thead {
+        background-color: #f1f5f9;
+        th {
+          padding: 1rem;
+          font-size: 0.75rem;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          color: $secondary-color;
+          font-weight: 600;
+          border-bottom: 1px solid $border-color;
+        }
+      }
+
+      tbody {
+        tr {
+          transition: background-color 0.2s;
+          border-bottom: 1px solid $border-color;
+
+          &:hover {
+            background-color: #f8fafc;
+          }
+
+          &:last-child {
+            border-bottom: none;
+          }
+        }
+
+        td {
+          padding: 1rem;
+          font-size: 0.9rem;
+          color: $text-main;
+        }
+      }
+    }
+  }
+
+  // Thay thế Icon buttons bằng Text buttons (Clean Code Requirement)
+  // Class này cần được thêm vào nút trong ApplicantTable.jsx nếu muốn thay đổi
+  button {
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s;
+
+    &:focus {
+      outline: 2px solid rgba($primary-color, 0.4);
+      outline-offset: 2px;
+    }
+  }
+}
+
+/* =========================================
+   ANIMATIONS
+   ========================================= */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes bounce {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(-10px);
+  }
+}

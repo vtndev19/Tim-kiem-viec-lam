@@ -1,0 +1,380 @@
+// ===========================
+// IMAGE SLIDE BOX COMPONENT
+// ===========================
+$box-height: 320px;
+$box-radius: 12px;
+$dot-color-active: #ffffff;
+$dot-color-inactive: rgba(255, 255, 255, 0.4);
+$arrow-color: rgba(255, 255, 255, 0.9);
+
+// ===========================
+// MAIN CONTAINER
+// ===========================
+.image-slide-box {
+  width: 100%;
+  border-radius: $box-radius;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  background: #1a1a1a;
+  position: relative;
+}
+
+// ===========================
+// CAROUSEL WRAPPER
+// ===========================
+.carousel-wrapper {
+  width: 100%;
+  height: $box-height;
+  overflow: hidden;
+  position: relative;
+  background-color: #1a1a1a;
+
+  // ===========================
+  // CUSTOM ARROWS
+  // ===========================
+  .slick-prev,
+  .slick-next {
+    z-index: 15;
+    width: 48px;
+    height: 48px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255, 255, 255, 0.15);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.8;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    backdrop-filter: blur(10px);
+
+    &::before {
+      content: "";
+      display: none;
+    }
+
+    svg {
+      width: 24px;
+      height: 24px;
+      color: $arrow-color;
+      stroke-width: 2.5;
+    }
+
+    &:hover {
+      opacity: 1;
+      background: rgba(74, 144, 226, 0.35);
+      border-color: rgba(255, 255, 255, 0.6);
+      box-shadow: 0 4px 20px rgba(74, 144, 226, 0.3);
+      svg {
+        color: #ffffff;
+      }
+    }
+
+    &:active {
+      transform: translateY(-50%) scale(0.95);
+    }
+  }
+
+  .slick-prev {
+    left: 16px;
+  }
+
+  .slick-next {
+    right: 16px;
+  }
+
+  // ===========================
+  // SLIDE ITEMS
+  // ===========================
+  .slide-item {
+    outline: none;
+    position: relative;
+    height: $box-height;
+
+    .slide-ratio {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      overflow: hidden;
+
+      .slide-image {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center 30%;
+        animation: zoomInImage 8s ease-out;
+      }
+
+      // Overlay effect
+      .slide-overlay {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          135deg,
+          rgba(0, 0, 0, 0.15) 0%,
+          rgba(0, 0, 0, 0.1) 100%
+        );
+        pointer-events: none;
+        z-index: 2;
+      }
+    }
+  }
+
+  // ===========================
+  // SLICK LIST & TRACK
+  // ===========================
+  .slick-list,
+  .slick-track {
+    height: 100%;
+  }
+
+  // ===========================
+  // CUSTOM DOTS
+  // ===========================
+  .slick-dots {
+    bottom: 16px;
+    left: 0;
+    right: 0;
+    display: flex !important;
+    justify-content: center;
+    gap: 8px;
+    z-index: 15;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+
+    li {
+      width: auto;
+      margin: 0;
+      padding: 0;
+
+      button {
+        border: none;
+        background: transparent;
+        padding: 0;
+        outline: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        &::before {
+          content: "";
+          display: block;
+          width: 10px;
+          height: 10px;
+          border-radius: 50%;
+          background-color: $dot-color-inactive;
+          opacity: 1;
+          transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+          font-size: 0;
+        }
+      }
+
+      &.slick-active button::before {
+        width: 28px;
+        background-color: $dot-color-active;
+        box-shadow: 0 3px 12px rgba(74, 144, 226, 0.4);
+        border-radius: 5px;
+      }
+
+      &:hover button::before {
+        transform: scale(1.15);
+      }
+    }
+  }
+
+  // ===========================
+  // PROGRESS BAR
+  // ===========================
+  .carousel-progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: rgba(255, 255, 255, 0.1);
+    z-index: 14;
+
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #4a90e2 0%, #f39c12 100%);
+      transition: width 5s linear;
+      box-shadow: 0 0 8px rgba(74, 144, 226, 0.5);
+    }
+  }
+
+  // Hide default arrows
+  .slick-arrow {
+    &::before {
+      display: none !important;
+    }
+  }
+}
+
+// ===========================
+// ANIMATIONS
+// ===========================
+@keyframes zoomInImage {
+  from {
+    transform: scale(1);
+    opacity: 1;
+  }
+  to {
+    transform: scale(1.02);
+    opacity: 1;
+  }
+}
+
+// ===========================
+// RESPONSIVE
+// ===========================
+@media (max-width: 1024px) {
+  .carousel-wrapper {
+    .slick-prev,
+    .slick-next {
+      width: 44px;
+      height: 44px;
+
+      svg {
+        width: 20px;
+        height: 20px;
+      }
+    }
+
+    .slick-prev {
+      left: 12px;
+    }
+
+    .slick-next {
+      right: 12px;
+    }
+
+    .slick-dots {
+      bottom: 12px;
+      gap: 6px;
+
+      li button::before {
+        width: 8px;
+        height: 8px;
+      }
+
+      li.slick-active button::before {
+        width: 20px;
+      }
+    }
+  }
+
+  .image-slide-box {
+    .carousel-wrapper {
+      height: 280px;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .carousel-wrapper {
+    height: 240px;
+
+    .slick-prev,
+    .slick-next {
+      width: 40px;
+      height: 40px;
+      opacity: 0.6;
+
+      svg {
+        width: 18px;
+        height: 18px;
+      }
+
+      &:hover {
+        opacity: 0.85;
+      }
+    }
+
+    .slick-prev {
+      left: 8px;
+    }
+
+    .slick-next {
+      right: 8px;
+    }
+
+    .slick-dots {
+      bottom: 10px;
+      gap: 5px;
+
+      li button::before {
+        width: 7px;
+        height: 7px;
+      }
+
+      li.slick-active button::before {
+        width: 18px;
+      }
+    }
+
+    .carousel-progress {
+      height: 2px;
+    }
+  }
+
+  .image-slide-box {
+    border-radius: 8px;
+
+    .carousel-wrapper {
+      height: 200px;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .carousel-wrapper {
+    height: 180px;
+
+    .slick-prev,
+    .slick-next {
+      width: 36px;
+      height: 36px;
+
+      svg {
+        width: 16px;
+        height: 16px;
+      }
+    }
+
+    .slick-prev {
+      left: 6px;
+    }
+
+    .slick-next {
+      right: 6px;
+    }
+
+    .slick-dots {
+      bottom: 8px;
+      gap: 4px;
+
+      li button::before {
+        width: 6px;
+        height: 6px;
+      }
+
+      li.slick-active button::before {
+        width: 14px;
+      }
+    }
+  }
+
+  .image-slide-box {
+    border-radius: 6px;
+  }
+}

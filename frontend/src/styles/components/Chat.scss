@@ -420,3 +420,137 @@
     transform: translateY(0);
   }
 }
+/* =======================
+   GỢI Ý SỰ KIỆN & FLOW Q&A
+   ======================= */
+
+/* Khu vực hiển thị gợi ý ngay dưới header của chat AI */
+.chat-window {
+  /* ... giữ nguyên các style cũ ... */
+
+  .chat-suggestions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $spacing-sm;
+    padding: $spacing-md $spacing-lg $spacing-sm;
+    border-bottom: 1px solid #eee;
+    background: #fafbff;
+  }
+
+  .suggestion-btn {
+    appearance: none;
+    border: 1px solid #dfe3eb;
+    background: #ffffff;
+    color: #1a1a1a;
+    border-radius: 999px;
+    padding: 8px 14px;
+    font-size: 0.92rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(26, 115, 232, 0.06);
+
+    &:hover {
+      background: #e8f0fe;
+      border-color: #cbd5e1;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(26, 115, 232, 0.12);
+    }
+
+    &:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 8px rgba(26, 115, 232, 0.06);
+    }
+  }
+}
+
+/* Placeholder khi người dùng đang trong flow Q&A (đã set từ component) */
+.chat-input-area input::placeholder {
+  color: #9aa0a6;
+}
+
+/* Tin nhắn bot hiển thị tóm tắt dữ liệu đã thu thập (multi-line) */
+.message.bot {
+  white-space: pre-line; /* hỗ trợ xuống dòng \n từ text */
+}
+
+/* Nhãn nhỏ hiển thị lỗi/nhắc nhập đúng Full-time/Part-time (nếu cần) */
+.chat-input-area {
+  position: relative;
+
+  .input-hint {
+    position: absolute;
+    left: $spacing-md;
+    bottom: 100%;
+    transform: translateY(-6px);
+    font-size: 0.82rem;
+    color: #c62828;
+    background: #ffebee;
+    border: 1px solid #ffcdd2;
+    border-radius: 6px;
+    padding: 4px 8px;
+    box-shadow: 0 2px 8px rgba(198, 40, 40, 0.1);
+  }
+}
+
+/* ==========================
+   TỐI ƯU NHÌN - CẢM CHO FLOW
+   ========================== */
+
+/* Nhấn mạnh các câu hỏi từ bot trong flow */
+.chat-messages .message.bot {
+  border: 1px solid #eceff3;
+}
+
+/* Tin nhắn của người dùng trong flow: nhấn mạnh hơn */
+.chat-messages .message.user {
+  box-shadow: 0 2px 8px rgba(45, 140, 255, 0.18);
+}
+
+/* Nút gửi khi đang trong flow đổi text: đã xử lý ở component;
+   thêm màu nhấn nhẹ để người dùng nhận diện */
+.chat-input-area button {
+  &.flow-submit {
+    background-color: #2d8cff;
+  }
+}
+
+/* ==========================
+   RESPONSIVE & TRẢI NGHIỆM
+   ========================== */
+
+/* Bo góc nhẹ hơn ở phần suggestions & messages khi hẹp màn hình */
+@media (max-width: 480px) {
+  .chat-window {
+    width: 94vw;
+    height: 70vh;
+  }
+
+  .chat-window .chat-suggestions {
+    gap: 6px;
+    padding: 10px 12px;
+  }
+
+  .chat-window .suggestion-btn {
+    font-size: 0.88rem;
+    padding: 7px 12px;
+  }
+
+  .chat-messages .message {
+    max-width: 88%;
+  }
+}
+
+/* ==========================
+   TRẠNG THÁI LOADING NÂNG CAO
+   ========================== */
+
+/* Loader dots đã có; thêm nền nhẹ khi bot đang phản hồi dài */
+.message.bot.loading {
+  background: linear-gradient(180deg, #f7f9fc, #f1f5fb);
+  border: 1px dashed #cbd5e1;
+
+  span {
+    background-color: #78909c;
+  }
+}

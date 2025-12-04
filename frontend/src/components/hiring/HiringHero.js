@@ -1,5 +1,6 @@
 import React from "react";
 import "./HiringHero.scss";
+import { Link } from "react-router-dom";
 
 const HiringHero = ({ onPostJobClick, onManageJobsClick }) => {
   return (
@@ -43,7 +44,7 @@ const HiringHero = ({ onPostJobClick, onManageJobsClick }) => {
               onClick={onPostJobClick}
               className="button button-primary button-large"
             >
-              <span className="button-icon">+</span> Đăng Tuyển Ngay
+              <Link to="/applicant-dashboard">Trang quản trị</Link>
             </button>
             <button
               onClick={onManageJobsClick}

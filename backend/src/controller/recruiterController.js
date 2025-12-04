@@ -66,18 +66,16 @@ export const sendRecruiterOtp = async (req, res) => {
 };
 
 // =======================================================
-// 🟢 API 2: XÁC THỰC OTP & GÁN CÔNG TY & NÂNG CẤP
+// 🟢 API 2: XÁC THỰC OTP & GÁN CÔNG TY (LOGIC MỚI)
 // =======================================================
 export const verifyAndUpgrade = async (req, res) => {
-  // 1. Khởi tạo kết nối Transaction
   const connection = await db.getConnection();
 
   try {
-    // Bắt đầu giao dịch
+    // Bắt đầu giao dịch (Transaction)
     await connection.beginTransaction();
 
     const user_id = req.user.user_id;
-    // 📌 Lấy industry_input thay vì industry_id
     const {
       otp,
       company_name,
@@ -95,12 +93,20 @@ export const verifyAndUpgrade = async (req, res) => {
     );
 
     if (users.length === 0) throw new Error("Người dùng không tồn tại.");
-
     const user = users[0];
 
-    if (user.role === "recruiter")
-      throw new Error("Tài khoản này đã là Nhà tuyển dụng rồi.");
+    // Kiểm tra xem user này đã tham gia công ty nào chưa (trong bảng company_members)
+    // Nếu bạn muốn 1 người chỉ làm cho 1 công ty thì giữ đoạn này.
+    const [existingMember] = await connection.query(
+      "SELECT id FROM company_members WHERE user_id = ?",
+      [user_id]
+    );
 
+    if (existingMember.length > 0) {
+      throw new Error("Bạn đã là thành viên của một công ty khác rồi.");
+    }
+
+    // Check OTP
     if (!user.otp_code || String(user.otp_code) !== String(otp))
       throw new Error("Mã OTP không chính xác.");
 
@@ -110,29 +116,25 @@ export const verifyAndUpgrade = async (req, res) => {
       throw new Error("Mã OTP đã hết hạn. Vui lòng yêu cầu lại.");
 
     // ---------------------------------------------------
-    // 🔥 BƯỚC 2: XỬ LÝ NGÀNH NGHỀ (Find or Create Logic)
+    // BƯỚC 2: XỬ LÝ NGÀNH NGHỀ (Industry)
     // ---------------------------------------------------
     let finalIndustryId = null;
 
     if (industry_input) {
-      // Kiểm tra: Nếu input là số => Đã là ID
       if (!isNaN(industry_input)) {
-        finalIndustryId = industry_input;
+        finalIndustryId = industry_input; // Nếu gửi lên ID
       } else {
-        // Nếu input là chuỗi => Tên ngành mới
         const sanitizedName = industry_input.trim();
-
-        // Check xem tên này đã có trong DB chưa (tránh tạo trùng)
+        // Tìm xem ngành có chưa
         const [existingInd] = await connection.query(
           "SELECT industry_id FROM industries WHERE name = ?",
           [sanitizedName]
         );
 
         if (existingInd.length > 0) {
-          // Có rồi -> Lấy ID
           finalIndustryId = existingInd[0].industry_id;
         } else {
-          // Chưa có -> Tạo mới -> Lấy ID vừa tạo
+          // Tạo ngành mới
           const [newIndResult] = await connection.query(
             "INSERT INTO industries (name) VALUES (?)",
             [sanitizedName]
@@ -143,59 +145,51 @@ export const verifyAndUpgrade = async (req, res) => {
     }
 
     // ---------------------------------------------------
-    // BƯỚC 3: KIỂM TRA VÀ TẠO/CẬP NHẬT CÔNG TY
+    // 🔥 BƯỚC 3: XỬ LÝ CÔNG TY (FIND OR CREATE)
     // ---------------------------------------------------
+    const normalizedCompanyName = company_name.trim();
 
-    // Kiểm tra User đã sở hữu công ty nào chưa
-    const [existingOwnCompany] = await connection.query(
-      "SELECT company_id FROM companies WHERE user_id = ?",
-      [user_id]
+    // Tìm xem công ty tên này đã có chưa?
+    const [existingCompany] = await connection.query(
+      "SELECT company_id FROM companies WHERE company_name = ?",
+      [normalizedCompanyName]
     );
 
-    if (existingOwnCompany.length > 0) {
-      // Đã có -> Update thông tin + Ngành nghề mới
-      const companyId = existingOwnCompany[0].company_id;
-      await connection.query(
-        `UPDATE companies 
-         SET company_name = ?, contact_email = ?, address = ?, industry_id = ? 
-         WHERE company_id = ?`,
-        [
-          company_name,
-          company_email,
-          company_address,
-          finalIndustryId,
-          companyId,
-        ]
-      );
+    let targetCompanyId = null;
+    let userRoleInCompany = "Staff"; // Mặc định là nhân viên
+    let isNewCompany = false;
+
+    if (existingCompany.length > 0) {
+      // === TRƯỜNG HỢP A: CÔNG TY ĐÃ TỒN TẠI ===
+      // User tham gia vào công ty đã có -> Role: Staff
+      targetCompanyId = existingCompany[0].company_id;
+      userRoleInCompany = "Staff";
     } else {
-      // Chưa có -> Tạo mới
-      // Check trùng tên công ty
-      const [duplicateName] = await connection.query(
-        "SELECT company_id FROM companies WHERE company_name = ?",
-        [company_name]
+      // === TRƯỜNG HỢP B: CÔNG TY MỚI ===
+      // Tạo công ty mới -> Role: Manager
+      const [createResult] = await connection.query(
+        `INSERT INTO companies (company_name, contact_email, address, industry_id) 
+         VALUES (?, ?, ?, ?)`,
+        [normalizedCompanyName, company_email, company_address, finalIndustryId]
       );
-
-      if (duplicateName.length > 0) {
-        throw new Error(
-          `Công ty tên "${company_name}" đã tồn tại trong hệ thống.`
-        );
-      }
-
-      await connection.query(
-        `INSERT INTO companies (user_id, company_name, contact_email, address, industry_id) 
-         VALUES (?, ?, ?, ?, ?)`,
-        [
-          user_id,
-          company_name,
-          company_email,
-          company_address,
-          finalIndustryId, // ID ngành (cũ hoặc mới tạo)
-        ]
-      );
+      targetCompanyId = createResult.insertId;
+      userRoleInCompany = "Manager";
+      isNewCompany = true;
     }
 
     // ---------------------------------------------------
-    // BƯỚC 4: NÂNG CẤP ROLE USER
+    // BƯỚC 4: THÊM USER VÀO BẢNG COMPANY_MEMBERS
+    // ---------------------------------------------------
+    // Dùng INSERT IGNORE để nếu lỡ click đúp không bị lỗi
+    await connection.query(
+      `INSERT INTO company_members (company_id, user_id, role, status)
+       VALUES (?, ?, ?, 'Active') 
+       ON DUPLICATE KEY UPDATE role = role`, // Nếu trùng thì giữ nguyên
+      [targetCompanyId, user_id, userRoleInCompany]
+    );
+
+    // ---------------------------------------------------
+    // BƯỚC 5: NÂNG CẤP ROLE USER TRONG HỆ THỐNG
     // ---------------------------------------------------
     await connection.query(
       `UPDATE users 
@@ -204,20 +198,25 @@ export const verifyAndUpgrade = async (req, res) => {
       [user_id]
     );
 
-    // ---------------------------------------------------
-    // BƯỚC 5: COMMIT GIAO DỊCH
-    // ---------------------------------------------------
+    // Commit Transaction (Lưu thay đổi)
     await connection.commit();
+
+    // Custom thông báo
+    const msg = isNewCompany
+      ? "Tạo công ty thành công! Bạn là Quản lý (Manager)."
+      : "Gia nhập công ty thành công! Bạn là Nhân viên (Staff).";
 
     return res.status(200).json({
       success: true,
-      message: "🎉 Xác thực thành công! Bạn đã trở thành Nhà tuyển dụng.",
+      message: msg,
       data: {
         role: "recruiter",
-        company: company_name,
+        company_role: userRoleInCompany,
+        company: normalizedCompanyName,
       },
     });
   } catch (error) {
+    // Nếu có lỗi, hoàn tác mọi thay đổi DB
     await connection.rollback();
     console.error("❌ Lỗi Verify & Upgrade:", error.message);
 

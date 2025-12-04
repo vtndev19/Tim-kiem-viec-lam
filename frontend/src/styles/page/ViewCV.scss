@@ -1,0 +1,187 @@
+/* --- src/styles/page/ViewCV.scss --- */
+
+/* 1. LAYER PHỦ TOÀN MÀN HÌNH (Giao diện xem) */
+/* Class này tương ứng với div ngoài cùng trong JSX của bạn */
+.cv-view-page {
+  position: fixed; /* QUAN TRỌNG: Ghim chặt đè lên Header/Footer của web cũ */
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: #323639; /* Màu xám đậm chuẩn PDF Viewer */
+  z-index: 9999; /* Đảm bảo nằm trên cùng, che nút chat/thông báo */
+  overflow-y: auto; /* Cho phép cuộn dọc */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-bottom: 50px;
+
+  /* 2. THANH CÔNG CỤ (HEADER) */
+  .cv-toolbar {
+    position: sticky;
+    top: 0;
+    width: 100%;
+    background-color: #202124; /* Màu đen thanh công cụ */
+    color: #e8eaed;
+    padding: 12px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    z-index: 10000;
+
+    /* Khu vực bên trái (Back button + Title) */
+    .toolbar-left {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+
+      h2 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 500;
+        color: #ffffff;
+      }
+    }
+
+    /* Khu vực bên phải (Buttons) */
+    .toolbar-right {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    /* Style chung cho các nút bấm (.btn) */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px 16px;
+      border-radius: 4px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      border: 1px solid transparent;
+      line-height: 1.2;
+
+      /* Nút Quay lại (Màu tối/trong suốt) */
+      &.btn-back {
+        background-color: transparent;
+        border-color: #5f6368;
+        color: #e8eaed;
+
+        &:hover {
+          background-color: rgba(255, 255, 255, 0.08);
+        }
+      }
+
+      /* Nút Chỉnh sửa (Màu xanh dương) */
+      &.btn-edit {
+        background-color: #8ab4f8;
+        color: #202124;
+        font-weight: 600;
+
+        &:hover {
+          background-color: #aecbfa;
+        }
+      }
+
+      /* Nút In (Màu xanh lá) */
+      &.btn-print {
+        background-color: #10b981;
+        color: white;
+
+        &:hover {
+          background-color: #059669;
+        }
+      }
+    }
+  }
+
+  /* 3. KHUNG BAO GIẤY A4 */
+  .cv-paper-wrapper {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin-top: 30px;
+    margin-bottom: 30px;
+  }
+
+  /* 4. TỜ GIẤY CV THỰC TẾ */
+  .cv-paper-container {
+    background: white;
+    width: 210mm; /* Chiều rộng chuẩn A4 */
+    min-height: 297mm; /* Chiều cao tối thiểu A4 */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5); /* Bóng đổ làm nổi tờ giấy */
+    position: relative;
+    color: #000; /* Text màu đen */
+    text-align: left;
+
+    /* Đảm bảo nội dung không bị dính sát mép nếu component con không có padding */
+    box-sizing: border-box;
+  }
+}
+
+/* 5. CẤU HÌNH IN (MEDIA PRINT) - QUAN TRỌNG */
+@media print {
+  @page {
+    size: A4;
+    margin: 0; /* Xóa lề mặc định trình duyệt */
+  }
+
+  /* Ẩn thanh cuộn */
+  ::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Ẩn toàn bộ những thứ bên ngoài component này (Header/Footer của App chính) */
+  body * {
+    visibility: hidden;
+    height: 0;
+    overflow: hidden;
+  }
+
+  /* Ẩn Toolbar của trang xem CV */
+  .cv-toolbar {
+    display: none !important;
+  }
+
+  /* Reset lại container chính để không còn fix overlay */
+  .cv-view-page {
+    position: static !important;
+    background: white !important;
+    width: 100% !important;
+    height: auto !important;
+    padding: 0 !important;
+    display: block !important;
+    overflow: visible !important;
+    z-index: auto !important;
+  }
+
+  .cv-paper-wrapper {
+    margin: 0 !important;
+    padding: 0 !important;
+    display: block !important;
+    width: 100% !important;
+  }
+
+  /* HIỆN LẠI TỜ GIẤY CV */
+  .cv-paper-container,
+  .cv-paper-container * {
+    visibility: visible !important;
+  }
+
+  .cv-paper-container {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important; /* Bỏ bóng đổ khi in */
+    border: none !important;
+    min-height: auto !important;
+  }
+}

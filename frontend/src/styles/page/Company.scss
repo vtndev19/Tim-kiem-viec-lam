@@ -1,146 +1,213 @@
-// src/styles/page/Company.scss
-@import "../global.scss";
+// 1. Variables (Đồng bộ với HomeHeader để giữ Identity)
+$primary-color: #2563eb;
+$text-dark: #1e293b;
+$text-gray: #64748b;
+$bg-light: #f8fafc;
+$bg-white: #ffffff;
+$border-color: #e2e8f0;
+$radius: 12px;
+$shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+$shadow-hover: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+$transition: all 0.3s ease;
 
+// 2. Main Container
 .company-page {
-  padding: $spacing-2xl 0;
+  padding: 40px 16px; // Padding an toàn cho mobile
+  background-color: $bg-light;
+  min-height: 100vh;
 
-  .page-title {
-    text-align: center;
-    font-size: $font-size-3xl;
-    color: $text-dark;
-    margin-bottom: $spacing-xl;
-  }
-
-  /* ===== Giữ dạng lưới ===== */
-  .company-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: $spacing-xl;
+  .container {
     max-width: 1200px;
     margin: 0 auto;
   }
 
-  /* ===== Card công ty ===== */
-  .company-card {
+  // Tiêu đề trang
+  .page-title {
+    font-size: 2rem;
+    font-weight: 800;
+    color: $text-dark;
+    text-align: center;
+    margin-bottom: 40px;
+    position: relative;
+
+    // Gạch chân trang trí nhỏ dưới tiêu đề
+    &::after {
+      content: "";
+      display: block;
+      width: 60px;
+      height: 4px;
+      margin: 10px auto 0;
+      border-radius: 2px;
+    }
+  }
+
+  // 3. Grid Layout (Responsive tự động)
+  .company-grid {
+    display: grid;
+    // Tự động chia cột: Tối thiểu 300px, tối đa 1fr.
+    // Giúp giao diện đẹp trên cả mobile (1 cột), tablet (2 cột) và PC (3-4 cột).
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 30px;
+  }
+
+  // 4. Loading & Empty State
+  .loading,
+  .no-data {
+    text-align: center;
+    font-size: 1.2rem;
+    color: $text-gray;
+    grid-column: 1 / -1; // Chiếm toàn bộ chiều ngang
+    padding: 40px;
+  }
+}
+
+// 5. Company Card (Thẻ Công Ty)
+.company-card {
+  background: $bg-white;
+  border-radius: $radius;
+  border: 1px solid $border-color;
+  box-shadow: $shadow-sm;
+  transition: $transition;
+  display: flex;
+  flex-direction: column; // Quan trọng để đẩy footer xuống đáy
+  overflow: hidden;
+  height: 100%; // Đảm bảo thẻ chiếm hết chiều cao của Grid cell
+
+  &:hover {
+    transform: translateY(-5px); // Bay lên nhẹ khi hover
+    box-shadow: $shadow-hover;
+    border-color: rgba($primary-color, 0.3);
+
+    .company-logo img {
+      transform: scale(1.05); // Zoom nhẹ logo
+    }
+  }
+
+  // --- Logo Area ---
+  .company-logo {
+    height: 160px; // Cố định chiều cao vùng ảnh
+    background-color: #fff;
+    border-bottom: 1px solid $border-color;
     display: flex;
     align-items: center;
-    background: $white;
-    border-radius: $radius-lg;
-    box-shadow: $shadow-md;
-    padding: $spacing-md;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    height: 150px;
+    justify-content: center;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
 
-    &:hover {
-      transform: translateY(-4px);
-      box-shadow: $shadow-lg;
+    img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain; // Giữ tỉ lệ ảnh không bị méo
+      transition: $transition;
+    }
+  }
+
+  // --- Info Area ---
+  .company-info {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1; // Chiếm phần không gian còn lại -> Đẩy nút xuống đáy
+
+    h2 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: $text-dark;
+      margin-bottom: 12px;
+      line-height: 1.4;
+
+      // Cắt bớt nếu tên quá dài (tối đa 2 dòng)
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
     }
 
-    /* Logo bên trái */
-    .company-logo {
-      flex: 0 0 80px;
+    p {
+      font-size: 0.9rem;
+      color: $text-gray;
+      margin-bottom: 8px;
       display: flex;
       align-items: center;
-      justify-content: center;
-      height: 100px;
-
-      img {
-        width: 100%;
-        height: 100%;
-        object-fit: contain;
-        border-radius: $radius-md;
-      }
-    }
-
-    /* Thông tin giữa */
-    .company-info {
-      flex: 1;
-      padding: 0 $spacing-md;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-
-      h2 {
-        font-size: $font-size-md;
-        color: $primary;
-        margin-bottom: 4px;
-        font-weight: 600;
-      }
-
-      .company-industry {
-        font-size: $font-size-sm;
-        color: $text-muted;
-        margin-bottom: 2px;
-      }
-
-      .company-location {
-        font-size: $font-size-sm;
-        color: $text-light;
-      }
-    }
-
-    /* Nút hành động bên phải */
-    .company-actions {
-      display: flex;
-      flex-wrap: wrap; /* Cho phép xuống dòng khi hẹp */
-      justify-content: flex-end;
       gap: 6px;
 
+      // Icon giả lập bằng CSS (hoặc bạn có thể dùng FontAwesome)
+      &.company-industry::before {
+        content: "🏢";
+        font-size: 1rem;
+      }
+      &.company-location::before {
+        content: "📍";
+        font-size: 1rem;
+      }
+
+      &.company-location {
+        // Cắt địa chỉ nếu quá dài (1 dòng)
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+    }
+
+    // --- Actions (Buttons) ---
+    .company-actions {
+      margin-top: auto; // Kỹ thuật Flexbox: Tự động đẩy vùng này xuống đáy thẻ
+      padding-top: 20px;
+      display: flex;
+      gap: 10px;
+
       .btn {
-        flex: 1 1 45%; /* Mỗi nút chiếm khoảng 45% chiều rộng */
-        min-width: 90px;
-        padding: 4px 8px;
-        border-radius: 4px;
-        font-size: 12px;
-        text-decoration: none;
+        flex: 1; // Chia đều độ rộng 2 nút
+        padding: 10px;
+        font-size: 0.9rem;
+        font-weight: 600;
         text-align: center;
-        transition: all 0.2s ease;
-        cursor: pointer;
-        font-weight: 500;
-      }
+        border-radius: 6px;
+        text-decoration: none;
+        transition: $transition;
+        display: flex;
+        align-items: center;
+        justify-content: center;
 
-      .company-detail-btn {
-        background-color: #007bff;
-        color: white;
-
-        &:hover {
-          background-color: #0056b3;
-        }
-      }
-
-      .company-link-btn {
-        border: 1px solid #007bff;
-        color: #007bff;
-        background-color: transparent;
-
-        &:hover {
-          background-color: #007bff;
+        // Nút Chi tiết (Xanh)
+        &.company-detail-btn {
+          background-color: $primary-color;
           color: white;
+          border: 1px solid $primary-color;
+
+          &:hover {
+            background-color: darken($primary-color, 5%);
+          }
+        }
+
+        // Nút Website (Trắng viền)
+        &.company-link-btn {
+          background-color: transparent;
+          color: $text-dark;
+          border: 1px solid $border-color;
+
+          &:hover {
+            border-color: $primary-color;
+            color: $primary-color;
+            background-color: #eff6ff;
+          }
         }
       }
     }
   }
+}
 
-  /* Responsive */
-  @media (max-width: 768px) {
-    .company-grid {
-      grid-template-columns: 1fr;
+// 6. Responsive Mobile Tweaks
+@media (max-width: 768px) {
+  .company-page {
+    .page-title {
+      font-size: 1.5rem;
+      margin-bottom: 24px;
     }
 
-    .company-card {
-      flex-direction: column;
-      height: auto;
-      text-align: center;
-
-      .company-logo {
-        margin-bottom: $spacing-sm;
-      }
-
-      .company-actions {
-        flex-direction: row;
-        justify-content: center;
-        margin-top: $spacing-sm;
-      }
+    .company-grid {
+      gap: 20px;
     }
   }
 }

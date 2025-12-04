@@ -9,6 +9,10 @@ export default function HomeHeader({ siteName }) {
   const [industries, setIndustries] = useState([]);
   const [isDropdownVisible, setDropdownVisible] = useState(false);
   const [isUserMenuVisible, setUserMenuVisible] = useState(false);
+
+  // State lưu role người dùng
+  const [userRole, setUserRole] = useState(null);
+
   const userMenuRef = useRef(null);
   const loc = useLocation();
   const navigate = useNavigate();
@@ -17,7 +21,44 @@ export default function HomeHeader({ siteName }) {
     setIndustries(db.industries || []);
   }, []);
 
-  // Ẩn menu khi click ra ngoài
+  //  HÀM GIẢI MÃ TOKEN (Đã khớp với Backend của bạn)
+  const getUserRoleFromToken = () => {
+    try {
+      const token = localStorage.getItem("authToken");
+      if (!token) return null;
+
+      // Token gồm 3 phần: Header.Payload.Signature
+      const base64Url = token.split(".")[1];
+      const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+      const jsonPayload = decodeURIComponent(
+        atob(base64)
+          .split("")
+          .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+          .join("")
+      );
+
+      const parsedToken = JSON.parse(jsonPayload);
+
+      // Backend của bạn lưu: decoded.role => Frontend lấy: parsedToken.role
+      return parsedToken.role ? parsedToken.role.toString() : null;
+    } catch (error) {
+      console.error("Lỗi khi đọc token:", error);
+      return null;
+    }
+  };
+
+  // ✅ CẬP NHẬT ROLE KHI CÓ USER
+  useEffect(() => {
+    if (user) {
+      const role = getUserRoleFromToken();
+      // Chuẩn hóa về chữ thường để so sánh chính xác (tránh lỗi Hoa/Thường)
+      setUserRole(role ? role.toLowerCase() : null);
+    } else {
+      setUserRole(null);
+    }
+  }, [user]);
+
+  // Click outside để đóng menu
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (userMenuRef.current && !userMenuRef.current.contains(e.target)) {
@@ -28,10 +69,10 @@ export default function HomeHeader({ siteName }) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // ✅ Đăng xuất → quay về trang chủ
   const handleLogout = () => {
     logout();
     setUserMenuVisible(false);
+    setUserRole(null);
     navigate("/");
   };
 
@@ -51,6 +92,7 @@ export default function HomeHeader({ siteName }) {
             Trang chủ
           </Link>
 
+          {/* Menu Việc làm */}
           <div
             className="jobs-menu-item"
             onMouseEnter={() => setDropdownVisible(true)}
@@ -74,7 +116,7 @@ export default function HomeHeader({ siteName }) {
 
           <Link
             className={loc.pathname.startsWith("/companies") ? "active" : ""}
-            to="/companies"
+            to="/companies-landing"
           >
             Công ty
           </Link>
@@ -88,7 +130,7 @@ export default function HomeHeader({ siteName }) {
           </Link>
         </nav>
 
-        {/* User */}
+        {/* User Auth */}
         <div className="auth">
           {!user ? (
             <>
@@ -121,7 +163,17 @@ export default function HomeHeader({ siteName }) {
                     <li>
                       <Link to="/saved-jobs">Việc làm đã lưu</Link>
                     </li>
-                    <li></li>
+
+                    {/* LOGIC HIỂN THỊ MENU TUYỂN DỤNG */}
+                    {/* So sánh với chữ thường 'recruiter' để đảm bảo chính xác */}
+                    {userRole === "recruiter" && (
+                      <li>
+                        <Link to="/hiring-dashboard" className="highlight-link">
+                          Trang tuyển dụng
+                        </Link>
+                      </li>
+                    )}
+
                     <li className="logout" onClick={handleLogout}>
                       Đăng xuất
                     </li>

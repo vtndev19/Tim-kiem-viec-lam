@@ -1,323 +1,309 @@
 import db from "../configs/data.js"; // Pool MySQL
 
+// --- HELPER FUNCTIONS (Đưa lên đầu để tránh lỗi ReferenceError) ---
+
+// Hàm parse chung để chuyển đổi dữ liệu JSON từ DB sang Object
+const parseCVData = (cv) => {
+  const parseSafe = (jsonString) => {
+    try {
+      return typeof jsonString === "string"
+        ? JSON.parse(jsonString)
+        : jsonString;
+    } catch (e) {
+      return [];
+    }
+  };
+
+  const parseMeta = (jsonString) => {
+    try {
+      return typeof jsonString === "string"
+        ? JSON.parse(jsonString)
+        : jsonString;
+    } catch (e) {
+      return {};
+    }
+  };
+
+  return {
+    ...cv,
+    education: parseSafe(cv.education),
+    experience: parseSafe(cv.experience),
+    skills: parseSafe(cv.skills),
+    certifications: parseSafe(cv.certifications),
+    meta_data: parseMeta(cv.meta_data),
+  };
+};
+
+/**
+ * ✅ TẠO MỚI CV (Sử dụng Stored Procedure)
+ */
 export const saveCVBuilder = async (req, res) => {
   try {
-    console.log("🔧 saveCVBuilder received request");
-    console.log(
-      "📦 Request body:",
-      JSON.stringify(req.body, null, 2).substring(0, 500)
-    );
-    console.log("👤 User from JWT:", req.user);
-
-    const user_id = req.user?.user_id; // lấy từ JWT middleware
+    const user_id = req.user?.user_id;
 
     if (!user_id) {
-      console.log("❌ No user_id from JWT");
-      return res.status(401).json({
-        success: false,
-        message: "Không có quyền truy cập",
-      });
+      return res
+        .status(401)
+        .json({ success: false, message: "Không có quyền truy cập" });
     }
 
     const {
       title,
       summary,
-      personalInfo,
-      education,
       experience,
+      education,
       skills,
-      style,
+      certifications,
+      file_url,
+      meta_data,
     } = req.body;
 
-    // Validate dữ liệu bắt buộc
-    if (!title || !personalInfo?.fullName) {
-      console.log("❌ Missing required fields:", { title, personalInfo });
-      return res.status(400).json({
-        success: false,
-        message: "Tiêu đề và tên đầy đủ là bắt buộc",
-      });
+    if (!title) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Tiêu đề CV là bắt buộc" });
     }
 
-    console.log("✅ Validation passed. Saving to DB...");
+    const formatJSON = (data) =>
+      typeof data === "string" ? data : JSON.stringify(data || []);
 
-    // Lưu vào bảng cv (schema đơn giản)
-    const [result] = await db.execute(
-      `INSERT INTO cv (user_id, title, summary, experience, certifications, education, skills, file_url, created_at) 
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())`,
-      [
-        user_id,
-        title.trim(),
-        summary?.trim() || "",
-        JSON.stringify(experience || []),
-        JSON.stringify([]), // certifications
-        JSON.stringify(education || []),
-        JSON.stringify(skills || []),
-        null, // file_url
-      ]
-    );
-
-    const cv_id = result.insertId;
-    console.log(`✅ CV created with ID: ${cv_id} for user_id: ${user_id}`);
+    await db.execute(`CALL sp_create_user_cv(?, ?, ?, ?, ?, ?, ?, ?, ?)`, [
+      user_id,
+      title.trim(),
+      summary?.trim() || "",
+      formatJSON(experience),
+      formatJSON(certifications),
+      formatJSON(education),
+      formatJSON(skills),
+      file_url || null,
+      typeof meta_data === "object"
+        ? JSON.stringify(meta_data)
+        : meta_data || "{}",
+    ]);
 
     return res.status(201).json({
       success: true,
       message: "🎉 CV đã được lưu thành công!",
-      data: {
-        cv_id,
-        user_id,
-        title,
-      },
+      data: { user_id, title },
     });
   } catch (err) {
-    console.error("❌ Error in saveCVBuilder:", err);
-    console.error("Stack:", err.stack);
-    return res.status(500).json({
-      success: false,
-      message: "Lỗi khi lưu CV",
-      error: err.message,
-    });
+    console.error("Error in saveCVBuilder:", err);
+    return res
+      .status(500)
+      .json({ success: false, message: "Lỗi khi lưu CV", error: err.message });
   }
 };
 
 /**
- * ✅ Lấy danh sách CV của user hiện tại
+ * ✅ LẤY DANH SÁCH CV CỦA USER
  */
 export const getUserCV = async (req, res) => {
   try {
     const user_id = req.user?.user_id;
-
-    if (!user_id) {
-      return res.status(401).json({
-        success: false,
-        message: "Không có quyền truy cập",
-      });
-    }
+    if (!user_id)
+      return res.status(401).json({ success: false, message: "Unauthorized" });
 
     const [rows] = await db.execute(
       `SELECT * FROM cv WHERE user_id = ? ORDER BY created_at DESC`,
       [user_id]
     );
 
-    // Parse JSON data từ database
-    const cvList = rows.map((cv) => ({
-      ...cv,
-      education: cv.education ? JSON.parse(cv.education) : [],
-      experience: cv.experience ? JSON.parse(cv.experience) : [],
-      skills: cv.skills ? JSON.parse(cv.skills) : [],
-      certifications: cv.certifications ? JSON.parse(cv.certifications) : [],
-    }));
+    const cvList = rows.map((cv) => parseCVData(cv));
 
-    return res.status(200).json({
-      success: true,
-      data: cvList,
-    });
+    return res.status(200).json({ success: true, data: cvList });
   } catch (err) {
-    console.error("❌ Lỗi lấy danh sách CV:", err);
-    return res.status(500).json({
-      success: false,
-      message: "Lỗi khi lấy danh sách CV",
-      error: err.message,
-    });
+    console.error("Lỗi lấy danh sách CV:", err);
+    return res
+      .status(500)
+      .json({ success: false, message: "Lỗi server", error: err.message });
   }
 };
 
 /**
- * ✅ Cập nhật CV
+ * ✅ CẬP NHẬT CV
  */
 export const updateCV = async (req, res) => {
   try {
     const user_id = req.user?.user_id;
     const cv_id = req.params.cv_id;
 
-    if (!user_id) {
-      return res.status(401).json({
-        success: false,
-        message: "Không có quyền truy cập",
-      });
-    }
+    if (!user_id)
+      return res.status(401).json({ success: false, message: "Unauthorized" });
 
-    // Kiểm tra CV thuộc về user
     const [checkCV] = await db.execute(
       `SELECT user_id FROM cv WHERE cv_id = ?`,
       [cv_id]
     );
-
     if (checkCV.length === 0 || checkCV[0].user_id !== user_id) {
-      return res.status(403).json({
-        success: false,
-        message: "Bạn không có quyền cập nhật CV này",
-      });
+      return res
+        .status(403)
+        .json({ success: false, message: "Không có quyền cập nhật" });
     }
 
     const {
       title,
       summary,
-      personalInfo,
-      education,
       experience,
+      education,
       skills,
-      style,
+      certifications,
+      file_url,
+      meta_data,
     } = req.body;
 
-    if (!title || !personalInfo?.fullName) {
-      return res.status(400).json({
-        success: false,
-        message: "Tiêu đề và tên đầy đủ là bắt buộc",
-      });
-    }
+    const formatJSON = (data) =>
+      typeof data === "string" ? data : JSON.stringify(data || []);
 
-    // Cập nhật CV
     await db.execute(
       `UPDATE cv SET 
-        title = ?, 
-        summary = ?, 
-        experience = ?, 
-        education = ?, 
-        skills = ? 
+        title = ?, summary = ?, experience = ?, education = ?, skills = ?,
+        certifications = ?, file_url = ?, meta_data = ?  
        WHERE cv_id = ? AND user_id = ?`,
       [
-        title.trim(),
+        title?.trim(),
         summary?.trim() || "",
-        JSON.stringify(experience || []),
-        JSON.stringify(education || []),
-        JSON.stringify(skills || []),
+        formatJSON(experience),
+        formatJSON(education),
+        formatJSON(skills),
+        formatJSON(certifications),
+        file_url || null,
+        typeof meta_data === "object"
+          ? JSON.stringify(meta_data)
+          : meta_data || "{}",
         cv_id,
         user_id,
       ]
     );
 
-    console.log(`✅ CV updated: ${cv_id}`);
-
-    return res.status(200).json({
-      success: true,
-      message: "CV đã được cập nhật",
-      data: { cv_id },
-    });
+    return res
+      .status(200)
+      .json({ success: true, message: "CV đã được cập nhật", data: { cv_id } });
   } catch (err) {
-    console.error("❌ Lỗi cập nhật CV:", err);
-    return res.status(500).json({
-      success: false,
-      message: "Lỗi khi cập nhật CV",
-      error: err.message,
-    });
+    console.error("Lỗi cập nhật CV:", err);
+    return res
+      .status(500)
+      .json({ success: false, message: "Lỗi server", error: err.message });
   }
 };
 
 /**
- * ✅ Xóa CV
+ * ✅ XÓA CV
  */
 export const deleteCV = async (req, res) => {
   try {
     const user_id = req.user?.user_id;
     const cv_id = req.params.cv_id;
 
-    if (!user_id) {
-      return res.status(401).json({
-        success: false,
-        message: "Không có quyền truy cập",
-      });
-    }
+    if (!user_id) return res.status(401).json({ message: "Unauthorized" });
 
-    // Kiểm tra CV thuộc về user
     const [checkCV] = await db.execute(
       `SELECT user_id FROM cv WHERE cv_id = ?`,
       [cv_id]
     );
 
     if (checkCV.length === 0 || checkCV[0].user_id !== user_id) {
-      return res.status(403).json({
-        success: false,
-        message: "Bạn không có quyền xóa CV này",
-      });
+      return res.status(403).json({ message: "Forbidden" });
     }
 
-    // Xóa CV
     await db.execute(`DELETE FROM cv WHERE cv_id = ? AND user_id = ?`, [
       cv_id,
       user_id,
     ]);
 
-    console.log(`✅ CV deleted: ${cv_id}`);
-
-    return res.status(200).json({
-      success: true,
-      message: "CV đã được xóa",
-    });
+    return res.status(200).json({ success: true, message: "CV đã được xóa" });
   } catch (err) {
-    console.error("❌ Lỗi xóa CV:", err);
-    return res.status(500).json({
-      success: false,
-      message: "Lỗi khi xóa CV",
-      error: err.message,
-    });
+    console.error("Lỗi xóa CV:", err);
+    return res.status(500).json({ success: false, error: err.message });
   }
 };
 
 /**
- * ✅ Legacy endpoint - giữ lại cho tương thích
+ * ✅ [PRIVATE] LẤY CHI TIẾT CV (Dành cho chủ sở hữu xem/sửa)
  */
-export const saveCV = async (req, res) => {
+export const getCVDetail = async (req, res) => {
   try {
+    const cv_id = req.params.cv_id;
     const user_id = req.user?.user_id;
 
-    if (!user_id) {
-      return res.status(401).json({
-        success: false,
-        message: "Không có quyền truy cập",
-      });
-    }
+    if (!user_id)
+      return res.status(401).json({ success: false, message: "Unauthorized" });
 
-    const {
-      title,
-      summary,
-      personalInfo,
-      education,
-      experience,
-      skills,
-      style,
-    } = req.body;
-
-    if (!title || !personalInfo?.fullName) {
-      return res.status(400).json({
-        success: false,
-        message: "Tiêu đề và tên đầy đủ là bắt buộc",
-      });
-    }
-
-    // Lưu vào bảng cv
-    const [result] = await db.execute(
-      `INSERT INTO cv (user_id, title, summary, experience, certifications, education, skills, file_url, created_at) 
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())`,
-      [
-        user_id,
-        title.trim(),
-        summary?.trim() || "",
-        JSON.stringify(experience || []),
-        JSON.stringify([]),
-        JSON.stringify(education || []),
-        JSON.stringify(skills || []),
-        null,
-      ]
+    const [rows] = await db.execute(
+      `SELECT * FROM cv WHERE cv_id = ? AND user_id = ?`,
+      [cv_id, user_id]
     );
 
-    const cv_id = result.insertId;
-    console.log(`✅ CV saved with ID: ${cv_id} for user_id: ${user_id}`);
+    if (rows.length === 0) {
+      return res
+        .status(404)
+        .json({ success: false, message: "CV không tồn tại" });
+    }
 
-    return res.status(201).json({
+    return res.status(200).json({
       success: true,
-      message: "CV đã được lưu",
-      data: {
-        cv_id,
-        user_id,
-        title,
-      },
+      data: parseCVData(rows[0]),
     });
   } catch (err) {
-    console.error("❌ Lỗi lưu CV:", err);
-    return res.status(500).json({
-      success: false,
-      message: "Lỗi khi lưu CV",
-      error: err.message,
+    console.error("Lỗi lấy chi tiết CV:", err);
+    return res
+      .status(500)
+      .json({ success: false, message: "Lỗi server", error: err.message });
+  }
+};
+
+// =======================================================
+// 6. [PUBLIC] XEM CHI TIẾT CV (KHÔNG CẦN AUTH)
+// Dùng cho: Recruiter xem CV, Chia sẻ link CV
+// =======================================================
+export const getCVByIdPublic = async (req, res) => {
+  try {
+    // Lấy ID từ params (hỗ trợ cả /:id và /:cv_id)
+    const cv_id = req.params.id || req.params.cv_id;
+
+    // ⚠️ SQL AN TOÀN:
+    // 1. KHÔNG check user_id (để ai có link cũng xem được)
+    // 2. KHÔNG lấy address/avatar từ bảng users (vì bảng users của bạn không có cột này)
+    // 3. Chỉ lấy các trường cơ bản từ users: full_name, email, phone
+    const sql = `
+      SELECT cv.*, users.full_name, users.email, users.phone 
+      FROM cv 
+      LEFT JOIN users ON cv.user_id = users.user_id
+      WHERE cv.cv_id = ?
+    `;
+
+    const [rows] = await db.execute(sql, [cv_id]);
+
+    if (rows.length === 0) {
+      return res
+        .status(404)
+        .json({ success: false, message: "CV không tồn tại hoặc đã bị xóa" });
+    }
+
+    const cvData = rows[0];
+    const parsedData = parseCVData(cvData);
+
+    // Bổ sung thông tin cá nhân cho Frontend hiển thị:
+    // Logic: Ưu tiên dữ liệu trong meta_data (do người dùng nhập trong CV Builder).
+    // Nếu thiếu thì mới lấy fallback từ tài khoản User (full_name, email...).
+    const metaPersonalInfo = parsedData.meta_data?.personalInfo || {};
+
+    parsedData.personalInfo = {
+      fullName: metaPersonalInfo.fullName || cvData.full_name,
+      email: metaPersonalInfo.email || cvData.email,
+      phone: metaPersonalInfo.phone || cvData.phone,
+      address: metaPersonalInfo.address || "", // Lấy từ meta_data của CV
+      avatar: metaPersonalInfo.avatar || "", // Lấy từ meta_data của CV
+      title: metaPersonalInfo.title || parsedData.title, // Job title trong CV
+    };
+
+    return res.status(200).json({
+      success: true,
+      data: parsedData,
     });
+  } catch (err) {
+    console.error("Lỗi getCVByIdPublic:", err);
+    return res
+      .status(500)
+      .json({ success: false, message: "Lỗi server", error: err.message });
   }
 };

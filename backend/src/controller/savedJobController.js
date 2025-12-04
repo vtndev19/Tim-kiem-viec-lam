@@ -51,32 +51,40 @@ export const getSavedJobs = async (req, res) => {
       return res.status(401).json({ message: "Người dùng chưa đăng nhập." });
     }
 
+    // 🛠️ SỬA LẠI SQL QUERY:
+    // - Lấy trực tiếp location và job_type từ bảng jobs
+    // - Dùng LEFT JOIN cho industries (phòng trường hợp industry_id là NULL)
+    // - Giả định bảng companies có cột 'company_name'
     const [rows] = await db.query(
       `
       SELECT 
         j.job_id AS id,
         j.title,
         c.company_name AS company,
-        l.city AS location,
+        j.location AS location,
         j.salary_range AS salary,
-        jt.type_name AS type,
+        j.job_type AS type,
         j.posted_date,
         j.description,
         j.requirements,
         j.benefits,
-        i.name AS industry_name,
+        i.name AS industry_name, 
         s.saved_at
       FROM saved_jobs s
       JOIN jobs j ON s.job_id = j.job_id
       JOIN companies c ON j.company_id = c.company_id
-      JOIN locations l ON j.location_id = l.location_id
-      JOIN job_types jt ON j.job_type_id = jt.job_type_id
-      JOIN industries i ON j.industry_id = i.industry_id
+      LEFT JOIN industries i ON j.industry_id = i.industry_id
       WHERE s.user_id = ?
       ORDER BY s.saved_at DESC
       `,
       [userId]
     );
+
+    /* Lưu ý: 
+       - i.industry_name: Bạn cần kiểm tra xem bảng 'industries' tên cột là 'name' hay 'industry_name'. 
+       - c.company_name: Kiểm tra xem bảng 'companies' tên cột là 'name' hay 'company_name'.
+       (Đoạn code trên đang giả định là industry_name và company_name)
+    */
 
     if (rows.length === 0) {
       return res.status(200).json({
@@ -96,7 +104,7 @@ export const getSavedJobs = async (req, res) => {
         : [],
       benefits: job.benefits
         ? job.benefits
-            .split(/[;\n,]+/)
+            .split(/[;\n,]+/) // Tách theo dấu chấm phẩy, xuống dòng hoặc phẩy
             .map((b) => b.trim())
             .filter(Boolean)
         : [],
@@ -114,6 +122,7 @@ export const getSavedJobs = async (req, res) => {
     });
   }
 };
+
 // ✅ Xóa công việc khỏi danh sách đã lưu
 export const deleteSavedJob = async (req, res) => {
   try {

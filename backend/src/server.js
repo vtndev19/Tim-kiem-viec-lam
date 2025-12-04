@@ -9,18 +9,19 @@ import path from "path";
 import { fileURLToPath } from "url";
 
 /* Router Imports */
-import jobRoutes from "./routers/jobRoutes.js";
-import companyRoutes from "./routers/companyRouter.js";
-import locationRoutes from "./routers/locationRouter.js";
-import adminPostRoutes from "./routers/adminPostRoutes.js";
-import recommendRoutes from "./routers/geminiRecommendRoutes.js"; // Router gợi ý công việc
-import searchHistoryRoutes from "./routers/searchHistoryRoutes.js";
-import authRoutes from "./routers/authRoutes.js";
-import cvRoutes from "./routers/cvRoutes.js";
-import userPostRoutes from "./routers/userPostRoutes.js"; // 🧩 Bài viết người dùng
-import savedJobRoutes from "./routers/savedJobRoutes.js";
-import recruiterRoutes from "./routers/recruiterRoutes.js";
-
+import jobRoutes from "./routes/jobRoutes.js";
+import companyRoutes from "./routes/companyRouter.js";
+import locationRoutes from "./routes/locationRouter.js";
+import adminPostRoutes from "./routes/adminPostRoutes.js";
+import recommendationRoutes from "./routes/geminiRecommendRoutes.js"; // Router gợi ý công việc
+import searchHistoryRoutes from "./routes/searchHistoryRoutes.js";
+import authRoutes from "./routes/authRoutes.js";
+import cvRoutes from "./routes/cvRoutes.js";
+import userPostRoutes from "./routes/userPostRoutes.js"; // 🧩 Bài viết người dùng
+import savedJobRoutes from "./routes/savedJobRoutes.js";
+import recruiterRoutes from "./routes/recruiterRoutes.js";
+import applicationRoutes from "./routes/applicationRoutes.js";
+import predictSalary from "./routes/salaryRoutes.js";
 /* database Connection */
 import db from "./configs/data.js";
 
@@ -95,14 +96,15 @@ app.use("/api/jobs", jobRoutes);
 app.use("/api/companies", companyRoutes);
 app.use("/api/locations", locationRoutes);
 app.use("/api/admin/posts", adminPostRoutes);
-app.use("/api/gemini", recommendRoutes);
 app.use("/api/search-history", searchHistoryRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/cv", cvRoutes);
 app.use("/api/user-posts", userPostRoutes); // ✅ Bài viết người dùng (blogs)
 app.use("/api/saved-jobs", savedJobRoutes);
 app.use("/api/employer", recruiterRoutes);
-
+app.use("/api/recommendations", recommendationRoutes);
+app.use("/api/applications", applicationRoutes);
+app.use("/api/salary", predictSalary);
 // ===================================================
 // 🚀 KHỞI ĐỘNG SERVER
 // ===================================================

@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
-import CreatableSelect from "react-select/creatable"; // 📦 Import thư viện này
+import CreatableSelect from "react-select/creatable";
+import "../styles/components/employerRegistration.scss"; // 📦 Import SCSS
 
 // ⭐ CẤU HÌNH API BASE URL
 const API_BASE = "http://localhost:8080/api";
 
-const EmployerRegistration = () => {
+const EmployerRegistrationModal = ({ isOpen, onClose }) => {
   const [step, setStep] = useState(1);
 
   // State form
@@ -15,23 +16,36 @@ const EmployerRegistration = () => {
     otp: "",
   });
 
-  // State riêng cho Industry (để tương thích với react-select)
+  // State riêng cho Industry
   const [selectedIndustry, setSelectedIndustry] = useState(null);
-
   const [industryOptions, setIndustryOptions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
-  // 🟢 1. Lấy danh sách ngành nghề khi load trang
+  // 🟢 1. Reset state khi mở modal
+  useEffect(() => {
+    if (isOpen) {
+      setStep(1);
+      setMessage("");
+      setFormData({
+        companyName: "",
+        companyEmail: "",
+        address: "",
+        otp: "",
+      });
+      setSelectedIndustry(null);
+    }
+  }, [isOpen]);
+
+  // 🟢 2. Lấy danh sách ngành nghề
   useEffect(() => {
     const fetchIndustries = async () => {
       try {
         const res = await fetch(`${API_BASE}/industries`);
         if (res.ok) {
           const data = await res.json();
-          // Chuyển đổi dữ liệu API thành format của react-select { value, label }
           const options = data.map((ind) => ({
-            value: ind.industry_id, // ID là số
+            value: ind.industry_id,
             label: ind.name,
           }));
           setIndustryOptions(options);
@@ -43,12 +57,10 @@ const EmployerRegistration = () => {
     fetchIndustries();
   }, []);
 
-  // Xử lý nhập liệu các trường text thường
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // Xử lý khi chọn hoặc tạo mới ngành nghề
   const handleIndustryChange = (newValue) => {
     setSelectedIndustry(newValue);
   };
@@ -68,7 +80,7 @@ const EmployerRegistration = () => {
       const token = localStorage.getItem("authToken");
       if (!token) {
         alert("Bạn chưa đăng nhập! Vui lòng đăng nhập lại.");
-        window.location.href = "/login"; // Chuyển hướng về trang login
+        window.location.href = "/login";
         return;
       }
       const res = await fetch(`${API_BASE}/employer/send-otp`, {
@@ -102,14 +114,8 @@ const EmployerRegistration = () => {
     try {
       const token = localStorage.getItem("authToken");
 
-      // LOGIC QUAN TRỌNG: Chuẩn bị industry_input gửi về Backend
-      // Nếu user chọn có sẵn -> value là ID (số)
-      // Nếu user tạo mới -> value là Tên ngành (chuỗi) - react-select tự xử lý việc này
       let industryValue = "";
       if (selectedIndustry) {
-        // Nếu là option có sẵn (value là ID), ta gửi ID
-        // Nếu là option tạo mới (do react-select tạo ra), value chính là chuỗi user nhập
-        // Tuy nhiên, react-select creatable khi tạo mới sẽ trả về { value: 'string', label: 'string', __isNew__: true }
         industryValue = selectedIndustry.value;
       }
 
@@ -118,7 +124,7 @@ const EmployerRegistration = () => {
         company_name: formData.companyName,
         company_email: formData.companyEmail,
         company_address: formData.address,
-        industry_input: industryValue, // Gửi về backend (ID hoặc String)
+        industry_input: industryValue,
       };
 
       const res = await fetch(`${API_BASE}/employer/verify-upgrade`, {
@@ -133,6 +139,7 @@ const EmployerRegistration = () => {
 
       if (res.ok) {
         alert("" + data.message);
+        onClose(); // Đóng modal trước khi chuyển trang
         window.location.href = "/hiring-dashboard";
       } else {
         setMessage("❌ " + data.message);
@@ -144,280 +151,169 @@ const EmployerRegistration = () => {
     }
   };
 
+  // ⛔ Nếu isOpen = false, không render gì cả
+  if (!isOpen) return null;
+
+  // Custom style cho React-Select (giữ lại trong JS vì khó override hoàn toàn bằng class)
+  const selectCustomStyles = {
+    control: (base) => ({
+      ...base,
+      padding: "2px",
+      borderColor: "#ccc",
+      borderRadius: "6px",
+      boxShadow: "none",
+      "&:hover": { borderColor: "#007bff" },
+    }),
+  };
+
   return (
-    <div
-      style={{
-        maxWidth: "500px",
-        margin: "50px auto",
-        padding: "30px",
-        border: "1px solid #e0e0e0",
-        borderRadius: "12px",
-        boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
-        backgroundColor: "#fff",
-        fontFamily: "'Segoe UI', sans-serif",
-      }}
-    >
-      <h2
-        style={{ textAlign: "center", color: "#2c3e50", marginBottom: "10px" }}
+    <div className="employer-modal-overlay" onClick={onClose}>
+      <div
+        className="employer-modal-content"
+        onClick={(e) => e.stopPropagation()} // Ngăn click vào modal bị đóng
       >
-        Đăng Ký Nhà Tuyển Dụng
-      </h2>
-      <p
-        style={{
-          textAlign: "center",
-          color: "#7f8c8d",
-          fontSize: "14px",
-          marginBottom: "25px",
-        }}
-      >
-        Nâng cấp tài khoản để đăng tin và tìm kiếm ứng viên.
-      </p>
+        {/* Nút đóng X */}
+        <button className="btn-close-modal" onClick={onClose}>
+          &times;
+        </button>
 
-      {message && (
-        <div
-          style={{
-            padding: "12px",
-            marginBottom: "20px",
-            borderRadius: "6px",
-            backgroundColor: message.startsWith("✅") ? "#e8f5e9" : "#ffebee",
-            color: message.startsWith("✅") ? "#2e7d32" : "#c62828",
-            fontSize: "14px",
-            border: message.startsWith("✅")
-              ? "1px solid #c8e6c9"
-              : "1px solid #ffcdd2",
-          }}
-        >
-          {message}
-        </div>
-      )}
+        <h2>Đăng Ký Nhà Tuyển Dụng</h2>
+        <p className="modal-subtitle">
+          Nâng cấp tài khoản để đăng tin và tìm kiếm ứng viên.
+        </p>
 
-      {step === 1 && (
-        <form onSubmit={handleSendOtp}>
-          <div style={{ marginBottom: "15px" }}>
-            <label
-              style={{
-                fontWeight: "600",
-                display: "block",
-                marginBottom: "6px",
-                color: "#34495e",
-              }}
-            >
-              Tên Công Ty <span style={{ color: "red" }}>*</span>
-            </label>
-            <input
-              type="text"
-              name="companyName"
-              required
-              value={formData.companyName}
-              onChange={handleChange}
-              placeholder="VD: Công Ty Cổ Phần Tech Việt"
-              style={inputStyle}
-            />
-          </div>
-
-          <div style={{ marginBottom: "15px" }}>
-            <label
-              style={{
-                fontWeight: "600",
-                display: "block",
-                marginBottom: "6px",
-                color: "#34495e",
-              }}
-            >
-              Lĩnh Vực Hoạt Động <span style={{ color: "red" }}>*</span>
-            </label>
-            {/* 🔥 Dropdown thông minh: Tìm kiếm hoặc Tạo mới */}
-            <CreatableSelect
-              isClearable
-              options={industryOptions}
-              onChange={handleIndustryChange}
-              value={selectedIndustry}
-              placeholder="Chọn hoặc nhập ngành nghề mới..."
-              formatCreateLabel={(inputValue) =>
-                `Tạo mới ngành: "${inputValue}"`
-              }
-              styles={{
-                control: (base) => ({
-                  ...base,
-                  padding: "2px",
-                  borderColor: "#ccc",
-                  borderRadius: "6px",
-                  boxShadow: "none",
-                  "&:hover": { borderColor: "#007bff" },
-                }),
-              }}
-            />
-            <small
-              style={{
-                display: "block",
-                marginTop: "5px",
-                color: "#999",
-                fontSize: "12px",
-              }}
-            >
-              * Gõ tên ngành nghề của bạn và nhấn Enter nếu chưa có trong danh
-              sách.
-            </small>
-          </div>
-
-          <div style={{ marginBottom: "15px" }}>
-            <label
-              style={{
-                fontWeight: "600",
-                display: "block",
-                marginBottom: "6px",
-                color: "#34495e",
-              }}
-            >
-              Email Công Ty (Nhận OTP) <span style={{ color: "red" }}>*</span>
-            </label>
-            <input
-              type="email"
-              name="companyEmail"
-              required
-              value={formData.companyEmail}
-              onChange={handleChange}
-              placeholder="contact@company.com"
-              style={inputStyle}
-            />
-          </div>
-
-          <div style={{ marginBottom: "25px" }}>
-            <label
-              style={{
-                fontWeight: "600",
-                display: "block",
-                marginBottom: "6px",
-                color: "#34495e",
-              }}
-            >
-              Địa chỉ trụ sở <span style={{ color: "red" }}>*</span>
-            </label>
-            <input
-              type="text"
-              name="address"
-              required
-              value={formData.address}
-              onChange={handleChange}
-              placeholder="Số 1, Đường X, Quận Y, TP.Z..."
-              style={inputStyle}
-            />
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            style={{
-              ...buttonStyle,
-              background: loading ? "#95a5a6" : "#007bff",
-              cursor: loading ? "wait" : "pointer",
-            }}
+        {message && (
+          <div
+            className={`message-box ${
+              message.startsWith("✅") ? "success" : "error"
+            }`}
           >
-            {loading ? "Đang xử lý..." : "Tiếp Tục (Gửi OTP)"}
-          </button>
-        </form>
-      )}
+            {message}
+          </div>
+        )}
 
-      {step === 2 && (
-        <form onSubmit={handleVerify}>
-          <div style={{ textAlign: "center", marginBottom: "25px" }}>
-            <p style={{ color: "#555" }}>Mã xác thực 6 số đã được gửi đến:</p>
-            <div
-              style={{
-                fontSize: "18px",
-                fontWeight: "bold",
-                color: "#007bff",
-                marginTop: "5px",
-              }}
-            >
-              {formData.companyEmail}
+        {step === 1 && (
+          <form onSubmit={handleSendOtp}>
+            <div className="form-group">
+              <label>
+                Tên Công Ty <span className="required">*</span>
+              </label>
+              <input
+                type="text"
+                name="companyName"
+                required
+                value={formData.companyName}
+                onChange={handleChange}
+                placeholder="VD: Công Ty Cổ Phần Tech Việt"
+                className="form-control"
+              />
             </div>
-          </div>
 
-          <div style={{ marginBottom: "25px" }}>
-            <label
-              style={{
-                fontWeight: "600",
-                display: "block",
-                marginBottom: "6px",
-                textAlign: "center",
-              }}
-            >
-              Nhập mã OTP
-            </label>
-            <input
-              type="text"
-              name="otp"
-              required
-              maxLength="6"
-              value={formData.otp}
-              onChange={handleChange}
-              placeholder="• • • • • •"
-              style={{
-                ...inputStyle,
-                textAlign: "center",
-                fontSize: "24px",
-                letterSpacing: "10px",
-                fontWeight: "bold",
-                color: "#333",
-              }}
-            />
-          </div>
+            <div className="form-group">
+              <label>
+                Lĩnh Vực Hoạt Động <span className="required">*</span>
+              </label>
+              <CreatableSelect
+                isClearable
+                options={industryOptions}
+                onChange={handleIndustryChange}
+                value={selectedIndustry}
+                placeholder="Chọn hoặc nhập ngành nghề mới..."
+                formatCreateLabel={(inputValue) =>
+                  `Tạo mới ngành: "${inputValue}"`
+                }
+                styles={selectCustomStyles}
+              />
+              <small className="helper-text">
+                * Gõ tên ngành nghề của bạn và nhấn Enter nếu chưa có trong danh
+                sách.
+              </small>
+            </div>
 
-          <div style={{ display: "flex", gap: "15px" }}>
-            <button
-              type="button"
-              onClick={() => setStep(1)}
-              style={{
-                ...buttonStyle,
-                flex: 1,
-                background: "#ecf0f1",
-                color: "#333",
-                border: "1px solid #ccc",
-              }}
-            >
-              Quay lại
-            </button>
+            <div className="form-group">
+              <label>
+                Email Công Ty (Nhận OTP) <span className="required">*</span>
+              </label>
+              <input
+                type="email"
+                name="companyEmail"
+                required
+                value={formData.companyEmail}
+                onChange={handleChange}
+                placeholder="contact@company.com"
+                className="form-control"
+              />
+            </div>
+
+            <div className="form-group mb-25">
+              <label>
+                Địa chỉ trụ sở <span className="required">*</span>
+              </label>
+              <input
+                type="text"
+                name="address"
+                required
+                value={formData.address}
+                onChange={handleChange}
+                placeholder="Số 1, Đường X, Quận Y, TP.Z..."
+                className="form-control"
+              />
+            </div>
+
             <button
               type="submit"
               disabled={loading}
-              style={{
-                ...buttonStyle,
-                flex: 2,
-                background: loading ? "#95a5a6" : "#27ae60",
-                cursor: loading ? "wait" : "pointer",
-              }}
+              className={`btn btn-primary ${loading ? "loading" : ""}`}
             >
-              {loading ? "Đang xác thực..." : "Hoàn Tất Đăng Ký"}
+              {loading ? "Đang xử lý..." : "Tiếp Tục (Gửi OTP)"}
             </button>
-          </div>
-        </form>
-      )}
+          </form>
+        )}
+
+        {step === 2 && (
+          <form onSubmit={handleVerify}>
+            <div className="otp-info">
+              <p>Mã xác thực 6 số đã được gửi đến:</p>
+              <div className="email-highlight">{formData.companyEmail}</div>
+            </div>
+
+            <div className="form-group mb-25">
+              <label style={{ textAlign: "center" }}>Nhập mã OTP</label>
+              <input
+                type="text"
+                name="otp"
+                required
+                maxLength="6"
+                value={formData.otp}
+                onChange={handleChange}
+                placeholder="• • • • • •"
+                className="form-control otp-input"
+              />
+            </div>
+
+            <div className="button-group">
+              <button
+                type="button"
+                onClick={() => setStep(1)}
+                className="btn btn-secondary"
+                style={{ flex: 1 }}
+              >
+                Quay lại
+              </button>
+              <button
+                type="submit"
+                disabled={loading}
+                className={`btn btn-success ${loading ? "loading" : ""}`}
+                style={{ flex: 2 }}
+              >
+                {loading ? "Đang xác thực..." : "Hoàn Tất Đăng Ký"}
+              </button>
+            </div>
+          </form>
+        )}
+      </div>
     </div>
   );
 };
 
-// CSS Styles (Inline cho gọn)
-const inputStyle = {
-  width: "100%",
-  padding: "12px",
-  borderRadius: "6px",
-  border: "1px solid #ccc",
-  fontSize: "14px",
-  outline: "none",
-  transition: "border 0.3s",
-  boxSizing: "border-box",
-};
-
-const buttonStyle = {
-  width: "100%",
-  padding: "12px",
-  border: "none",
-  borderRadius: "6px",
-  color: "#fff",
-  fontSize: "16px",
-  fontWeight: "600",
-  transition: "background 0.3s",
-};
-
-export default EmployerRegistration;
+export default EmployerRegistrationModal;

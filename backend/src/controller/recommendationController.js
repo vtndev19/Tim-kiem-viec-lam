@@ -4,189 +4,206 @@ import db from "../configs/data.js";
 
 dotenv.config();
 
-// ======================= AI CONFIG =======================
-const ai = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-const model = ai.getGenerativeModel({ model: "gemini-2.0-flash" });
+// ======================= CONFIG & CONSTANTS =======================
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+const MODEL_NAME = "gemini-2.0-flash";
+
+const ai = new GoogleGenerativeAI(GEMINI_API_KEY);
+const model = ai.getGenerativeModel({ model: MODEL_NAME });
+
+// SQL Queries (Tách biệt để dễ quản lý)
+const SQL_GET_HISTORY = `
+  SELECT city, industry, keyword 
+  FROM search_history 
+  WHERE user_id = ?
+  ORDER BY search_date DESC
+  LIMIT 5
+`;
+
+// Đã sửa: Bỏ JOIN locations, dùng trực tiếp j.location
+const SQL_GET_LATEST_JOBS = `
+  SELECT 
+    j.job_id AS id, 
+    j.title, 
+    j.location, 
+    j.salary_range AS salary, 
+    i.name AS industry
+  FROM jobs j
+  LEFT JOIN industries i ON j.industry_id = i.industry_id
+  ORDER BY j.posted_date DESC
+  LIMIT 30
+`;
+
+const SQL_GET_CACHE = `SELECT * FROM recommendation_cache WHERE user_id = ?`;
+
+const SQL_DELETE_CACHE = `DELETE FROM recommendation_cache WHERE user_id = ?`;
+
+const SQL_INSERT_CACHE = `
+  INSERT INTO recommendation_cache 
+  (user_id, job_id, title, location, salary, reason) 
+  VALUES ?
+`;
 
 // ======================= HELPERS ==========================
 
-// 1. Safe call AI
-async function safeCallAI(prompt) {
+async function generateAIContent(prompt) {
   try {
-    const res = await model.generateContent(prompt);
-    return res.response.text();
-  } catch (err) {
-    console.error("❌ [AI ERROR]:", err.message);
+    const result = await model.generateContent(prompt);
+    return result.response.text();
+  } catch (error) {
+    console.error("[AI Error]", error.message);
     return null;
   }
 }
 
-// 2. Parse JSON từ AI
-function parseAIResponse(raw) {
+function parseAIResponse(rawText) {
   try {
-    if (!raw) return null;
+    if (!rawText) return [];
+    // Tìm chuỗi JSON trong phản hồi (tránh các text rác)
+    const jsonMatch = rawText.match(/\[.*\]/s);
+    if (!jsonMatch) return [];
 
-    const jsonMatch = raw.match(/\[.*\]/s);
-    if (!jsonMatch) return null;
-
-    const arr = JSON.parse(jsonMatch[0]);
-    return Array.isArray(arr) ? arr.slice(0, 3) : null;
-  } catch (err) {
-    console.error("❌ [JSON PARSE ERROR]:", err.message);
-    return null;
+    const parsedData = JSON.parse(jsonMatch[0]);
+    return Array.isArray(parsedData) ? parsedData.slice(0, 3) : [];
+  } catch (error) {
+    console.error("[Parse JSON Error]", error.message);
+    return [];
   }
 }
 
-// 3. Fallback khi AI lỗi
-function fallbackRecommend(jobs, history) {
-  console.log("⚠️ [FALLBACK] Sử dụng fallback recommendation...");
+function getFallbackRecommendations(jobs, history) {
+  console.log("[Fallback] Generating fallback recommendations...");
 
-  const city = history[0]?.city;
-  const industry = history[0]?.industry;
-  const seen = new Set();
+  const lastSearch = history[0] || {};
+  const { city, industry } = lastSearch;
 
-  let selected = jobs
-    .filter((job) => {
-      if (job.location === city || job.industry === industry) {
-        seen.add(job.id);
-        return true;
-      }
-      return false;
-    })
-    .slice(0, 3);
+  const recommendedJobs = [];
+  const seenJobIds = new Set();
 
-  if (selected.length < 3) {
-    for (const job of jobs) {
-      if (selected.length >= 3) break;
-      if (!seen.has(job.id)) {
-        selected.push(job);
-        seen.add(job.id);
+  // Ưu tiên 1: Khớp cả địa điểm và ngành
+  for (const job of jobs) {
+    if (recommendedJobs.length >= 3) break;
+
+    const matchLocation = city && job.location && job.location.includes(city);
+    const matchIndustry = industry && job.industry === industry;
+
+    if (matchLocation || matchIndustry) {
+      if (!seenJobIds.has(job.id)) {
+        recommendedJobs.push({
+          job_id: job.id,
+          reason: matchIndustry
+            ? `Phù hợp với ngành nghề bạn quan tâm: ${industry}`
+            : `Việc làm nổi bật tại ${job.location}`,
+        });
+        seenJobIds.add(job.id);
       }
     }
   }
 
-  return selected.map((job) => ({
-    job_id: job.id,
-    reason: `Gợi ý fallback theo ${
-      job.industry === industry ? "ngành" : "địa điểm"
-    }.`,
-  }));
+  // Ưu tiên 2: Lấy ngẫu nhiên nếu chưa đủ
+  if (recommendedJobs.length < 3) {
+    for (const job of jobs) {
+      if (recommendedJobs.length >= 3) break;
+      if (!seenJobIds.has(job.id)) {
+        recommendedJobs.push({
+          job_id: job.id,
+          reason: "Việc làm mới nhất đề xuất cho bạn",
+        });
+        seenJobIds.add(job.id);
+      }
+    }
+  }
+
+  return recommendedJobs;
 }
 
-// ======================= SAVE CACHE =======================
+// ======================= DATABASE ACTIONS =======================
 
-async function saveRecommendationCache(user_id, jobs, recommendations) {
-  const conn = await db.getConnection();
+async function saveRecommendationsToDB(userId, jobsSource, aiRecommendations) {
+  const connection = await db.getConnection();
 
   try {
-    await conn.beginTransaction();
+    await connection.beginTransaction();
 
-    // Xoá cache cũ
-    await conn.execute("DELETE FROM recommendation_cache WHERE user_id = ?", [
-      user_id,
+    // 1. Xóa cache cũ
+    await connection.query(SQL_DELETE_CACHE, [userId]);
+
+    // 2. Chuẩn bị dữ liệu Bulk Insert (Hiệu năng tốt hơn loop insert)
+    const insertValues = [];
+
+    for (const rec of aiRecommendations) {
+      const job = jobsSource.find((j) => j.id === rec.job_id);
+      if (job) {
+        insertValues.push([
+          userId,
+          job.id,
+          job.title,
+          job.location,
+          job.salary || "Thoả thuận",
+          rec.reason || "Gợi ý phù hợp",
+        ]);
+      }
+    }
+
+    if (insertValues.length > 0) {
+      await connection.query(SQL_INSERT_CACHE, [insertValues]);
+    }
+
+    await connection.commit();
+    return true;
+  } catch (error) {
+    await connection.rollback();
+    console.error("[Database Error] Save cache failed:", error);
+    return false;
+  } finally {
+    connection.release();
+  }
+}
+
+async function processUserRecommendations(userId) {
+  try {
+    // 1. Lấy dữ liệu đầu vào song song để tiết kiệm thời gian
+    const [historyResult, jobsResult] = await Promise.all([
+      db.execute(SQL_GET_HISTORY, [userId]),
+      db.execute(SQL_GET_LATEST_JOBS),
     ]);
 
-    const sql = `
-      INSERT INTO recommendation_cache
-      (user_id, job_id, title, location, salary, reason, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?, NOW())
-      ON DUPLICATE KEY UPDATE
-        title = VALUES(title),
-        location = VALUES(location),
-        salary = VALUES(salary),
-        reason = VALUES(reason),
-        updated_at = NOW()
-    `;
-
-    for (const rec of recommendations) {
-      const job = jobs.find((j) => j.id === rec.job_id);
-      if (!job) {
-        console.warn("⚠️ Không tìm thấy job cho id:", rec.job_id);
-        continue;
-      }
-
-      await conn.execute(sql, [
-        user_id,
-        job.id,
-        job.title,
-        job.location,
-        job.salary || "Thoả thuận",
-        rec.reason || null,
-      ]);
-    }
-
-    await conn.commit();
-    conn.release();
-    return true;
-  } catch (err) {
-    await conn.rollback();
-    conn.release();
-    console.error("🔥 Lỗi khi lưu cache:", err);
-    return false;
-  }
-}
-
-// ======================= CORE LOGIC =======================
-
-async function updateUserRecommendations(user_id) {
-  console.log(`\n🚀 Update recommendations cho user ${user_id}`);
-
-  try {
-    // 1. Lịch sử tìm kiếm
-    const [history] = await db.execute(
-      `SELECT city, industry, keyword 
-       FROM search_history 
-       WHERE user_id = ?
-       ORDER BY search_date DESC
-       LIMIT 5`,
-      [user_id]
-    );
+    const history = historyResult[0];
+    const jobs = jobsResult[0];
 
     if (history.length === 0) {
-      console.log("⛔ Không có lịch sử tìm kiếm.");
-      return false;
+      console.log(`[Info] User ${userId} has no search history.`);
+      return false; // Hoặc trả về random jobs
     }
 
-    // 2. Job mới nhất
-    const [jobs] = await db.execute(`
-      SELECT j.job_id AS id, j.title, l.city AS location, 
-             j.salary_range AS salary, i.name AS industry
-      FROM jobs j
-      JOIN locations l ON j.location_id = l.location_id
-      JOIN industries i ON j.industry_id = i.industry_id
-      ORDER BY j.posted_date DESC
-      LIMIT 30
-    `);
-
-    const aiJobs = jobs.map((j) => ({
+    // 2. Chuẩn bị dữ liệu cho AI
+    const simplifiedJobs = jobs.map((j) => ({
       id: j.id,
       title: j.title,
       location: j.location,
       industry: j.industry,
     }));
 
-    // 3. Prompt AI
     const prompt = `
       User History: ${JSON.stringify(history)}
-      Available Jobs: ${JSON.stringify(aiJobs)}
-      Task: Recommend top 3 jobs. 
-      Return ONLY JSON array: [{"job_id": 1, "reason": "text"}]
+      Available Jobs: ${JSON.stringify(simplifiedJobs)}
+      Task: Recommend top 3 most suitable jobs based on history.
+      Output format: STRICT JSON Array only [{"job_id": 123, "reason": "Short reason in Vietnamese"}]
     `;
 
-    const rawAI = await safeCallAI(prompt);
-    let recommendations = parseAIResponse(rawAI);
+    // 3. Gọi AI
+    const aiRawText = await generateAIContent(prompt);
+    let finalRecommendations = parseAIResponse(aiRawText);
 
-    if (!recommendations) {
-      console.log("⚠️ AI fail → dùng fallback");
-      recommendations = fallbackRecommend(jobs, history);
+    // 4. Fallback nếu AI lỗi
+    if (!finalRecommendations || finalRecommendations.length === 0) {
+      finalRecommendations = getFallbackRecommendations(jobs, history);
     }
 
-    // 4. Lưu cache
-    const ok = await saveRecommendationCache(user_id, jobs, recommendations);
-
-    return ok;
-  } catch (err) {
-    console.error("🔥 [updateUserRecommendations ERROR]:", err);
+    // 5. Lưu xuống DB
+    return await saveRecommendationsToDB(userId, jobs, finalRecommendations);
+  } catch (error) {
+    console.error("[Process Error]", error);
     return false;
   }
 }
@@ -195,43 +212,57 @@ async function updateUserRecommendations(user_id) {
 
 export const recommendJobs = async (req, res) => {
   try {
-    const user_id = req.user?.user_id;
-    if (!user_id) {
-      return res.status(401).json({ error: "User chưa đăng nhập" });
-    }
+    const userId = req.user?.user_id;
+    if (!userId)
+      return res.status(401).json({ success: false, message: "Unauthorized" });
 
     // 1. Kiểm tra cache
-    const [cached] = await db.execute(
-      `SELECT * FROM recommendation_cache WHERE user_id = ?`,
-      [user_id]
-    );
+    const [cachedData] = await db.execute(SQL_GET_CACHE, [userId]);
 
-    if (cached.length > 0) {
-      return res.json({
-        fromCache: true,
-        recommendations: cached,
+    let shouldUseCache = false;
+
+    if (cachedData.length > 0) {
+      // Lấy thời gian cập nhật của bản ghi đầu tiên
+      const lastUpdate = new Date(cachedData[0].updated_at);
+      const now = new Date();
+
+      // Tính khoảng cách thời gian (miliseconds)
+      const diffTime = Math.abs(now - lastUpdate);
+      const diffHours = Math.ceil(diffTime / (1000 * 60 * 60));
+
+      //  LOGIC MỚI: Chỉ dùng cache nếu nó mới tạo dưới 24 giờ
+      if (diffHours < 3) {
+        shouldUseCache = true;
+      } else {
+        console.log(
+          ` Cache của user ${userId} đã cũ (${diffHours}h), đang tạo mới...`
+        );
+      }
+    }
+
+    // 2. Nếu Cache còn mới -> Trả về Cache
+    if (shouldUseCache) {
+      return res.status(200).json({
+        success: true,
+        source: "cache",
+        data: cachedData,
       });
     }
 
-    // 2. Không có cache → chạy AI
-    const ok = await updateUserRecommendations(user_id);
+    // 3. Nếu không có cache HOẶC cache đã cũ -> Gọi AI chạy lại
+    const isSuccess = await processUserRecommendations(userId);
 
-    if (!ok) {
-      return res.status(500).json({ error: "Không tạo được recommendation" });
-    }
+    // ... (Phần còn lại giữ nguyên) ...
 
-    // 3. Lấy cache mới
-    const [fresh] = await db.execute(
-      `SELECT * FROM recommendation_cache WHERE user_id = ?`,
-      [user_id]
-    );
-
-    return res.json({
-      fromCache: false,
-      recommendations: fresh,
+    // Lấy lại data mới nhất vừa tạo
+    const [newData] = await db.execute(SQL_GET_CACHE, [userId]);
+    return res.status(200).json({
+      success: true,
+      source: "ai_generated_fresh", // Đánh dấu là mới tạo
+      data: newData,
     });
-  } catch (err) {
-    console.error("🔥 [recommendJobs ERROR]:", err);
-    return res.status(500).json({ error: "Server error" });
+  } catch (error) {
+    console.error("[Controller Error]", error);
+    return res.status(500).json({ success: false });
   }
 };

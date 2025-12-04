@@ -29,7 +29,7 @@ const db = mysql.createPool(dbConfig);
     console.log(`✅ Kết nối thành công đến Database: ${dbConfig.database}`);
     connection.release(); // Trả lại kết nối cho pool
   } catch (err) {
-    console.error("❌ LỖI KẾT NỐI CSDL:");
+    console.error("LỖI KẾT NỐI CSDL:");
     console.error(`   - Host: ${dbConfig.host}`);
     console.error(`   - User: ${dbConfig.user}`);
     console.error(`   - Database: ${dbConfig.database}`);

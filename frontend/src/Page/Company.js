@@ -26,7 +26,7 @@ const Company = () => {
 
   return (
     <div className="company-page container">
-      <h1 className="page-title">Danh sách công ty nổi bật</h1>
+      <h1 className="page-title"></h1>
       <div className="company-grid">
         {companies.length > 0 ? (
           companies.map((company) => (

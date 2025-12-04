@@ -1,72 +1,389 @@
+// ===========================
+// VARIABLES
+// ===========================
+$dot-color-active: #ffffff;
+$dot-color-inactive: rgba(255, 255, 255, 0.4);
+$arrow-color: rgba(255, 255, 255, 0.9);
+$arrow-hover-color: #ffffff;
+
+// ===========================
+// MAIN CAROUSEL WRAPPER
+// ===========================
 .carousel-wrapper {
   width: 100%;
-  max-width: 1200px; // giới hạn chiều rộng banner
-  margin: 0 auto;
+  height: 100%;
+  overflow: hidden;
   position: relative;
+  background-color: #1a1a1a;
 
+  // ===========================
+  // CUSTOM ARROWS (Navigation)
+  // ===========================
+  .slick-prev,
+  .slick-next {
+    z-index: 15;
+    width: 50px;
+    height: 50px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255, 255, 255, 0.15);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.8;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    backdrop-filter: blur(10px);
+
+    &::before {
+      content: "";
+      display: none;
+    }
+
+    svg {
+      width: 24px;
+      height: 24px;
+      color: $arrow-color;
+      stroke-width: 2.5;
+    }
+
+    &:hover {
+      opacity: 1;
+      background: rgba(74, 144, 226, 0.35);
+      border-color: rgba(255, 255, 255, 0.6);
+      box-shadow: 0 4px 20px rgba(74, 144, 226, 0.3);
+      svg {
+        color: $arrow-hover-color;
+      }
+    }
+
+    &:active {
+      transform: translateY(-50%) scale(0.95);
+    }
+  }
+
+  .slick-prev {
+    left: 20px;
+
+    @media (max-width: 768px) {
+      left: 12px;
+      width: 44px;
+      height: 44px;
+
+      svg {
+        width: 20px;
+        height: 20px;
+      }
+    }
+  }
+
+  .slick-next {
+    right: 20px;
+
+    @media (max-width: 768px) {
+      right: 12px;
+      width: 44px;
+      height: 44px;
+
+      svg {
+        width: 20px;
+        height: 20px;
+      }
+    }
+  }
+
+  // ===========================
+  // SLIDE ITEM STYLING
+  // ===========================
   .slide-item {
-    width: 100%;
+    outline: none;
     position: relative;
-  }
+    height: 100%;
 
-  // ✅ Tỉ lệ 1920x675 = ~2.84 : 1
-  .slide-ratio {
-    aspect-ratio: 1920 / 675; // chính xác tỉ lệ ảnh
-    width: 100%;
-    max-height: 675px; // giới hạn chiều cao tối đa (tỉ lệ chuẩn)
-    min-height: 250px; // tránh quá thấp ở màn nhỏ
-    overflow: hidden;
-    border-radius: 16px;
-
-    img {
+    .slide-ratio {
       width: 100%;
       height: 100%;
-      object-fit: cover; // ảnh phủ kín khung mà không bị méo
-      display: block;
-      border-radius: 16px;
+      position: relative;
+      overflow: hidden;
+
+      .slide-image {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center 30%;
+        animation: zoomInImage 8s ease-out;
+      }
+
+      // ===========================
+      // OVERLAY GRADIENT (Professional Effect)
+      // ===========================
+      &::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          135deg,
+          rgba(0, 15, 40, 0.2) 0%,
+          rgba(42, 82, 140, 0.15) 50%,
+          rgba(0, 15, 40, 0.2) 100%
+        );
+        pointer-events: none;
+        z-index: 2;
+      }
     }
   }
 
-  // ✅ Fallback cho trình duyệt cũ không hỗ trợ aspect-ratio
-  .slide-ratio-fallback {
-    position: relative;
-    width: 100%;
-    padding-top: calc((675 / 1920) * 100%); // tương đương ~35.15%
-    overflow: hidden;
-    border-radius: 10px;
+  // ===========================
+  // SLICK LIST & TRACK (Full Height)
+  // ===========================
+  .slick-list,
+  .slick-track {
+    height: 100%;
+  }
 
-    img {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
+  // ===========================
+  // CUSTOM DOTS (Pagination)
+  // ===========================
+  .slick-dots {
+    bottom: 28px;
+    left: 0;
+    right: 0;
+    display: flex !important;
+    justify-content: center;
+    gap: 8px;
+    z-index: 15;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+
+    li {
+      width: auto;
+      margin: 0;
+      padding: 0;
+
+      button {
+        border: none;
+        background: transparent;
+        padding: 0;
+        outline: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        &::before {
+          content: "";
+          display: block;
+          width: 10px;
+          height: 10px;
+          border-radius: 50%;
+          background-color: $dot-color-inactive;
+          opacity: 1;
+          transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+          font-size: 0;
+        }
+      }
+
+      &.slick-active button::before {
+        width: 28px;
+        background-color: $dot-color-active;
+        box-shadow: 0 3px 12px rgba(74, 144, 226, 0.4);
+        border-radius: 5px;
+      }
+
+      &:hover button::before {
+        transform: scale(1.15);
+      }
+    }
+  }
+
+  // ===========================
+  // PROGRESS BAR
+  // ===========================
+  .carousel-progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: rgba(255, 255, 255, 0.1);
+    z-index: 14;
+
+    .progress-bar-fill {
       height: 100%;
-      object-fit: cover;
-      border-radius: 16px;
+      background: linear-gradient(90deg, #4a90e2 0%, #f39c12 100%);
+      transition: width 5s linear;
+      box-shadow: 0 0 8px rgba(74, 144, 226, 0.5);
+    }
+  }
+
+  // ===========================
+  // SLICK ARROW DEFAULTS (Hide Default)
+  // ===========================
+  .slick-arrow {
+    &::before {
+      display: none !important;
     }
   }
 }
 
-/* ============================
-   📱 Responsive cho Mobile
-============================ */
-@media (max-width: 992px) {
-  .carousel-wrapper {
-    max-width: 100%;
+// ===========================
+// ANIMATIONS
+// ===========================
+@keyframes zoomInImage {
+  from {
+    transform: scale(1);
+    opacity: 1;
+  }
+  to {
+    transform: scale(1.02);
+    opacity: 1;
+  }
+}
 
-    .slide-ratio {
-      aspect-ratio: 16 / 9; // đổi sang tỉ lệ video phổ biến
-      max-height: 400px;
+// ===========================
+// RESPONSIVE
+// ===========================
+@media (max-width: 1024px) {
+  .carousel-wrapper {
+    .slick-prev {
+      left: 16px;
+      width: 48px;
+      height: 48px;
+
+      svg {
+        width: 22px;
+        height: 22px;
+      }
+    }
+
+    .slick-next {
+      right: 16px;
+      width: 48px;
+      height: 48px;
+
+      svg {
+        width: 22px;
+        height: 22px;
+      }
+    }
+
+    .slick-dots {
+      bottom: 24px;
+      gap: 6px;
+
+      li {
+        button::before {
+          width: 9px;
+          height: 9px;
+        }
+
+        &.slick-active button::before {
+          width: 24px;
+        }
+      }
     }
   }
 }
 
-@media (max-width: 576px) {
+@media (max-width: 768px) {
   .carousel-wrapper {
-    .slide-ratio {
-      aspect-ratio: 4 / 3;
-      max-height: 280px;
-      min-height: 200px;
+    .slick-prev,
+    .slick-next {
+      opacity: 0.6;
+
+      &:hover {
+        opacity: 0.85;
+      }
+    }
+
+    .slick-prev {
+      left: 10px;
+      width: 40px;
+      height: 40px;
+
+      svg {
+        width: 18px;
+        height: 18px;
+      }
+    }
+
+    .slick-next {
+      right: 10px;
+      width: 40px;
+      height: 40px;
+
+      svg {
+        width: 18px;
+        height: 18px;
+      }
+    }
+
+    .slick-dots {
+      bottom: 16px;
+      gap: 5px;
+
+      li {
+        button::before {
+          width: 8px;
+          height: 8px;
+        }
+
+        &.slick-active button::before {
+          width: 20px;
+        }
+      }
+    }
+
+    .carousel-progress {
+      height: 2px;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .carousel-wrapper {
+    .slick-prev {
+      left: 8px;
+      width: 36px;
+      height: 36px;
+
+      svg {
+        width: 16px;
+        height: 16px;
+      }
+    }
+
+    .slick-next {
+      right: 8px;
+      width: 36px;
+      height: 36px;
+
+      svg {
+        width: 16px;
+        height: 16px;
+      }
+    }
+
+    .slick-dots {
+      bottom: 12px;
+      gap: 4px;
+
+      li button::before {
+        width: 6px;
+        height: 6px;
+      }
+
+      li.slick-active button::before {
+        width: 16px;
+      }
     }
   }
 }

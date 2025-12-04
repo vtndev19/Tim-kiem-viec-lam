@@ -1,202 +1,250 @@
-@import "../../styles/hiring/variables.scss";
+// ==========================================
+// 🎨 VARIABLES & THEME
+// ==========================================
+$primary-color: #2563eb; // Xanh chủ đạo
+$primary-hover: #1d4ed8; // Xanh đậm khi hover
+$text-main: #1f2937; // Màu chữ chính
+$text-secondary: #6b7280; // Màu chữ phụ
+$bg-body: #f3f4f6; // Màu nền tổng thể trang
+$bg-white: #ffffff; // Màu nền card
+$bg-input: #f9fafb; // Màu nền input
+$border-color: #e5e7eb; // Màu viền
+$danger-color: #ef4444; // Màu lỗi
+$success-color: #10b981; // Màu thành công
+$radius-md: 12px; // Bo góc vừa
+$radius-sm: 8px; // Bo góc nhỏ
+$shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+$shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+  0 2px 4px -1px rgba(0, 0, 0, 0.06);
+$transition: all 0.2s ease-in-out;
 
+// ==========================================
+// 🏗 LAYOUT & STRUCTURE
+// ==========================================
 .job-posting-form-section {
-  background: linear-gradient(135deg, $light-gray 0%, $white 100%);
-  scroll-margin-top: 80px;
+  padding: 3rem 1rem;
+  background-color: $bg-body;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
 
   .container {
-    max-width: 900px;
+    width: 100%;
+    max-width: 900px; // Giới hạn chiều rộng để form không bị bè ra quá
   }
 
-  .form-wrapper {
-    margin-top: 40px;
-    overflow: hidden;
+  // --- Title ---
+  .section-title {
+    text-align: center;
+    font-size: 1.875rem;
+    font-weight: 700;
+    color: $text-main;
+    margin-bottom: 2rem;
   }
 
-  .job-posting-form {
-    padding: 40px;
-
-    @media (max-width: $mobile) {
-      padding: 20px;
-    }
-  }
-
-  .form-grid {
+  // --- Alerts (Thông báo) ---
+  .alert {
+    padding: 1rem 1.5rem;
+    border-radius: $radius-sm;
+    margin-bottom: 1.5rem;
+    font-weight: 500;
     display: flex;
-    flex-direction: column;
-    gap: 20px;
-  }
+    align-items: center;
+    box-shadow: $shadow-sm;
 
-  .form-row {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 20px;
-
-    @media (max-width: $tablet) {
-      grid-template-columns: 1fr;
+    &.alert-success {
+      background-color: lighten($success-color, 45%);
+      color: darken($success-color, 10%);
+      border: 1px solid lighten($success-color, 30%);
     }
 
-    &.full-width {
-      grid-template-columns: 1fr;
+    &.alert-error {
+      background-color: lighten($danger-color, 42%);
+      color: darken($danger-color, 10%);
+      border: 1px solid lighten($danger-color, 25%);
     }
   }
 
-  .form-group {
-    display: flex;
-    flex-direction: column;
+  // --- Main Form Card ---
+  .form-wrapper.card {
+    background-color: $bg-white;
+    padding: 2.5rem;
+    border-radius: $radius-md;
+    box-shadow: $shadow-md;
+    border: 1px solid $border-color;
 
-    label {
-      font-size: 14px;
-      font-weight: 600;
-      color: $text-dark;
-      margin-bottom: 8px;
+    .form-grid {
       display: flex;
-      align-items: center;
-      gap: 6px;
-
-      &::after {
-        content: attr(data-required);
-      }
+      flex-direction: column;
+      gap: 1.5rem; // Khoảng cách giữa các hàng dọc
     }
 
-    input,
-    textarea,
-    select {
-      padding: 12px;
-      border: 2px solid $medium-gray;
-      border-radius: $border-radius-medium;
-      font-size: 14px;
-      font-family: inherit;
-      color: $text-dark;
-      transition: all $transition-normal;
-      background-color: $white;
-
-      &::placeholder {
-        color: $text-light;
-      }
-
-      &:focus {
-        outline: none;
-        border-color: $primary-blue;
-        box-shadow: 0 0 0 3px rgba(30, 136, 229, 0.1);
-        background-color: #f8fbff;
-      }
-
-      &:disabled {
-        background-color: $light-gray;
-        color: $text-light;
-        cursor: not-allowed;
-      }
-    }
-
-    textarea {
-      resize: vertical;
-      min-height: 120px;
-      max-height: 300px;
-    }
-
-    .char-count {
-      font-size: 12px;
-      color: $text-light;
-      margin-top: 4px;
-      text-align: right;
-    }
-
-    .form-error {
-      color: $danger-red;
-      font-size: 13px;
-      margin-top: 6px;
+    // Hàng chứa 2 cột
+    .form-row {
       display: flex;
-      align-items: center;
-      gap: 4px;
+      gap: 1.5rem; // Khoảng cách giữa 2 cột
 
-      &::before {
-        content: "⚠";
+      .form-group {
+        flex: 1; // Chia đều độ rộng
       }
     }
 
-    .form-success {
-      color: $success-green;
-      font-size: 13px;
-      margin-top: 6px;
+    // --- Form Elements ---
+    .form-group {
+      display: flex;
+      flex-direction: column;
+
+      label {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: $text-main;
+        margin-bottom: 0.5rem;
+
+        .required {
+          color: $danger-color;
+          margin-left: 4px;
+        }
+      }
+
+      // Input, Select, Textarea Style
+      input,
+      select,
+      textarea {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 1px solid $border-color;
+        border-radius: $radius-sm;
+        font-size: 0.95rem;
+        color: $text-main;
+        background-color: $bg-input;
+        transition: $transition;
+        font-family: inherit;
+
+        &::placeholder {
+          color: #9ca3af;
+        }
+
+        &:hover:not(:disabled) {
+          background-color: $bg-white;
+          border-color: darken($border-color, 15%);
+        }
+
+        &:focus {
+          outline: none;
+          background-color: $bg-white;
+          border-color: $primary-color;
+          box-shadow: 0 0 0 4px rgba($primary-color, 0.1); // Hiệu ứng focus ring
+        }
+
+        // Style cho ô bị khóa (Read-only)
+        &:disabled,
+        &.input-readonly {
+          background-color: #e5e7eb !important; // Ghi đè inline style nếu cần
+          color: #6b7280 !important;
+          cursor: not-allowed;
+          border-color: #d1d5db;
+          font-weight: 500;
+        }
+      }
+
+      textarea {
+        resize: vertical; // Chỉ cho phép kéo chiều dọc
+        min-height: 120px;
+        line-height: 1.5;
+      }
+
+      // Thông báo lỗi dưới input
+      .form-error {
+        margin-top: 0.35rem;
+        font-size: 0.8rem;
+        color: $danger-color;
+        font-weight: 500;
+      }
+
+      small {
+        margin-top: 0.35rem;
+        font-size: 0.8rem;
+        display: block;
+      }
     }
-  }
 
-  .form-actions {
-    display: flex;
-    gap: 16px;
-    justify-content: flex-end;
-    margin-top: 32px;
-    padding-top: 24px;
-    border-top: 1px solid $medium-gray;
-
-    @media (max-width: $mobile) {
-      flex-direction: column-reverse;
-      gap: 12px;
+    // --- Actions Buttons ---
+    .form-actions {
+      margin-top: 2rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid $border-color;
+      display: flex;
+      justify-content: flex-end; // Căn nút sang phải
 
       .button {
-        width: 100%;
-      }
-    }
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.875rem 2rem;
+        font-size: 1rem;
+        font-weight: 600;
+        border-radius: $radius-sm;
+        border: none;
+        cursor: pointer;
+        transition: $transition;
+        background-color: $primary-color;
+        color: white;
+        box-shadow: 0 2px 4px rgba($primary-color, 0.25);
 
-    .button {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
+        &:hover:not(:disabled) {
+          background-color: $primary-hover;
+          transform: translateY(-1px);
+          box-shadow: 0 4px 6px rgba($primary-color, 0.3);
+        }
 
-      &:disabled {
-        opacity: 0.7;
-        cursor: not-allowed;
-      }
+        &:active:not(:disabled) {
+          transform: translateY(0);
+        }
 
-      .spinner {
-        display: inline-block;
-        width: 14px;
-        height: 14px;
-        border: 2px solid rgba(255, 255, 255, 0.3);
-        border-top-color: $white;
-        border-radius: 50%;
-        animation: spin 0.8s linear infinite;
+        &:disabled {
+          background-color: #9ca3af;
+          cursor: not-allowed;
+          opacity: 0.7;
+          box-shadow: none;
+        }
+
+        &.button-large {
+          width: 100%; // Trên mobile nút sẽ full chiều rộng
+          @media (min-width: 640px) {
+            width: auto; // Trên desktop nút tự co lại
+          }
+        }
       }
     }
   }
 }
 
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
+// ==========================================
+// 📱 RESPONSIVE
+// ==========================================
+@media (max-width: 768px) {
+  .job-posting-form-section {
+    padding: 1.5rem 1rem;
 
-// Alert Messages
-.alert {
-  padding: 16px;
-  border-radius: $border-radius-medium;
-  margin-bottom: 20px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  border-left: 4px solid;
+    .section-title {
+      font-size: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
 
-  &.alert-success {
-    background-color: lighten($success-green, 38%);
-    color: darken($success-green, 20%);
-    border-left-color: $success-green;
-  }
+    .form-wrapper.card {
+      padding: 1.5rem; // Giảm padding card
 
-  &.alert-error {
-    background-color: lighten($danger-red, 38%);
-    color: darken($danger-red, 20%);
-    border-left-color: $danger-red;
-  }
+      // Chuyển 2 cột thành 1 cột
+      .form-row {
+        flex-direction: column;
+        gap: 1.25rem;
+      }
 
-  span {
-    font-size: 18px;
-
-    &:last-child {
-      font-size: 14px;
-      flex: 1;
+      .form-actions {
+        .button {
+          width: 100%; // Nút full chiều ngang cho dễ bấm
+        }
+      }
     }
   }
 }

@@ -1,6 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import axios from "axios";
+import {
+  Globe,
+  MapPin,
+  Users,
+  Mail,
+  Phone,
+  Calendar,
+  Briefcase,
+  DollarSign,
+} from "lucide-react"; // Gợi ý cài thêm lucide-react để có icon đẹp
 import "../styles/page/companyDetail.scss";
 
 const CompanyDetail = () => {
@@ -12,7 +22,6 @@ const CompanyDetail = () => {
   useEffect(() => {
     const fetchCompany = async () => {
       try {
-        // ✅ Gọi đúng API backend
         const res = await axios.get(
           `http://localhost:8080/api/companies/${id}`
         );
@@ -24,100 +33,126 @@ const CompanyDetail = () => {
         setLoading(false);
       }
     };
-
     if (id) fetchCompany();
   }, [id]);
 
-  if (loading) return <p>Đang tải dữ liệu công ty...</p>;
-  if (error) return <p>{error}</p>;
-  if (!company) return <p>Không tìm thấy thông tin công ty.</p>;
+  if (loading) return <div className="loading-state">Đang tải dữ liệu...</div>;
+  if (error) return <div className="error-state">{error}</div>;
+  if (!company)
+    return <div className="error-state">Không tìm thấy công ty.</div>;
 
   return (
-    <div className="company-detail">
-      <div className="company-header">
-        {company.logo_url && (
-          <img
-            src={
-              company.logo_url.startsWith("http")
-                ? company.logo_url
-                : `http://localhost:8080${company.logo_url}`
-            }
-            alt={company.company_name}
-            className="company-logo"
-          />
-        )}
-        <div className="company-info">
-          <h2>{company.company_name}</h2>
-          <p>
-            <strong>Ngành nghề:</strong> {company.industry}
-          </p>
-          <p>
-            <strong>Quy mô:</strong> {company.company_size}
-          </p>
-          <p>
-            <strong>Địa chỉ:</strong> {company.address}
-          </p>
-          <p>
-            <strong>Website:</strong>{" "}
-            <a href={company.website} target="_blank" rel="noreferrer">
-              {company.website}
-            </a>
-          </p>
-          <p>
-            <strong>Email:</strong> {company.email}
-          </p>
-          <p>
-            <strong>Điện thoại:</strong> {company.phone}
-          </p>
-          <p>
-            <strong>Năm thành lập:</strong> {company.founded_year}
-          </p>
+    <div className="company-detail-page container">
+      {/* --- HERO SECTION --- */}
+      <div className="company-hero">
+        <div className="hero-content">
+          <div className="logo-wrapper">
+            <img
+              src={
+                company.logo_url?.startsWith("http")
+                  ? company.logo_url
+                  : `http://localhost:8080${company.logo_url}` ||
+                    "https://via.placeholder.com/150"
+              }
+              alt={company.company_name}
+              onError={(e) => {
+                e.target.src = "https://via.placeholder.com/150";
+              }} // Fallback nếu ảnh lỗi
+              className="company-logo"
+            />
+          </div>
+
+          <div className="info-wrapper">
+            <h1 className="company-name">{company.company_name}</h1>
+            <div className="meta-grid">
+              <div className="meta-item">
+                <Briefcase size={16} /> <span>{company.industry}</span>
+              </div>
+              <div className="meta-item">
+                <Users size={16} /> <span>{company.company_size} nhân sự</span>
+              </div>
+              <div className="meta-item">
+                <MapPin size={16} /> <span>{company.address}</span>
+              </div>
+              <div className="meta-item">
+                <Calendar size={16} />{" "}
+                <span>Thành lập: {company.founded_year}</span>
+              </div>
+            </div>
+
+            <div className="contact-actions">
+              {company.website && (
+                <a
+                  href={company.website}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="btn-outline"
+                >
+                  <Globe size={16} /> Website
+                </a>
+              )}
+              <span className="contact-info">
+                <Mail size={16} /> {company.email}
+              </span>
+              <span className="contact-info">
+                <Phone size={16} /> {company.phone}
+              </span>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div className="company-description">
-        <h3>Giới thiệu công ty</h3>
-        <p>{company.description}</p>
+      {/* --- DESCRIPTION SECTION --- */}
+      <div className="section-container">
+        <h3 className="section-title">Giới thiệu công ty</h3>
+        <div className="description-content">
+          <p>{company.description}</p>
+        </div>
       </div>
 
-      {/* ✅ Danh sách các job */}
-      <div className="company-jobs">
-        <h3>Việc làm đang tuyển tại {company.company_name}</h3>
+      {/* --- JOBS GRID SECTION --- */}
+      <div className="section-container">
+        <div className="jobs-header">
+          <h3 className="section-title">
+            Việc làm đang tuyển dụng ({company.jobs?.length || 0})
+          </h3>
+        </div>
+
         {company.jobs && company.jobs.length > 0 ? (
-          <ul className="job-list">
+          <div className="jobs-grid">
             {company.jobs.map((job) => (
-              <li key={job.id} className="job-item">
-                <div className="job-info">
+              <div key={job.id} className="job-card">
+                <div className="job-card-header">
                   <h4>{job.title}</h4>
-                  <p>
-                    <strong>Mức lương:</strong> {job.salary}
-                  </p>
-                  <p>
-                    <strong>Hình thức:</strong> {job.job_type}
-                  </p>
-                  <p>
-                    <strong>Ngành nghề:</strong> {job.industry}
-                  </p>
-                  <p>
-                    <strong>Mô tả:</strong> {job.description}
-                  </p>
-                  <p>
-                    <strong>Ngày đăng:</strong>{" "}
-                    {new Date(job.posted_date).toLocaleDateString("vi-VN")}
-                  </p>
-                  <Link
-                    to={`/job/${job.id}`}
-                    key={job.id}
-                    className="job-detail-link"
-                  >
+                  <span className="job-type-badge">{job.job_type}</span>
+                </div>
+
+                <div className="job-card-body">
+                  <div className="salary-row">
+                    <DollarSign size={16} className="text-green" />
+                    <span className="salary-text">{job.salary}</span>
+                  </div>
+                  <p className="job-desc-short">{job.description}</p>
+
+                  <div className="job-meta">
+                    <span className="date">
+                      📅 {new Date(job.posted_date).toLocaleDateString("vi-VN")}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="job-card-footer">
+                  <Link to={`/job/${job.id}`} className="btn-view-job">
                     Xem chi tiết
                   </Link>
                 </div>
-              </li>
+              </div>
             ))}
-          </ul>
+          </div>
         ) : (
-          <p>Chưa có việc làm nào được đăng.</p>
+          <div className="empty-jobs">
+            Hiện tại công ty chưa có vị trí nào đang mở.
+          </div>
         )}
       </div>
     </div>
