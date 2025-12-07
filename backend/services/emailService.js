@@ -104,7 +104,9 @@ export const sendResultEmail = async (email, name, jobTitle, status) => {
       html: htmlContent,
     });
 
-    console.log(`[EmailService] Result email sent successfully to ${email}`);
+    console.log(
+      `[EmailService] Result auto email sent successfully to ${email}`
+    );
     return true;
   } catch (error) {
     console.error("[EmailService] Error sending result email:", error);

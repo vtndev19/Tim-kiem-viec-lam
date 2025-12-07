@@ -151,7 +151,7 @@ export default function HomeHeader({ siteName }) {
                   src={user.avatar || "/images/default-avatar.png"}
                   alt="avatar"
                 />
-                <span>{user.name}</span>
+                <span>{user.full_name || user.name || user.email}</span>
               </div>
 
               {isUserMenuVisible && (
@@ -173,7 +173,11 @@ export default function HomeHeader({ siteName }) {
                         </Link>
                       </li>
                     )}
-
+                    {userRole === "recruiter" && (
+                      <li>
+                        <Link to="/recruiter-dashboard">Quản lý ứng viên</Link>
+                      </li>
+                    )}
                     <li className="logout" onClick={handleLogout}>
                       Đăng xuất
                     </li>

@@ -142,16 +142,14 @@ const CVList = () => {
       <div className="page-header">
         <h1 className="title">Danh sách CV</h1>
         <button className="btn-primary" onClick={handleCreate}>
-          + Tạo CV Mới
+          Tạo CV Mới
         </button>
       </div>
 
       {cvList.length === 0 ? (
         <div className="empty-state">
           <h3>Bạn chưa có CV nào</h3>
-          <button className="btn-primary" onClick={handleCreate}>
-            Tạo ngay
-          </button>
+          <p>Bắt đầu tạo CV chuyên nghiệp để ứng tuyển ngay hôm nay!</p>
         </div>
       ) : (
         <div className="cv-grid">

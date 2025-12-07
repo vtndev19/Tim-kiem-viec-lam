@@ -25,9 +25,9 @@ const JobListSidebar = ({ jobs, selectedJobId, onSelectJob, loading }) => {
               <div className="job-title">{job.title}</div>
               <div className="job-meta">
                 <span className={`status-dot ${job.status || "open"}`}></span>
-                <span className="count-badge">
+                {/* <span className="count-badge">
                   {job.application_count || 0} hồ sơ
-                </span>
+                </span> */}
               </div>
               <div className="job-date">
                 {new Date(job.posted_date).toLocaleDateString("vi-VN")}

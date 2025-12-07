@@ -82,10 +82,7 @@ export default function App() {
           <Route path="/hiring-dashboard" element={<HiringDashboard />} />
 
           {/* ✅ CẤU HÌNH ROUTE MỚI CHO DASHBOARD QUẢN LÝ ỨNG VIÊN */}
-          {/* Route 1: Vào dashboard mặc định (Tự chọn job đầu tiên) */}
-          <Route path="/recruiter/dashboard" element={<RecruiterDashboard />} />
-
-          {/* Route 2: Vào dashboard với Job ID cụ thể (Khi click từ link hoặc F5) */}
+          <Route path="/recruiter-dashboard" element={<RecruiterDashboard />} />
           <Route
             path="/recruiter-dashboard/:jobId"
             element={<RecruiterDashboard />}

@@ -1,112 +1,505 @@
-.saved-jobs-page {
-  padding: 30px;
+// Variables
+$primary: #0066cc;
+$dark: #1f2937;
+$gray: #6b7280;
+$light-bg: #f3f4f6;
+$white: #ffffff;
+$border: #e5e7eb;
+$danger: #dc2626;
 
-  h1 {
-    font-size: 28px;
-    margin-bottom: 20px;
-    color: #2b3a55;
+// Reset & Layout Chính
+.saved-jobs-page {
+  background: $light-bg;
+  height: 100vh; // Chiếm toàn bộ chiều cao màn hình
+  overflow: hidden; // Không cho body cuộn
+  display: flex;
+  flex-direction: column;
+  font-family: "Inter", sans-serif;
+
+  &.loading-center {
+    align-items: center;
+    justify-content: center;
   }
 
-  .job-list {
+  .container {
+    max-width: 1400px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+    height: 100%; // Container con cũng full chiều cao
     display: flex;
     flex-direction: column;
-    gap: 16px;
   }
 
-  .job-card {
-    background: #fff;
-    border: 1px solid #eee;
-    border-radius: 12px;
-    padding: 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-    transition: all 0.2s ease;
-
-    &:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  // 1. Top Nav (Cố định ở trên)
+  .top-nav {
+    flex-shrink: 0; // Không bị co lại
+    padding: 1rem 0;
+    .back-link-simple {
+      text-decoration: none;
+      color: $gray;
+      font-weight: 500;
+      font-size: 0.9rem;
+      &:hover {
+        color: $primary;
+      }
     }
+  }
 
-    .job-info {
-      flex: 1;
-      h2 {
-        font-size: 20px;
-        margin-bottom: 8px;
+  // 2. Layout 3 Cột (Phần chính)
+  .saved-layout {
+    flex: 1; // Chiếm hết phần chiều cao còn lại
+    display: grid;
+    grid-template-columns: 280px 1fr 280px;
+    gap: 1.5rem;
+    overflow: hidden; // Quan trọng: Ngăn tràn ra ngoài layout này
+    padding-bottom: 1rem; // Cách đáy màn hình 1 chút
 
-        a {
-          color: #1e90ff;
-          text-decoration: none;
+    // Responsive
+    @media (max-width: 1200px) {
+      grid-template-columns: 240px 1fr 240px;
+    }
+    @media (max-width: 992px) {
+      grid-template-columns: 1fr 260px; // Tablet: Ẩn cột trái
+      .saved-sidebar.left {
+        display: none;
+      }
+    }
+    @media (max-width: 768px) {
+      grid-template-columns: 1fr; // Mobile: 1 cột
+      .saved-sidebar.right {
+        display: none;
+      }
+      overflow-y: auto; // Mobile cho phép cuộn trang bình thường
+    }
+  }
 
-          &:hover {
-            text-decoration: underline;
+  // 3. Sidebar (Cố định, không cuộn)
+  .saved-sidebar {
+    background: $white;
+    border: 1px solid $border;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    height: 100%; // Full chiều cao của layout cha
+    overflow-y: auto; // Nếu nội dung sidebar dài quá thì sidebar tự cuộn
+
+    &.left {
+      .sidebar-header h3 {
+        font-size: 0.9rem;
+        margin: 0 0 0.8rem;
+        color: $dark;
+      }
+      .search-box {
+        position: relative;
+        margin-bottom: 1rem;
+        input {
+          width: 100%;
+          padding: 0.5rem 2rem 0.5rem 0.6rem;
+          border: 1px solid #d1d5db;
+          border-radius: 4px;
+          font-size: 0.85rem;
+          outline: none;
+          &:focus {
+            border-color: $primary;
           }
         }
+        .search-icon {
+          position: absolute;
+          right: 8px;
+          top: 50%;
+          transform: translateY(-50%);
+          font-size: 0.75rem;
+          color: $gray;
+        }
       }
-
-      .company {
-        font-weight: 500;
-        color: #333;
-      }
-
-      .location {
-        color: #777;
-      }
-
-      .salary {
-        color: #2e8b57;
-        font-weight: 600;
-      }
-
-      .saved-at {
-        font-size: 13px;
-        color: #aaa;
-        margin-top: 6px;
+      .info-box {
+        font-size: 0.8rem;
+        color: $gray;
+        line-height: 1.4;
+        border-top: 1px solid $border;
+        padding-top: 0.8rem;
       }
     }
 
-    .job-actions {
+    &.right {
+      background: transparent;
+      border: none;
+      padding: 0;
       display: flex;
       flex-direction: column;
-      gap: 8px;
-
-      button,
-      .detail-btn {
-        background: #1e90ff;
-        color: #fff;
-        border: none;
-        border-radius: 8px;
-        padding: 8px 14px;
-        cursor: pointer;
-        transition: 0.2s;
+      gap: 1rem;
+      color: #ffffff;
+      .ad-box {
+        background: $white;
+        border: 1px solid $border;
+        border-radius: 0.5rem;
+        padding: 1rem;
         text-align: center;
-        font-size: 14px;
-        text-decoration: none;
-
-        &:hover {
-          background: #0b6efb;
+        h4 {
+          margin: 0 0 0.5rem;
+          color: $primary;
+          font-size: 0.9rem;
         }
-      }
-
-      .unsave-btn {
-        background: #e74c3c;
-
-        &:hover {
-          background: #c0392b;
+        p {
+          font-size: 0.8rem;
+          color: $gray;
+          margin-bottom: 0.8rem;
+        }
+        button {
+          background: $primary;
+          color: $white;
+          border: none;
+          padding: 0.3rem 0.8rem;
+          border-radius: 4px;
+          font-size: 0.8rem;
+          cursor: pointer;
         }
       }
     }
   }
 
-  .back-link {
-    display: inline-block;
-    margin-top: 20px;
-    color: #1e90ff;
-    text-decoration: none;
+  // 4. Main Content (Chứa Header cố định và List cuộn)
+  .saved-main {
+    background: $white;
+    border: 1px solid $border;
+    border-radius: 0.5rem;
+    display: flex;
+    flex-direction: column; // Xếp dọc header và list
+    height: 100%; // Full chiều cao
+    overflow: hidden; // Ẩn thanh cuộn của container này
+
+    .main-header-fixed {
+      flex-shrink: 0; // Header không bị co lại
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid $border;
+      background: $white;
+      h1 {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: $dark;
+        margin: 0 0 0.2rem;
+      }
+      .subtitle {
+        color: $gray;
+        font-size: 0.85rem;
+        margin: 0;
+      }
+    }
+
+    .scrollable-list {
+      flex: 1; // Chiếm toàn bộ không gian còn lại
+      overflow-y: auto; // CHỈ PHẦN NÀY CUỘN
+      padding: 1rem;
+
+      // Custom Scrollbar cho đẹp
+      &::-webkit-scrollbar {
+        width: 6px;
+      }
+      &::-webkit-scrollbar-track {
+        background: #f1f1f1;
+      }
+      &::-webkit-scrollbar-thumb {
+        background: #c1c1c1;
+        border-radius: 3px;
+      }
+      &::-webkit-scrollbar-thumb:hover {
+        background: #a0a0a0;
+      }
+    }
+
+    .job-list-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 2rem;
+      color: $gray;
+      a {
+        color: $primary;
+      }
+    }
+  }
+
+  // ... (Các phần trên giữ nguyên)
+
+  // 5. Thẻ Job Compact (Mỏng hơn, gọn hơn) - ĐÃ CẬP NHẬT HOVER
+  .job-card-compact {
+    background: $white;
+    border: 1px solid $border;
+    border-radius: 6px;
+    padding: 0.8rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+
+    // 🔥 Cấu hình chuyển động mượt mà
+    position: relative;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    top: 0; // Để định vị cho hiệu ứng top
 
     &:hover {
-      text-decoration: underline;
+      border-color: $primary;
+      // 1. Đẩy thẻ lên trên 4px
+      transform: translateY(-4px);
+      // 2. Tạo bóng đổ sâu hơn để tạo cảm giác nổi khối
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08), 0 4px 6px rgba(0, 0, 0, 0.05);
+
+      .job-title {
+        color: $primary;
+      }
+    }
+
+    // Header: Title - Salary - Delete Btn
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      .top-info {
+        flex: 1;
+        .job-title {
+          display: block;
+          font-size: 1rem;
+          font-weight: 600;
+          color: $dark;
+          text-decoration: none;
+          margin-bottom: 0.1rem;
+          line-height: 1.2;
+          transition: color 0.2s; // Thêm transition cho màu chữ
+        }
+        .job-salary {
+          font-size: 0.75rem;
+          font-weight: 600;
+          color: #b91c1c;
+          background: #fef2f2;
+          padding: 0.1rem 0.4rem;
+          border-radius: 3px;
+        }
+      }
+      .btn-delete-red {
+        background: $danger;
+        color: $white;
+        border: none;
+        border-radius: 4px;
+        padding: 0.25rem 0.6rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        cursor: pointer;
+        margin-left: 0.5rem;
+        white-space: nowrap;
+        transition: background-color 0.2s, transform 0.2s; // Thêm hiệu ứng cho nút xóa
+
+        &:hover {
+          background: darken($danger, 10%);
+          transform: scale(1.05); // Phóng to nhẹ nút xóa khi hover
+        }
+      }
+    }
+
+    // Body: Company
+    .card-mid {
+      .company-name {
+        font-size: 0.85rem;
+        color: #4b5563;
+        margin: 0;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
+      }
+    }
+
+    // Footer: Meta + Detail Button
+    .card-bot {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 0.2rem;
+      padding-top: 0.4rem;
+      border-top: 1px dashed $light-bg;
+
+      .meta-info {
+        font-size: 0.75rem;
+        color: $gray;
+        display: flex;
+        gap: 0.8rem;
+        @media (max-width: 500px) {
+          flex-direction: column;
+          gap: 0;
+        }
+      }
+
+      .btn-view-detail {
+        background: $primary;
+        color: $white;
+        text-decoration: none;
+        padding: 0.3rem 0.8rem;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        transition: all 0.2s; // Transition cho nút xem chi tiết
+
+        &:hover {
+          background: darken($primary, 10%);
+          box-shadow: 0 2px 5px rgba(0, 102, 204, 0.3); // Bóng đổ nút khi hover
+          transform: translateY(-1px); // Nhấc nút lên nhẹ
+        }
+      }
+    }
+  }
+
+  // ... (Các phần dưới giữ nguyên)
+
+  // Toast & Modal (Giữ nguyên style)
+  .toast-notification {
+    position: fixed;
+    top: 75px;
+    right: 20px;
+    background: $white;
+    padding: 12px 20px;
+    border-radius: 6px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    z-index: 9999;
+    transform: translateX(120%);
+    transition: transform 0.3s ease;
+    border-left: 4px solid transparent;
+    &.show {
+      transform: translateX(0);
+    }
+    &.success {
+      border-left-color: #10b981;
+      .toast-icon {
+        color: #10b981;
+      }
+    }
+    &.error {
+      border-left-color: $danger;
+      .toast-icon {
+        color: $danger;
+      }
+    }
+  }
+  .confirm-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+    .confirm-modal {
+      background: $white;
+      padding: 20px;
+      border-radius: 8px;
+      width: 90%;
+      max-width: 350px;
+      text-align: center;
+      h3 {
+        margin-top: 0;
+        font-size: 1.1rem;
+      }
+      p {
+        font-size: 0.9rem;
+        color: $gray;
+        margin-bottom: 20px;
+      }
+      .modal-actions {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        button {
+          padding: 8px 20px;
+          border-radius: 4px;
+          border: none;
+          cursor: pointer;
+          font-size: 0.9rem;
+        }
+        .btn-cancel {
+          background: #e5e7eb;
+        }
+        .btn-confirm {
+          background: $danger;
+          color: $white;
+        }
+      }
+    }
+  }
+}
+// ... trong file SavedJobsPage.scss ...
+
+.saved-sidebar.left {
+  // ...
+  .search-box {
+    position: relative;
+    margin-bottom: 1rem;
+
+    input {
+      // (Giữ nguyên style input cũ)
+      width: 100%;
+      padding: 0.5rem 2rem 0.5rem 0.6rem;
+      border: 1px solid #d1d5db;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      outline: none;
+      &:focus {
+        border-color: $primary;
+      }
+    }
+
+    .search-icon {
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 0.75rem;
+      color: $gray;
+      pointer-events: none;
+    }
+
+    // 🔥 Style mới cho icon Xóa tìm kiếm
+    .clear-icon {
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 0.8rem;
+      color: $gray;
+      cursor: pointer;
+      font-style: normal;
+      width: 16px;
+      height: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+
+      &:hover {
+        background-color: #e5e7eb;
+        color: $danger;
+      }
+    }
+  }
+}
+
+// 🔥 Style cho nút Xóa bộ lọc khi không tìm thấy kết quả
+.empty-state {
+  .btn-clear-filter {
+    margin-top: 10px;
+    background: transparent;
+    border: 1px solid $primary;
+    color: $primary;
+    padding: 5px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.85rem;
+
+    &:hover {
+      background: $primary;
+      color: $white;
     }
   }
 }

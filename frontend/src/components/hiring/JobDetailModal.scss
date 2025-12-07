@@ -1,136 +1,193 @@
-@import "../../styles/hiring/variables.scss";
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
 
 .job-detail-modal {
+  background: white;
+  width: 90%;
+  max-width: 700px;
+  max-height: 90vh;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+
   .modal-header {
+    padding: 20px;
+    border-bottom: 1px solid #e9ecef;
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    gap: 16px;
 
     h2 {
-      margin: 0 0 4px 0;
-      font-size: 22px;
-      color: $text-dark;
+      margin: 0;
+      font-size: 1.5rem;
+      color: #333;
     }
 
     .modal-subtitle {
-      font-size: 13px;
-      color: $text-light;
-      margin: 0;
-      font-weight: 500;
+      margin: 5px 0 0;
+      color: #6c757d;
+      font-size: 0.95rem;
+    }
+
+    .close-button {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: #999;
+
+      &:hover {
+        color: #333;
+      }
     }
   }
 
   .modal-body {
-    max-height: 600px;
+    padding: 20px;
     overflow-y: auto;
+    flex: 1;
+
+    // === Section thống kê ===
+    .applicant-stats-section {
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      border: 1px solid #e9ecef;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      .stats-info {
+        display: flex;
+        flex-direction: column;
+
+        .stats-label {
+          font-size: 0.9rem;
+          color: #6c757d;
+          margin-bottom: 5px;
+        }
+
+        .stats-count {
+          font-size: 1.5rem;
+          font-weight: bold;
+          color: #0d6efd;
+        }
+
+        .error-text {
+          color: #ef4444;
+          font-size: 0.8rem;
+          margin-top: 5px;
+        }
+      }
+    }
+
+    // === Các section nội dung ===
+    .detail-section {
+      margin-bottom: 20px;
+
+      h3 {
+        font-size: 1.1rem;
+        margin-bottom: 10px;
+        color: #2c3e50;
+        border-left: 4px solid #0d6efd;
+        padding-left: 10px;
+      }
+
+      .detail-text {
+        white-space: pre-line;
+        color: #444;
+        line-height: 1.6;
+      }
+
+      .detail-list {
+        padding-left: 20px;
+        margin: 0;
+        color: #444;
+
+        li {
+          margin-bottom: 5px;
+          line-height: 1.5;
+        }
+      }
+
+      // Grid 2 cột cho thông tin cơ bản
+      .detail-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+
+        .detail-item {
+          label {
+            display: block;
+            font-size: 0.85rem;
+            color: #888;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+          }
+          p {
+            margin: 0;
+            font-weight: 500;
+            color: #333;
+          }
+        }
+      }
+
+      &.info-section {
+        border-top: 1px solid #eee;
+        padding-top: 15px;
+        color: #888;
+        font-size: 0.9rem;
+      }
+    }
   }
 
-  .detail-section {
-    margin-bottom: 24px;
+  .modal-footer {
+    padding: 15px 20px;
+    border-top: 1px solid #e9ecef;
+    display: flex;
+    justify-content: flex-end;
+    background: #fff;
 
-    &:last-child {
-      margin-bottom: 0;
-    }
+    .button {
+      padding: 8px 20px;
+      border-radius: 4px;
+      border: none;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.2s;
 
-    h3 {
-      font-size: 16px;
-      font-weight: 700;
-      color: $primary-blue;
-      margin: 0 0 12px 0;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
+      &.button-secondary {
+        background-color: #6c757d;
+        color: white;
 
-    .detail-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 16px;
-
-      @media (max-width: $mobile) {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    .detail-item {
-      background-color: $pale-blue;
-      padding: 12px;
-      border-radius: $border-radius-medium;
-      border-left: 3px solid $primary-blue;
-
-      label {
-        font-size: 12px;
-        font-weight: 600;
-        color: $primary-blue;
-        display: block;
-        margin-bottom: 4px;
-      }
-
-      p {
-        font-size: 14px;
-        color: $text-dark;
-        margin: 0;
-        font-weight: 500;
-      }
-    }
-
-    .detail-text {
-      font-size: 14px;
-      line-height: 1.6;
-      color: $text-light;
-      margin: 0;
-      white-space: pre-wrap;
-      word-wrap: break-word;
-    }
-
-    &.info-section {
-      background-color: $light-gray;
-      padding: 12px;
-      border-radius: $border-radius-medium;
-      border-left: 3px solid $text-light;
-
-      p {
-        font-size: 13px;
-        color: $text-light;
-        margin: 0;
-
-        strong {
-          color: $text-dark;
+        &:hover {
+          background-color: #5a6268;
         }
       }
     }
   }
 }
 
-.modal-footer {
-  display: flex;
-  justify-content: flex-end;
-
-  .button {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-  }
-}
-
-// Scrollbar for modal
-.job-detail-modal .modal-body {
-  &::-webkit-scrollbar {
-    width: 6px;
-  }
-
-  &::-webkit-scrollbar-track {
-    background: $light-gray;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background: $primary-blue;
-    border-radius: 3px;
-
-    &:hover {
-      background: $primary-dark-blue;
+// Responsive
+@media (max-width: 576px) {
+  .job-detail-modal {
+    .modal-body {
+      .detail-grid {
+        grid-template-columns: 1fr; // Chuyển về 1 cột trên mobile
+      }
     }
   }
 }

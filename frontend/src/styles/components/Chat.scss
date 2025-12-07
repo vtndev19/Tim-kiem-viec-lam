@@ -315,7 +315,7 @@
 }
 .notification-bell {
   position: fixed;
-  bottom: 180px; // nằm trên icon chat realtime
+  bottom: 110px; // nằm trên icon chat realtime
   right: 32px;
   height: 60px;
   border-radius: 50%;
@@ -363,8 +363,8 @@
 /* ====== BOX THÔNG BÁO ====== */
 .notification-box {
   position: fixed;
-  bottom: 240px; // nằm trên icon chuông
-  right: 40px;
+  bottom: 170px; // nằm trên icon chuông
+  right: 60px;
   width: 280px;
   max-height: 300px;
   background: #fff;

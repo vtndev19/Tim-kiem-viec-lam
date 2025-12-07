@@ -546,3 +546,126 @@ $transition: all 0.3s ease;
     // color: #e0e0e0;
   }
 }
+// 1. Toast Notification Styles
+.toast-notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: #fff;
+  padding: 15px 20px;
+  border-radius: 8px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  z-index: 9999;
+  transform: translateX(120%); // Mặc định ẩn bên phải
+  transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55); // Hiệu ứng nảy nhẹ
+  min-width: 300px;
+  border-left: 5px solid transparent;
+
+  &.show {
+    transform: translateX(0);
+  }
+
+  &.success {
+    border-left-color: #2ecc71;
+    .toast-icon {
+      background-color: #2ecc71;
+    }
+  }
+
+  &.error {
+    border-left-color: #e74c3c;
+    .toast-icon {
+      background-color: #e74c3c;
+    }
+  }
+
+  .toast-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 14px;
+    font-weight: bold;
+    flex-shrink: 0;
+  }
+
+  .toast-message {
+    font-size: 14px;
+    color: #333;
+    font-weight: 500;
+  }
+}
+
+// 2. Job Detail Page Styles (Cập nhật nút Lưu)
+.job-detail-page {
+  padding: 40px 0;
+
+  // ... (giữ nguyên style cũ của header, content...)
+
+  .job-detail-buttons {
+    display: flex;
+    gap: 15px;
+    margin-top: 20px;
+
+    .btn-apply {
+      // Style cũ của bạn
+      background-color: #007bff;
+      color: white;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.3s;
+
+      &:hover {
+        background-color: #0056b3;
+      }
+    }
+
+    // STYLE MỚI CHO NÚT LƯU
+    .save-job-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px 24px;
+      border: 2px solid #e0e0e0;
+      background-color: white;
+      color: #555;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+
+      &:hover:not(.saved) {
+        border-color: #ff6b6b;
+        color: #ff6b6b;
+        background-color: #fff0f0;
+      }
+
+      &:disabled {
+        cursor: not-allowed;
+        opacity: 0.8;
+      }
+
+      // Khi đã lưu (State Active)
+      &.saved {
+        background-color: #e8f5e9; // Nền xanh nhạt
+        border-color: #2ecc71; // Viền xanh lá
+        color: #2ecc71; // Chữ xanh lá
+        cursor: default; // Không click được nữa (tuỳ logic)
+
+        &:hover {
+          // Hiệu ứng nhẹ khi hover vào nút đã lưu
+          box-shadow: 0 2px 8px rgba(46, 204, 113, 0.2);
+        }
+      }
+    }
+  }
+}

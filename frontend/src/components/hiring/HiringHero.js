@@ -41,12 +41,6 @@ const HiringHero = ({ onPostJobClick, onManageJobsClick }) => {
 
           <div className="hero-cta">
             <button
-              onClick={onPostJobClick}
-              className="button button-primary button-large"
-            >
-              <Link to="/applicant-dashboard">Trang quản trị</Link>
-            </button>
-            <button
               onClick={onManageJobsClick}
               className="button button-secondary button-large"
             >
