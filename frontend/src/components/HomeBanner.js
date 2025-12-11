@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import "../styles/components/HomeBanner.scss";
@@ -6,30 +6,32 @@ import ImageSlideBox from "./ImageSlideBox";
 
 // Helper: Chuẩn hóa chuỗi (bỏ dấu, lowercase)
 const normalizeText = (str) => {
-  return (
-    str
-      ?.toLowerCase()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .replace(/đ/g, "d")
-      .replace(/[^a-z0-9\s]/g, "")
-      .trim() || ""
-  );
+  if (!str) return "";
+  return String(str)
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/đ/g, "d")
+    .replace(/[^a-z0-9\s]/g, "")
+    .trim();
 };
 
 export default function HomeBanner({ industries = [] }) {
   const navigate = useNavigate();
 
   // --- STATE ---
-  const [cities, setCities] = useState([]);
-  const [jobs, setJobs] = useState([]);
-  const [filteredJobs, setFilteredJobs] = useState([]);
+  const [cities, setCities] = useState([]); // Danh sách tên thành phố từ API
+  const [jobs, setJobs] = useState([]); // Danh sách jobs từ API
 
+  // State tìm kiếm
   const [searchQuery, setSearchQuery] = useState("");
   const [jobCategory, setJobCategory] = useState("All");
-  const [location, setLocation] = useState("All");
 
-  // Fallback data
+  // State cho Location (Đã đổi tên để fix lỗi ESLint)
+  const [locationInput, setLocationInput] = useState("");
+  const [isCityDropdownOpen, setIsCityDropdownOpen] = useState(false);
+  const cityWrapperRef = useRef(null);
+
   const displayIndustries =
     industries.length > 0
       ? industries
@@ -40,10 +42,9 @@ export default function HomeBanner({ industries = [] }) {
           "Hành chính/Nhân sự",
           "Kế toán/Kiểm toán",
         ];
-
   const popularTags = ["Tester", "Java", "PHP", "Marketing", "Sales"];
 
-  // --- EFFECT: Fetch Data ---
+  // --- 1. FETCH DATA TỪ API ---
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -52,35 +53,68 @@ export default function HomeBanner({ industries = [] }) {
           axios.get("http://localhost:8080/api/jobs"),
         ]);
 
-        setCities(
-          resCities.data.map((i) => i.province_name || i.name || i.label || i)
-        );
+        // Xử lý City (Map object -> array string names)
+        const cityData = resCities.data;
+        if (Array.isArray(cityData)) {
+          const cityNames = cityData.map((item) => {
+            return item.province_name || item.name || item.label || item;
+          });
+          setCities(cityNames);
+        }
+
+        // Xử lý Jobs
         setJobs(Array.isArray(resJobs.data) ? resJobs.data : []);
       } catch (error) {
-        console.error("Error fetching data:", error);
+        console.error("Lỗi khi gọi API:", error);
+        setCities([]);
+        setJobs([]);
       }
     };
     fetchData();
   }, []);
 
-  // --- EFFECT: Filter Logic ---
+  // --- 2. XỬ LÝ CLICK OUTSIDE (Đóng dropdown thành phố) ---
   useEffect(() => {
-    if (!searchQuery && location === "All" && jobCategory === "All") {
-      setFilteredJobs([]);
-      return;
-    }
+    const handleClickOutside = (event) => {
+      if (
+        cityWrapperRef.current &&
+        !cityWrapperRef.current.contains(event.target)
+      ) {
+        setIsCityDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
-    const normLoc = normalizeText(location === "All" ? "" : location);
-    const normCat = normalizeText(jobCategory === "All" ? "" : jobCategory);
+  // --- 3. LOGIC LỌC THÀNH PHỐ (Autocomplete) ---
+  const filteredCities = useMemo(() => {
+    if (!locationInput || locationInput === "Toàn quốc") return cities;
+    const normInput = normalizeText(locationInput);
+    return cities.filter((city) => normalizeText(city).includes(normInput));
+  }, [locationInput, cities]);
+
+  // --- 4. LOGIC LỌC JOBS ---
+  const filteredJobs = useMemo(() => {
+    const isLocAll =
+      !locationInput ||
+      locationInput === "Toàn quốc" ||
+      locationInput === "All";
+
+    // Nếu chưa nhập gì thì không hiện dropdown kết quả job
+    if (!searchQuery && isLocAll && jobCategory === "All") return [];
+
     const normKey = normalizeText(searchQuery);
+    const normLoc = normalizeText(isLocAll ? "" : locationInput);
+    const normCat = normalizeText(jobCategory === "All" ? "" : jobCategory);
 
-    const results = jobs.filter((job) => {
-      const jLoc = normalizeText(job.location || job.address);
-      const jInd = normalizeText(job.industry || job.field);
+    return jobs.filter((job) => {
       const jTitle = normalizeText(job.title);
-      const jComp = normalizeText(job.company);
+      const jComp = normalizeText(job.company || job.companyName);
+      const jLoc = normalizeText(job.location || job.address || job.city);
+      const jInd = normalizeText(job.industry || job.field || job.category);
 
-      const matchLoc = location === "All" || jLoc.includes(normLoc);
+      const matchLoc = isLocAll || jLoc.includes(normLoc);
       const matchCat = jobCategory === "All" || jInd.includes(normCat);
       const matchKey =
         !normKey ||
@@ -90,59 +124,72 @@ export default function HomeBanner({ industries = [] }) {
 
       return matchLoc && matchCat && matchKey;
     });
+  }, [searchQuery, locationInput, jobCategory, jobs]);
 
-    setFilteredJobs(results);
-  }, [searchQuery, location, jobCategory, jobs]);
-
-  // --- EFFECT: Save History ---
+  // --- 5. LOGIC LƯU LỊCH SỬ TÌM KIẾM (Search History) ---
   useEffect(() => {
     const timer = setTimeout(async () => {
       const token = localStorage.getItem("authToken");
+      // Chỉ lưu nếu có token VÀ có ít nhất 1 điều kiện lọc
       if (
         token &&
-        (searchQuery || location !== "All" || jobCategory !== "All")
+        (searchQuery ||
+          (locationInput && locationInput !== "Toàn quốc") ||
+          jobCategory !== "All")
       ) {
         try {
           await axios.post(
             "http://localhost:8080/api/search-history",
             {
-              city: location !== "All" ? location : null,
+              city:
+                locationInput && locationInput !== "Toàn quốc"
+                  ? locationInput
+                  : null,
               industry: jobCategory !== "All" ? jobCategory : null,
               keyword: searchQuery || null,
             },
             { headers: { Authorization: `Bearer ${token}` } }
           );
         } catch (err) {
-          /* Silent fail */
+          // console.error("Không lưu được lịch sử:", err);
         }
       }
-    }, 1500);
+    }, 1500); // Debounce 1.5s
     return () => clearTimeout(timer);
-  }, [searchQuery, location, jobCategory]);
+  }, [searchQuery, locationInput, jobCategory]);
 
   // --- HANDLERS ---
   const handleSearchSubmit = (e) => {
     e.preventDefault();
+    const locParam =
+      !locationInput || locationInput === "Toàn quốc" ? "All" : locationInput;
     navigate(
       `/jobs?q=${encodeURIComponent(
         searchQuery
-      )}&loc=${location}&cat=${jobCategory}`
+      )}&loc=${locParam}&cat=${jobCategory}`
     );
   };
 
   const handleClearFilters = () => {
     setSearchQuery("");
-    setLocation("All");
+    setLocationInput(""); // Reset input địa điểm
     setJobCategory("All");
   };
 
+  const handleCitySelect = (cityName) => {
+    setLocationInput(cityName);
+    setIsCityDropdownOpen(false);
+  };
+
   const isFiltering =
-    searchQuery || location !== "All" || jobCategory !== "All";
+    filteredJobs.length > 0 ||
+    searchQuery ||
+    (locationInput && locationInput !== "Toàn quốc") ||
+    jobCategory !== "All";
 
   return (
     <div className="banner">
       <div className="banner-content">
-        {/* --- SECTION 1: SEARCH --- */}
         <div className="banner-top-section">
           <div className="hero-container">
             <h1 className="hero-title">
@@ -155,7 +202,7 @@ export default function HomeBanner({ industries = [] }) {
             <div className="search-box-container">
               <form className="hero-search" onSubmit={handleSearchSubmit}>
                 <div className="search-wrapper">
-                  {/* Category */}
+                  {/* --- 1. CATEGORY --- */}
                   <div className="search-select">
                     <svg
                       className="menu-icon"
@@ -177,7 +224,7 @@ export default function HomeBanner({ industries = [] }) {
                     </select>
                   </div>
 
-                  {/* Input */}
+                  {/* --- 2. KEYWORD INPUT --- */}
                   <div className="search-input-box">
                     <svg
                       className="search-icon"
@@ -185,7 +232,7 @@ export default function HomeBanner({ industries = [] }) {
                       fill="none"
                       stroke="currentColor"
                     >
-                      <circle cx="11" cy="11" r="8"></circle>
+                      <circle cx="11" cy="11" r="8"></circle>{" "}
                       <path d="m21 21-4.35-4.35"></path>
                     </svg>
                     <input
@@ -196,8 +243,11 @@ export default function HomeBanner({ industries = [] }) {
                     />
                   </div>
 
-                  {/* Location */}
-                  <div className="search-select location-select">
+                  {/* --- 3. LOCATION AUTOCOMPLETE --- */}
+                  <div
+                    className="search-select location-select"
+                    ref={cityWrapperRef}
+                  >
                     <svg
                       className="location-icon"
                       viewBox="0 0 24 24"
@@ -205,17 +255,47 @@ export default function HomeBanner({ industries = [] }) {
                     >
                       <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"></path>
                     </svg>
-                    <select
-                      value={location}
-                      onChange={(e) => setLocation(e.target.value)}
-                    >
-                      <option value="All">Toàn quốc</option>
-                      {cities.map((c) => (
-                        <option key={c} value={c}>
-                          {c}
-                        </option>
-                      ))}
-                    </select>
+
+                    <input
+                      type="text"
+                      className="location-input"
+                      placeholder="Toàn quốc"
+                      value={locationInput} // Bind vào state mới
+                      onChange={(e) => {
+                        setLocationInput(e.target.value);
+                        setIsCityDropdownOpen(true);
+                      }}
+                      onFocus={() => setIsCityDropdownOpen(true)}
+                    />
+
+                    {/* Dropdown gợi ý thành phố */}
+                    {isCityDropdownOpen && (
+                      <div className="city-dropdown-list">
+                        <div
+                          className="city-item"
+                          onClick={() => handleCitySelect("Toàn quốc")}
+                        >
+                          Toàn quốc
+                        </div>
+                        {filteredCities.length > 0 ? (
+                          filteredCities.map((city, idx) => (
+                            <div
+                              key={idx}
+                              className="city-item"
+                              onClick={() => handleCitySelect(city)}
+                            >
+                              {city}
+                            </div>
+                          ))
+                        ) : (
+                          <div className="city-empty">
+                            {cities.length === 0
+                              ? "Đang tải..."
+                              : "Không tìm thấy"}
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
 
                   <button type="submit" className="search-button">
@@ -224,7 +304,7 @@ export default function HomeBanner({ industries = [] }) {
                 </div>
               </form>
 
-              {/* Dropdown Results */}
+              {/* --- DROPDOWN JOB RESULTS --- */}
               {isFiltering && (
                 <div className="search-results-dropdown">
                   <div className="dropdown-header">
@@ -261,7 +341,7 @@ export default function HomeBanner({ industries = [] }) {
                       ))
                     ) : (
                       <div className="dropdown-empty">
-                        Không tìm thấy kết quả
+                        Không tìm thấy kết quả phù hợp
                       </div>
                     )}
 
@@ -278,7 +358,7 @@ export default function HomeBanner({ industries = [] }) {
               )}
             </div>
 
-            {/* Quick Tags */}
+            {/* TAGS */}
             <div className="quick-tags">
               <span className="tag-label">Gợi ý:</span>
               <div className="tags">
@@ -296,7 +376,6 @@ export default function HomeBanner({ industries = [] }) {
           </div>
         </div>
 
-        {/* --- SECTION 2: SLIDE IMAGE --- */}
         <div className="banner-bottom-section">
           <ImageSlideBox />
         </div>

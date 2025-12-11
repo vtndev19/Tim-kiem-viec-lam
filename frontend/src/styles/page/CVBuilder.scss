@@ -1,24 +1,95 @@
 /* ================================
    🎨 CV BUILDER - LAYOUT CHÍNH
 ================================ */
+// Variables
+$header-height: 60px;
+$primary-color: #4f46e5;
+$bg-light: #f9fafb;
+$text-dark: #1f2937;
+$border-color: #e5e7eb;
+$success-color: #10b981;
+$error-color: #ef4444;
+$info-color: #3b82f6;
 
-// Main Layout
 .cv-builder {
   display: flex;
   flex-direction: column;
   height: 100vh;
-  background: #f3f4f6;
-  overflow: hidden;
+  background-color: $bg-light;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  position: relative; // Để định vị Toast absolute/fixed
+
+  /* --- 2. Main Layout --- */
+  .cv-main-content {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+    height: calc(100vh - #{$header-height} - 50px);
+  }
+
+  /* --- 3. CUSTOM TOAST NOTIFICATION --- */
+  .cv-toast {
+    position: fixed;
+    top: 74px;
+    right: 24px;
+    min-width: 300px;
+    padding: 16px;
+    border-radius: 8px;
+    background: white;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+      0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 9999;
+    animation: slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    border-left: 4px solid transparent;
+
+    &__icon {
+      font-size: 20px;
+    }
+
+    &__message {
+      font-size: 14px;
+      font-weight: 500;
+      color: $text-dark;
+      line-height: 1.4;
+    }
+
+    // Các biến thể màu sắc
+    &--success {
+      border-left-color: $success-color;
+      .cv-toast__icon {
+        color: $success-color;
+      }
+    }
+
+    &--error {
+      border-left-color: $error-color;
+      .cv-toast__icon {
+        color: $error-color;
+      }
+    }
+
+    &--info {
+      border-left-color: $info-color;
+      .cv-toast__icon {
+        color: $info-color;
+      }
+    }
+  }
 }
 
-// Main content area
-.cv-main-content {
-  display: flex;
-  flex: 1;
-  gap: 0;
-  overflow: hidden;
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
-
 // Import component styles
 @import "../../components/CVBuilder/styles/CVTopTabs.scss";
 @import "../../components/CVBuilder/styles/CVInputSidebar.scss";

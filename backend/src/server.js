@@ -7,21 +7,25 @@ import dotenv from "dotenv";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+import { createServer } from "http"; // ✅ THÊM: Để tạo HTTP Server
+import { Server } from "socket.io"; // ✅ THÊM: Import Socket.io
 
 /* Router Imports */
 import jobRoutes from "./routes/jobRoutes.js";
 import companyRoutes from "./routes/companyRouter.js";
 import locationRoutes from "./routes/locationRouter.js";
 import adminPostRoutes from "./routes/adminPostRoutes.js";
-import recommendationRoutes from "./routes/geminiRecommendRoutes.js"; // Router gợi ý công việc
+import recommendationRoutes from "./routes/geminiRecommendRoutes.js";
 import searchHistoryRoutes from "./routes/searchHistoryRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 import cvRoutes from "./routes/cvRoutes.js";
-import userPostRoutes from "./routes/userPostRoutes.js"; // 🧩 Bài viết người dùng
+import userPostRoutes from "./routes/userPostRoutes.js";
 import savedJobRoutes from "./routes/savedJobRoutes.js";
 import recruiterRoutes from "./routes/recruiterRoutes.js";
 import applicationRoutes from "./routes/applicationRoutes.js";
 import predictSalary from "./routes/salaryRoutes.js";
+import notificationRoutes from "./routes/notificationRoutes.js"; // ✅ THÊM: Router thông báo
+
 /* database Connection */
 import db from "./configs/data.js";
 
@@ -31,6 +35,36 @@ import db from "./configs/data.js";
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 8080;
+
+// ✅ THÊM: Tạo HTTP Server bọc lấy Express App (bắt buộc để chạy chung Socket.io)
+const httpServer = createServer(app);
+
+// ✅ THÊM: Cấu hình Socket.IO
+const io = new Server(httpServer, {
+  cors: {
+    origin: "http://localhost:3000", // Phải trùng với URL Frontend React của bạn
+    methods: ["GET", "POST"],
+    credentials: true,
+  },
+});
+
+// ✅ THÊM: Lưu biến 'io' vào app để dùng ở Controller (ví dụ: applicationController.js)
+app.set("io", io);
+
+// ✅ THÊM: Lắng nghe kết nối Socket
+io.on("connection", (socket) => {
+  // console.log("🟢 Một User vừa kết nối Socket:", socket.id);
+
+  // Client (Frontend) gửi sự kiện 'join_room' với tên phòng (vd: room_user_10)
+  socket.on("join_room", (roomName) => {
+    socket.join(roomName);
+    // console.log(`User đã vào phòng: ${roomName}`);
+  });
+
+  socket.on("disconnect", () => {
+    // console.log("🔴 User đã ngắt kết nối");
+  });
+});
 
 // Xử lý __dirname trong môi trường ES Module
 const __filename = fileURLToPath(import.meta.url);
@@ -99,15 +133,20 @@ app.use("/api/admin/posts", adminPostRoutes);
 app.use("/api/search-history", searchHistoryRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/cv", cvRoutes);
-app.use("/api/user-posts", userPostRoutes); // ✅ Bài viết người dùng (blogs)
+app.use("/api/user-posts", userPostRoutes);
 app.use("/api/saved-jobs", savedJobRoutes);
 app.use("/api/employer", recruiterRoutes);
 app.use("/api/recommendations", recommendationRoutes);
 app.use("/api/applications", applicationRoutes);
 app.use("/api/salary", predictSalary);
+app.use("/api/notifications", notificationRoutes); // ✅ THÊM: Đăng ký route thông báo
+
 // ===================================================
 // 🚀 KHỞI ĐỘNG SERVER
 // ===================================================
-app.listen(PORT, () => {
-  console.log(`✅ Server Job-Finder đang chạy tại: http://localhost:${PORT}`);
+// ♻️ SỬA: Dùng httpServer.listen thay vì app.listen để chạy cả Express và Socket
+httpServer.listen(PORT, () => {
+  console.log(
+    `✅ Server Job-Finder (Socket+Express) đang chạy tại: http://localhost:${PORT}`
+  );
 });

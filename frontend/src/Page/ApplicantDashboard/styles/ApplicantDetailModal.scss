@@ -1,240 +1,304 @@
-/* --- CONTAINER MODAL --- */
+// Variables - Dễ dàng đổi màu theo brand của bạn
+$primary-color: #4f46e5; // Indigo hiện đại
+$primary-hover: #4338ca;
+$text-dark: #1f2937;
+$text-gray: #6b7280;
+$bg-light: #f9fafb;
+$border-color: #e5e7eb;
+$danger-color: #ef4444;
+$radius-md: 12px;
+$radius-lg: 16px;
+$shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+  0 10px 10px -5px rgba(0, 0, 0, 0.04);
+
+// Mixin cho Flex Center
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .modal-overlay {
   position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.6); // Làm tối nền phía sau
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 9999;
-  backdrop-filter: blur(3px); // Hiệu ứng mờ nền hiện đại
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px); // Hiệu ứng mờ nền chuyên nghiệp
+  z-index: 1000;
+  @include flex-center;
+  padding: 1rem; // Để modal không dính sát lề trên mobile
+  animation: fadeIn 0.2s ease-out;
 }
 
 .modal-content {
-  background: #f3f4f6;
-  width: 900px;
-  max-width: 95%;
-  height: 80vh;
-  border-radius: 12px;
-  overflow: hidden;
+  background: white;
+  width: 100%;
+  max-width: 500px; // Giới hạn chiều rộng để trông giống "Card" gọn gàng
+  border-radius: $radius-lg;
+  box-shadow: $shadow-xl;
   position: relative;
+  overflow: hidden; // Bo góc ảnh hưởng đến nội dung con
   display: flex;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
-    0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  flex-direction: column;
+  max-height: 90vh; // Tránh modal dài quá màn hình
+  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 
+  // Nút tắt
   .close-btn {
     position: absolute;
-    top: 10px;
-    right: 15px;
-    font-size: 24px;
-    background: white;
+    top: 12px;
+    right: 12px;
+    background: transparent;
     border: none;
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
+    font-size: 24px;
+    color: $text-gray;
     cursor: pointer;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    z-index: 100;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #4b5563;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    @include flex-center;
     transition: all 0.2s;
+    z-index: 10;
 
     &:hover {
-      background: #fee2e2;
-      color: #ef4444;
+      background-color: $bg-light;
+      color: $text-dark;
     }
   }
 }
 
+// Loading state
+.modal-loading {
+  height: 200px;
+  @include flex-center;
+
+  .spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid $bg-light;
+    border-top-color: $primary-color;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+}
+
+// Layout chính - Chuyển từ row sang column
 .split-layout {
   display: flex;
-  width: 100%;
-  height: 100%;
+  flex-direction: column;
+  overflow-y: auto; // Cho phép cuộn nội dung bên trong modal
 
-  // Mobile: Chuyển thành cột dọc
-  @media (max-width: 768px) {
-    flex-direction: column;
-    overflow-y: auto;
+  // Custom scrollbar cho đẹp
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: #d1d5db;
+    border-radius: 10px;
   }
 }
 
-/* --- CỘT TRÁI (SIDEBAR THÔNG TIN) --- */
+// --- PHẦN 1: THÔNG TIN ỨNG VIÊN (Header) ---
 .app-sidebar {
-  width: 300px;
-  background: white;
-  padding: 25px;
-  overflow-y: auto;
-  border-right: 1px solid #e5e7eb;
-  flex-shrink: 0;
+  padding: 2rem 2rem 1rem 2rem;
+  text-align: center; // Căn giữa tạo sự tập trung
+  border-bottom: 1px solid $border-color;
+  background: linear-gradient(to bottom, #ffffff, #fcfcfc);
 
   .candidate-header {
-    text-align: center;
-    margin-bottom: 25px;
+    margin-bottom: 1.5rem;
 
     .avatar-lg {
-      width: 80px;
-      height: 80px;
+      width: 100px;
+      height: 100px;
       border-radius: 50%;
-      margin-bottom: 10px;
-      border: 3px solid #bfdbfe;
       object-fit: cover;
+      border: 4px solid white;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      margin-bottom: 1rem;
     }
+
     h3 {
-      margin: 0;
-      font-size: 1.1rem;
-      color: #111;
+      font-size: 1.5rem;
       font-weight: 700;
+      color: $text-dark;
+      margin: 0 0 0.25rem 0;
     }
+
     .job-applied {
-      font-size: 0.85rem;
-      color: #6b7280;
-      margin-top: 5px;
-      display: block;
+      display: inline-block;
+      font-size: 0.875rem;
+      color: $primary-color;
+      background-color: rgba($primary-color, 0.1);
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-weight: 500;
     }
   }
 
+  // Grid thông tin liên hệ (Chia 2 cột nhỏ bên trong)
   .info-block {
-    margin-bottom: 20px;
+    text-align: left;
+    margin-bottom: 1rem;
+    font-size: 0.95rem;
+    color: $text-dark;
+
     label {
+      display: block;
       font-size: 0.75rem;
       text-transform: uppercase;
-      font-weight: 700;
-      color: #9ca3af;
-      display: block;
-      margin-bottom: 5px;
       letter-spacing: 0.05em;
+      color: $text-gray;
+      margin-bottom: 0.25rem;
+      font-weight: 600;
     }
+
     p {
-      margin: 0;
-      font-size: 0.95rem;
-      color: #374151;
-      word-break: break-all;
+      margin: 0.25rem 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
   }
 
-  .cover-letter .letter-content {
-    background: #f9fafb;
-    padding: 12px;
-    border-radius: 6px;
-    font-style: italic;
-    font-size: 0.9rem;
-    color: #4b5563;
-    border: 1px dashed #d1d5db;
-    white-space: pre-line;
+  // Cover letter style riêng
+  .cover-letter {
+    margin-top: 1.5rem;
+    background-color: $bg-light;
+    padding: 1rem;
+    border-radius: $radius-md;
+    border-left: 4px solid $primary-color;
+
+    .letter-content {
+      font-style: italic;
+      color: $text-dark;
+      line-height: 1.6;
+      font-size: 0.9rem;
+      max-height: 150px;
+      overflow-y: auto;
+    }
   }
 }
 
-/* --- CỘT PHẢI (ACTION CARD) --- */
+// --- PHẦN 2: ACTION AREA (Footer) ---
 .cv-action-wrapper {
-  flex: 1;
-  background-color: #f9fafb;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 20px;
+  padding: 1.5rem 2rem;
+  background-color: white;
 
   .action-card {
-    background: white;
-    padding: 40px;
-    border-radius: 16px;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
-      0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    // Reset style cũ của card, biến nó thành container phẳng
     text-align: center;
-    max-width: 380px;
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
 
     .icon-doc {
-      font-size: 48px;
-      margin-bottom: 15px;
-      background: #eff6ff;
-      width: 80px;
-      height: 80px;
+      display: none; // Ẩn icon cũ cho đỡ rối
+    }
+
+    h3 {
+      font-size: 1.1rem;
+      margin-bottom: 0.5rem;
+      color: $text-dark;
+    }
+
+    p {
+      font-size: 0.875rem;
+      color: $text-gray;
+      margin-bottom: 1.5rem;
+    }
+
+    // Nút hành động chính (Primary Button)
+    .btn-view-full {
       display: flex;
       align-items: center;
       justify-content: center;
-      border-radius: 50%;
-    }
-
-    h3 {
-      font-size: 1.25rem;
-      color: #1f2937;
-      margin-bottom: 8px;
-      font-weight: 700;
-    }
-
-    p {
-      color: #6b7280;
-      font-size: 0.95rem;
-      margin-bottom: 25px;
-      line-height: 1.5;
-    }
-
-    .btn-view-full {
-      background-color: #2563eb;
+      width: 100%;
+      padding: 14px;
+      background-color: $primary-color;
       color: white;
       font-weight: 600;
-      padding: 12px 24px;
-      border-radius: 8px;
+      border-radius: $radius-md;
       text-decoration: none;
-      transition: all 0.2s;
-      font-size: 1rem;
-      box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
-      width: 100%;
-      display: inline-block;
+      transition: transform 0.2s, background-color 0.2s;
+      box-shadow: 0 4px 6px rgba($primary-color, 0.25);
 
       &:hover {
-        background-color: #1d4ed8;
+        background-color: $primary-hover;
         transform: translateY(-2px);
-        box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.3);
       }
-    }
 
-    .link-download {
-      margin-top: 20px;
-      font-size: 0.85rem;
-      color: #9ca3af;
-      text-decoration: underline;
-      transition: color 0.2s;
-      cursor: pointer;
-      &:hover {
-        color: #4b5563;
+      &:active {
+        transform: translateY(0);
       }
     }
 
     .error-text {
-      color: #ef4444;
-      font-weight: 500;
+      color: $danger-color;
+      font-size: 0.875rem;
+      background: rgba($danger-color, 0.1);
+      padding: 8px;
+      border-radius: 6px;
+    }
+
+    .link-download {
+      display: block;
+      margin-top: 1rem;
+      font-size: 0.85rem;
+      color: $text-gray;
+      text-decoration: underline;
+
+      &:hover {
+        color: $primary-color;
+      }
     }
   }
 }
 
-/* --- SPINNER LOADING --- */
-.modal-loading {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  .spinner {
-    width: 40px;
-    height: 40px;
-    border: 4px solid #e5e7eb;
-    border-top: 4px solid #3b82f6;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
+// Animations
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
 @keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
+  to {
     transform: rotate(360deg);
+  }
+}
+
+// --- RESPONSIVE MOBILE ---
+@media (max-width: 480px) {
+  .modal-content {
+    height: 100vh; // Full màn hình trên điện thoại
+    max-height: 100vh;
+    border-radius: 0;
+    width: 100%;
+  }
+
+  .app-sidebar {
+    padding: 1.5rem;
+  }
+
+  .cv-action-wrapper {
+    margin-top: auto; // Đẩy nút xuống đáy màn hình nếu nội dung ngắn
+    border-top: 1px solid $border-color;
   }
 }

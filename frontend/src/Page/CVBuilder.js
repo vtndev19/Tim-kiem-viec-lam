@@ -1,11 +1,12 @@
 import React, { useState, useRef, useEffect } from "react";
-// 1. Import các hook cần thiết của React Router
 import { useLocation, useNavigate } from "react-router-dom";
+
+// Styles & Utils
 import "../styles/page/CVBuilder.scss";
 import { generateCVPrintHTML } from "../components/CVPrintTemplate";
 import {
   normalizeCVData,
-  denormalizeCVData, // Cần hàm này để chuyển data DB -> State
+  denormalizeCVData,
   downloadCVAsJSON,
   validateCVData,
 } from "../utils/cvNormalizer";
@@ -23,7 +24,9 @@ import CVFormExperience from "../components/CVBuilder/forms/CVFormExperience";
 import CVFormSkills from "../components/CVBuilder/forms/CVFormSkills";
 import CVFormStyle from "../components/CVBuilder/forms/CVFormStyle";
 
-// --- DỮ LIỆU MẶC ĐỊNH ---
+// --- CONSTANTS ---
+const API_BASE = "http://localhost:8080/api/cv";
+
 const DEFAULT_CV_DATA = {
   personalInfo: {
     fullName: "Nguyễn Văn A",
@@ -47,39 +50,44 @@ const DEFAULT_CV_DATA = {
   font: "Arial",
 };
 
+const TAB_CONFIG = [
+  { id: "info", label: "Thông tin", icon: "👤" },
+  { id: "summary", label: "Giới thiệu", icon: "📝" },
+  { id: "education", label: "Học vấn", icon: "🎓" },
+  { id: "experience", label: "Kinh nghiệm", icon: "💼" },
+  { id: "skills", label: "Kỹ năng", icon: "⚡" },
+  { id: "style", label: "Thiết kế", icon: "🎨" },
+];
+
 // ==========================================
 // COMPONENT CHÍNH
 // ==========================================
 export default function CVBuilder() {
-  const [activeTab, setActiveTab] = useState("info");
+  // Hooks
+  const location = useLocation();
+  const navigate = useNavigate();
   const printRef = useRef();
 
-  // 2. Khởi tạo các hook Router
-  const location = useLocation(); // Để nhận dữ liệu từ trang List
-  const navigate = useNavigate(); // Để quay lại trang List
+  // --- STATE ---
+  const [activeTab, setActiveTab] = useState("info");
 
-  // --- LOGIC NHẬN DỮ LIỆU ---
-  // Lấy dữ liệu thô gửi từ CVList (nếu có)
+  // Custom Toast State
+  const [toast, setToast] = useState({
+    show: false,
+    message: "",
+    type: "info",
+  });
+  const toastTimeoutRef = useRef(null);
+
+  // Data State
   const incomingData = location.state?.cvData;
-
-  // --- KHỞI TẠO STATE ---
   const [cvData, setCvData] = useState(() => {
-    // Trường hợp 1: Có dữ liệu từ trang List gửi sang (Chế độ Chỉnh sửa)
     if (incomingData) {
-      console.log("Dữ liệu nhận được từ List:", incomingData);
-
-      // Chuyển đổi dữ liệu DB -> Dạng State của React
       const processedData = denormalizeCVData(incomingData);
-
-      // Quan trọng: Gắn lại ID để lát nữa biết đường gọi API Update
-      if (incomingData.cv_id) {
-        processedData.cv_id = incomingData.cv_id;
-      }
-
-      // Merge với default để tránh lỗi thiếu trường
       return {
         ...DEFAULT_CV_DATA,
         ...processedData,
+        cv_id: incomingData.cv_id || processedData.cv_id,
         personalInfo: {
           ...DEFAULT_CV_DATA.personalInfo,
           ...processedData.personalInfo,
@@ -87,15 +95,11 @@ export default function CVBuilder() {
         colors: { ...DEFAULT_CV_DATA.colors, ...(processedData.colors || {}) },
       };
     }
-
-    // Trường hợp 2: Không có dữ liệu (Chế độ Tạo mới)
     return JSON.parse(JSON.stringify(DEFAULT_CV_DATA));
   });
 
-  // State font size (cũng lấy từ dữ liệu cũ nếu có)
   const [fontSize, setFontSize] = useState(() => {
-    if (incomingData && incomingData.meta_data) {
-      // Nếu meta_data là string thì parse, nếu là object thì dùng luôn
+    if (incomingData?.meta_data) {
       const meta =
         typeof incomingData.meta_data === "string"
           ? JSON.parse(incomingData.meta_data)
@@ -105,7 +109,20 @@ export default function CVBuilder() {
     return 11;
   });
 
-  // --- CÁC HÀM XỬ LÝ DỮ LIỆU FORM ---
+  // --- HELPER: CUSTOM TOAST ---
+  const showToast = (message, type = "success") => {
+    // Clear timeout cũ nếu user spam click
+    if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
+
+    setToast({ show: true, message, type });
+
+    // Tự động tắt sau 3 giây
+    toastTimeoutRef.current = setTimeout(() => {
+      setToast((prev) => ({ ...prev, show: false }));
+    }, 3000);
+  };
+
+  // --- FORM HANDLERS ---
   const updateField = (section, field, value) => {
     setCvData((prev) => ({
       ...prev,
@@ -136,35 +153,26 @@ export default function CVBuilder() {
     }));
   };
 
-  // --- HÀM LƯU / CẬP NHẬT ---
+  // --- ACTIONS ---
   const handleSave = async () => {
     // 1. Validate
     const validation = validateCVData(cvData);
     if (!validation.isValid) {
-      alert("Lỗi dữ liệu:\n" + validation.errors.join("\n"));
+      showToast(`Thiếu thông tin: ${validation.errors[0]}`, "error");
       return;
     }
 
-    // 2. Xác định là Tạo mới hay Cập nhật dựa vào cv_id
-    // cv_id đã được gắn vào state lúc khởi tạo nếu là edit
     const isEditing = !!cvData.cv_id;
-
-    // 3. Chọn URL và Method phù hợp
-    const url = isEditing
-      ? `http://localhost:8080/api/cv/${cvData.cv_id}` // API Update
-      : `http://localhost:8080/api/cv`; // API Create
-
+    const url = isEditing ? `${API_BASE}/${cvData.cv_id}` : API_BASE;
     const method = isEditing ? "PUT" : "POST";
 
     try {
-      const token =
-        localStorage.getItem("authToken") || localStorage.getItem("token");
-
-      // Chuẩn hóa dữ liệu để gửi đi
+      showToast("Đang lưu hồ sơ...", "info"); // Show loading toast
+      const token = localStorage.getItem("authToken");
       const payload = normalizeCVData(cvData, fontSize);
 
       const response = await fetch(url, {
-        method: method,
+        method,
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
@@ -175,98 +183,78 @@ export default function CVBuilder() {
       const result = await response.json();
 
       if (result.success) {
-        alert(
-          isEditing ? "Đã cập nhật CV thành công!" : "Đã tạo mới CV thành công!"
+        showToast(
+          isEditing ? "Cập nhật thành công!" : "Tạo mới thành công!",
+          "success"
         );
-
-        // Nếu là tạo mới thành công, chuyển hướng về trang danh sách
+        setTimeout(() => navigate("/cv"), 1500);
         if (!isEditing) {
-          navigate("/cv-list"); // Đường dẫn tới trang danh sách của bạn
+          setTimeout(() => navigate("/cv"), 1500);
         }
       } else {
-        alert("Lỗi từ server: " + result.message);
+        throw new Error(result.message);
       }
     } catch (error) {
       console.error(error);
-      alert("Lỗi kết nối khi lưu CV.");
+      showToast(error.message || "Lỗi kết nối server", "error");
     }
   };
 
-  // --- CÁC HÀM TIỆN ÍCH KHÁC ---
   const handleDownloadJSON = () => {
-    downloadCVAsJSON(cvData, fontSize);
+    try {
+      downloadCVAsJSON(cvData, fontSize);
+      showToast("Đang tải xuống dữ liệu...", "success");
+    } catch (e) {
+      showToast("Lỗi khi tải file", "error");
+    }
   };
 
   const handlePrint = () => {
     if (!printRef.current) return;
+    showToast("Đang mở cửa sổ in...", "info");
+
     const a4Content = printRef.current.innerHTML;
     const printWindow = window.open("", "", "width=900,height=1200");
-    const html = generateCVPrintHTML(a4Content, cvData, fontSize);
-    printWindow.document.write(html);
-    printWindow.document.close();
-    setTimeout(() => {
-      printWindow.print();
-      printWindow.close();
-    }, 500);
+
+    if (printWindow) {
+      const html = generateCVPrintHTML(a4Content, cvData, fontSize);
+      printWindow.document.write(html);
+      printWindow.document.close();
+      setTimeout(() => {
+        printWindow.print();
+        printWindow.close();
+      }, 500);
+    } else {
+      showToast("Vui lòng cho phép popup để in", "error");
+    }
   };
 
-  const handleBack = () => {
-    // Quay lại trang trước đó (thường là trang List)
-    navigate(-1);
-  };
-
-  // --- RENDER TAB CONTENT ---
-  const tabs = [
-    { id: "info", label: "Thông tin", icon: "👤" },
-    { id: "summary", label: "Giới thiệu", icon: "📝" },
-    { id: "education", label: "Học vấn", icon: "🎓" },
-    { id: "experience", label: "Kinh nghiệm", icon: "💼" },
-    { id: "skills", label: "Kỹ năng", icon: "⚡" },
-    { id: "style", label: "Thiết kế", icon: "🎨" },
-  ];
-
+  // --- RENDER CONTENT ---
   const renderTabContent = () => {
+    const commonProps = {
+      cvData,
+      setCvData,
+      updateField,
+      updateSectionItem,
+      addSectionItem,
+      removeSectionItem,
+      fontSize,
+      setFontSize,
+    };
+
     switch (activeTab) {
       case "info":
-        return <CVFormInfo cvData={cvData} updateField={updateField} />;
+        return <CVFormInfo {...commonProps} />;
       case "summary":
-        return <CVFormSummary cvData={cvData} setCvData={setCvData} />;
+        return <CVFormSummary {...commonProps} />;
       case "education":
-        return (
-          <CVFormEducation
-            cvData={cvData}
-            updateSectionItem={updateSectionItem}
-            addSectionItem={addSectionItem}
-            removeSectionItem={removeSectionItem}
-          />
-        );
+        return <CVFormEducation {...commonProps} />;
       case "experience":
-        return (
-          <CVFormExperience
-            cvData={cvData}
-            updateSectionItem={updateSectionItem}
-            addSectionItem={addSectionItem}
-            removeSectionItem={removeSectionItem}
-          />
-        );
+        return <CVFormExperience {...commonProps} />;
       case "skills":
-        return (
-          <CVFormSkills
-            cvData={cvData}
-            updateSectionItem={updateSectionItem}
-            addSectionItem={addSectionItem}
-            removeSectionItem={removeSectionItem}
-          />
-        );
+        return <CVFormSkills {...commonProps} />;
       case "style":
-        return (
-          <CVFormStyle
-            cvData={cvData}
-            setCvData={setCvData}
-            fontSize={fontSize}
-            setFontSize={setFontSize}
-          />
-        );
+        return <CVFormStyle {...commonProps} />;
       default:
         return null;
     }
@@ -274,43 +262,14 @@ export default function CVBuilder() {
 
   return (
     <div className="cv-builder">
-      {/* HEADER: Nút quay lại và Tiêu đề */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          padding: "10px 20px",
-          background: "#fff",
-          borderBottom: "1px solid #ddd",
-        }}
-      >
-        <button
-          onClick={handleBack}
-          style={{
-            marginRight: "15px",
-            padding: "8px 15px",
-            cursor: "pointer",
-            backgroundColor: "#f3f4f6",
-            border: "1px solid #d1d5db",
-            borderRadius: "4px",
-          }}
-        >
-          ← Quay lại
-        </button>
-        <h3 style={{ margin: 0 }}>
-          {/* Kiểm tra xem đang ở chế độ nào để hiện tiêu đề phù hợp */}
-          {cvData.cv_id
-            ? `Chỉnh sửa CV: ${cvData.personalInfo.fullName}`
-            : "Tạo CV Mới"}
-        </h3>
-      </div>
-
+      {/* 2. TABS */}
       <CVTopTabs
         activeTab={activeTab}
         setActiveTab={setActiveTab}
-        tabs={tabs}
+        tabs={TAB_CONFIG}
       />
 
+      {/* 3. MAIN WORKSPACE */}
       <div className="cv-main-content">
         <CVInputSidebar
           onPrint={handlePrint}
@@ -322,6 +281,18 @@ export default function CVBuilder() {
 
         <CVPreviewArea ref={printRef} cvData={cvData} fontSize={fontSize} />
       </div>
+
+      {/* 4. CUSTOM TOAST COMPONENT (HTML Thuần) */}
+      {toast.show && (
+        <div className={`cv-toast cv-toast--${toast.type}`}>
+          <div className="cv-toast__icon">
+            {toast.type === "success" && "✅"}
+            {toast.type === "error" && "⚠️"}
+            {toast.type === "info" && "ℹ️"}
+          </div>
+          <div className="cv-toast__message">{toast.message}</div>
+        </div>
+      )}
     </div>
   );
 }

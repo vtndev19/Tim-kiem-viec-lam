@@ -77,10 +77,11 @@ const cleanAIResponse = (text) => {
 const callGroqToExtractData = async (jobInfo, listCVs) => {
   console.log("🤖 [AI STEP 1] Đang chọn CV và trích xuất dữ liệu...");
 
+  // Mapping rõ ràng ID và Title để AI dễ chọn
   const candidatesText = listCVs
     .map((cv) => {
       const cleanSkills = parseSkills(cv.skills);
-      return `[ID: ${cv.cv_id}] Title: ${cv.title} | Skills: ${cleanSkills} | Exp: ${cv.experience}`;
+      return `[ID: ${cv.cv_id}] Title: "${cv.title}" | Skills: ${cleanSkills} | Exp: ${cv.experience}`;
     })
     .join("\n");
 
@@ -93,8 +94,8 @@ const callGroqToExtractData = async (jobInfo, listCVs) => {
 
     Output JSON strictly:
     {
-      "selected_cv_id": "ID",
-      "reason": "Reason",
+      "selected_cv_id": "ONLY THE ID NUMBER (e.g., 5, 10, not 'ID: 5')",
+      "reason": "Explain why in Vietnamese (ngắn gọn)",
       "extracted_data": {
         "formatted_experience_level": "Entry/Mid/Senior/Executive Level",
         "skills_desc": "Skill1; Skill2",
@@ -150,7 +151,8 @@ const callGroqToAnalyzeSalary = async (jobPayload, salaryData, cvTitle) => {
     - Ứng viên: "${cvTitle}"
     - Vị trí: "${jobPayload.title}"
     - Lương dự đoán: ${salaryData.min_salary} - ${salaryData.max_salary} ${salaryData.currency}.
-
+    - mức lương dự đoán này theo đơn vị trung bình trên 5 và mang tính chất tham khảo.  
+    - dữ liệu huấn luyện mô hình dựa trên các bài đăng ở linhkedin, sẽ có sự khác biệt so với thị trường Việt Nam.
     Task: Viết nhận xét chi tiết bằng Tiếng Việt.
     RULES: Output valid JSON only. Escape newlines with \\n.
 
@@ -199,7 +201,7 @@ const callGroqToAnalyzeSalary = async (jobPayload, salaryData, cvTitle) => {
  * AI SERVICE 3: Phân tích Profile (Đã nâng cấp Prompt: Deep Analysis & Single Persona)
  */
 const callGroqToAnalyzeProfile = async (listCVs) => {
-  console.log("🤖 [AI STEP 3] Đang phân tích tổng thể hồ sơ đa lĩnh vực...");
+  console.log("🤖 [AI STEP 3] Đang phân tích tổng thể hồ sơ...");
 
   // 1. Chuẩn bị dữ liệu đầu vào
   const candidatesText = listCVs
@@ -343,30 +345,42 @@ export const predictSalary = async (req, res) => {
       return res.status(404).json({ message: "Bạn chưa có CV nào." });
     }
 
-    // --- BƯỚC 3: GỌI AI ĐỂ CHỌN CV & TRÍCH XUẤT ---
+    // --- BƯỚC 3: GỌI AI ĐỂ CHỌN CV ---
     const aiExtracted = await callGroqToExtractData(
       { title, location, workType },
       userCVs
     );
 
-    // 🔥 LOGIC TÌM TITLE CV TỪ ID AI TRẢ VỀ 🔥
-    const aiSelectedIdStr = String(aiExtracted.selected_cv_id).trim();
-    let selectedCVOriginal = userCVs.find(
-      (cv) => String(cv.cv_id) === aiSelectedIdStr
-    );
+    // 🔥 FIX LỖI TÌM TÊN CV Ở ĐÂY 🔥
+    // 1. Lấy ID từ AI và ép về String để so sánh
+    const rawAiId = aiExtracted.selected_cv_id;
 
-    // Fallback nếu AI trả ID tào lao
+    // 2. Tìm CV trong list (So sánh lỏng lẻo == để khớp cả string '5' và number 5)
+    let selectedCVOriginal = userCVs.find((cv) => cv.cv_id == rawAiId);
+
+    // 3. Fallback & Debug Log
     if (!selectedCVOriginal) {
-      console.warn(`⚠️ ID ${aiSelectedIdStr} không khớp. Dùng CV đầu tiên.`);
+      console.warn(
+        `⚠️ CẢNH BÁO: AI trả về ID [${rawAiId}] không khớp với DB. Đang dùng CV đầu tiên.`
+      );
+      console.log(
+        "👉 Danh sách ID có trong DB:",
+        userCVs.map((c) => c.cv_id)
+      );
       selectedCVOriginal = userCVs[0];
     }
-    const selectedCVTitle = selectedCVOriginal.title || "Hồ sơ không tên";
+
+    // 4. Đảm bảo Title không bị Null/Rỗng
+    const selectedCVTitle =
+      selectedCVOriginal.title && selectedCVOriginal.title.trim() !== ""
+        ? selectedCVOriginal.title
+        : `CV #${selectedCVOriginal.cv_id} (Không tên)`;
 
     console.log(
-      `✅ Selected CV: [${selectedCVTitle}] (ID: ${selectedCVOriginal.cv_id})`
+      `✅ FINAL SELECTED CV: "${selectedCVTitle}" (ID: ${selectedCVOriginal.cv_id})`
     );
 
-    // --- BƯỚC 4: PAYLOAD PYTHON ---
+    // --- BƯỚC 4: PAYLOAD PYTHON (Giữ nguyên) ---
     const payloadForModel = {
       title: title,
       location: location || "Remote",
@@ -376,42 +390,26 @@ export const predictSalary = async (req, res) => {
         aiExtracted.extracted_data.formatted_experience_level || "Entry Level",
       skills_desc: aiExtracted.extracted_data.skills_desc || "",
       remote_allowed: String(aiExtracted.extracted_data.remote_allowed || "0"),
-      // Mock params
       company_name: "Prediction Market",
       views: 150.0,
       sponsored: 0,
       application_type: "Simple",
     };
 
-    // --- BƯỚC 5: GỌI PYTHON ---
+    // --- BƯỚC 5: GỌI PYTHON (Giữ nguyên logic cũ, chỉ rút gọn cho dễ nhìn) ---
     let salaryResult;
     try {
       const pythonUrl = "http://127.0.0.1:8000/predict";
       const response = await axios.post(pythonUrl, payloadForModel);
-
-      // 🔥 [MỚI] LOG DỮ LIỆU THÔ TỪ PYTHON 🔥
-      logSection("3.1. RAW PYTHON RESPONSE", response.data);
-
       const rawSalary = response.data.predicted_salary;
-
       salaryResult = {
         base_salary: Math.round(rawSalary),
         min_salary: Math.round(rawSalary * 0.9),
         max_salary: Math.round(rawSalary * 1.1),
         currency: "USD",
       };
-
-      logSection("3.2. PROCESSED SALARY", salaryResult);
     } catch (pyError) {
-      console.warn(
-        "⚠️ Python Error. Using Mock Data. Detail:",
-        pyError.message
-      );
-      // Nếu cần log chi tiết lỗi từ Python server:
-      if (pyError.response) {
-        console.warn("Python Server Response:", pyError.response.data);
-      }
-
+      console.warn("⚠️ Python Error, using mock data.");
       salaryResult = {
         base_salary: 1000,
         min_salary: 900,
@@ -420,20 +418,22 @@ export const predictSalary = async (req, res) => {
       };
     }
 
-    // --- BƯỚC 6: GỌI AI PHÂN TÍCH (Truyền Title) ---
+    // --- BƯỚC 6: GỌI AI PHÂN TÍCH ---
+    // 🔥 FIX PROMPT ĐỂ AI NHẮC TÊN CV 🔥
+    // Chúng ta truyền selectedCVTitle vào hàm này, hãy đảm bảo hàm đó dùng nó
     const analysisResult = await callGroqToAnalyzeSalary(
       payloadForModel,
       salaryResult,
-      selectedCVTitle
+      selectedCVTitle // <--- Đảm bảo biến này chứa text đúng
     );
 
-    // --- BƯỚC 7: TRẢ VỀ ---
+    // --- BƯỚC 7: TRẢ VỀ RESPONSE ---
     return res.status(200).json({
       success: true,
       data: {
         used_cv: {
           id: selectedCVOriginal.cv_id,
-          title: selectedCVTitle, // Frontend dùng cái này
+          title: selectedCVTitle, // Frontend sẽ hiển thị cái này
           reason: aiExtracted.reason,
         },
         input_details: payloadForModel,
@@ -445,10 +445,9 @@ export const predictSalary = async (req, res) => {
     console.error("❌ SYSTEM ERROR:", error);
     return res
       .status(500)
-      .json({ message: "Lỗi Server nội bộ", error: error.message });
+      .json({ message: "Lỗi Server", error: error.message });
   }
 };
-
 /**
  * CONTROLLER 2: PHÂN TÍCH HỒ SƠ TỔNG QUÁT (Analyze Profile)
  */

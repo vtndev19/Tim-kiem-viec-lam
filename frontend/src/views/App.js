@@ -13,6 +13,7 @@ import AdminPostItem from "../components/adminPostItem";
 import RecommendJobs from "../components/RecommendJobs";
 import Hiring from "../components/hiring";
 import EmployerRegistration from "../components/employerRegistration.js";
+import Notification from "../components/Notification";
 
 /* 🧭 Pages */
 import Login from "../Page/Login";
@@ -32,7 +33,7 @@ import ReactCVManager from "../Page/cvManager";
 import News from "../Page/News";
 import HiringDashboard from "../Page/HiringDashboard";
 
-/* ✅ IMPORT DASHBOARD MỚI (Lưu ý đường dẫn file bạn đã tạo ở bước trước) */
+/* ✅ IMPORT DASHBOARD MỚI */
 import RecruiterDashboard from "../Page/ApplicantDashboard/RecruiterDashboard.js";
 
 /* 🎨 Styles */
@@ -89,6 +90,7 @@ export default function App() {
           />
         </Routes>
       </main>
+      <Notification />
       <Chat />
       <Footer />
     </AuthProvider>
@@ -103,6 +105,7 @@ function HomeMain({ jobs }) {
   const [industryFilter, setIndustryFilter] = useState("All");
   const [latestPost, setLatestPost] = useState(null);
 
+  // --- API: Lấy bài viết mới nhất ---
   useEffect(() => {
     const fetchLatestPost = async () => {
       try {
@@ -117,7 +120,39 @@ function HomeMain({ jobs }) {
     fetchLatestPost();
   }, []);
 
-  // Các logic lọc job cũ giữ nguyên
+  // --- LOGIC: LẤY USER ID TỪ LOCALSTORAGE (ĐÃ SỬA) ---
+
+  // 1. Định nghĩa hàm giải mã Token
+  const parseJwt = (token) => {
+    try {
+      return JSON.parse(atob(token.split(".")[1]));
+    } catch (e) {
+      return null;
+    }
+  };
+
+  // 2. Lấy dữ liệu và xử lý
+  const storedData = localStorage.getItem("user");
+  let userId = null;
+
+  if (storedData) {
+    // TRƯỜNG HỢP A: Nếu dữ liệu bắt đầu bằng "ey" (là JWT Token string)
+    if (storedData.startsWith("ey")) {
+      const decoded = parseJwt(storedData);
+      userId = decoded ? decoded.user_id || decoded.id : null;
+    }
+    // TRƯỜNG HỢP B: Nếu dữ liệu bắt đầu bằng "{" (là JSON Object string)
+    else if (storedData.startsWith("{")) {
+      try {
+        const userObj = JSON.parse(storedData);
+        userId = userObj.user_id || userObj.id;
+      } catch (e) {
+        console.error("Lỗi parse JSON user:", e);
+      }
+    }
+  }
+
+  // --- LOGIC: Lọc Job (Giữ nguyên) ---
   const filtered = jobs.filter((j) => {
     const matchCity = cityFilter === "All" || j.location === cityFilter;
     const matchIndustry =
@@ -135,7 +170,14 @@ function HomeMain({ jobs }) {
           <HomeJobs jobs={filtered.slice(0, 10)} />
 
           <div className="recommend-section">
-            <RecommendJobs userId={1021} />
+            {/* Sử dụng biến userId đã tính toán ở trên */}
+            {userId ? (
+              <RecommendJobs userId={userId} />
+            ) : (
+              <p>
+                Vui lòng đăng nhập để xem việc làm gợi ý dành riêng cho bạn.
+              </p>
+            )}
           </div>
 
           {latestPost && <AdminPostItem post={latestPost} />}

@@ -1,143 +1,356 @@
-@import "../global.scss";
+/* Variables */
+$primary-color: #4f46e5; /* Indigo 600 - Màu xanh chuyên nghiệp */
+$primary-gradient: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%);
+$bg-user-bubble: $primary-color;
+$bg-bot-bubble: #f3f4f6;
+$text-user: #ffffff;
+$text-bot: #1f2937;
+$shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.1),
+  0 8px 10px -6px rgba(0, 0, 0, 0.1);
+$radius-bubble: 18px;
 
 .chat-container {
   position: fixed;
-  bottom: 30px;
-  right: 30px;
+  bottom: 24px;
+  right: 24px;
   z-index: 1000;
-}
-
-.chat-toggle-button {
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0;
-  border-radius: 50%;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  background-color: #f8f9fa;
-
-  img {
-    width: 60px;
-    height: 60px;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    sans-serif;
+  /* 1. Toggle Button (Nút tròn mở chat) */
+  .chat-toggle-button {
+    width: 100px;
+    height: 100px;
     border-radius: 50%;
-  }
-
-  &:hover {
-    transform: scale(1.2);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
-  }
-}
-
-.chat-window {
-  position: absolute;
-  bottom: 80px;
-  right: 0;
-  width: 550px;
-  max-width: 90vw;
-  height: 500px;
-  max-height: 80vh;
-  background-color: $primary-white;
-  border-radius: 15px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  animation: slideIn 0.3s ease-out;
-}
-
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.chat-header {
-  background: linear-gradient(
-    135deg,
-    $primary-blue,
-    darken($primary-blue, 10%)
-  );
-  color: $primary-white;
-  padding: $spacing-md $spacing-lg;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-
-  h3 {
-    margin: 0;
-    font-size: 1.1rem;
-    font-weight: 600;
-  }
-
-  .close-chat {
-    background: none;
     border: none;
-    color: $primary-white;
-    font-size: 1.5rem;
     cursor: pointer;
-    opacity: 0.8;
-    transition: opacity 0.2s;
+
+    // ===== THAY ĐỔI QUAN TRỌNG =====
+    background: transparent; // Không màu nền
+    box-shadow: none; // Loại bỏ bóng của khung nút (nếu muốn ảnh tự nhiên)
+    padding: 0; // Xóa padding để ảnh tràn viền
+    // ===============================
+
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1001;
+
+    // Style cho ảnh icon bên trong
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+
+      // 🔥 FIX LỖI ẢNH BÉ (LỌT THỎM) TẠI ĐÂY:
+      // Phóng to ảnh lên 1.3 lần (130%) để lấp đầy khoảng trống thừa của ảnh gốc
+      // Bạn có thể chỉnh số 1.3 lên 1.4 hoặc 1.5 nếu vẫn thấy bé
+      transform: scale(2.3);
+
+      // Tạo bóng đổ bám sát theo hình dáng nhân vật
+      filter: drop-shadow(0 5px 15px rgba(0, 0, 0, 0.3));
+      transition: all 0.3s ease;
+    }
 
     &:hover {
-      opacity: 1;
+      // Hiệu ứng khi di chuột: phóng to nhẹ cả nút (chứa ảnh)
+      transform: scale(1.1);
+    }
+
+    &.hidden {
+      opacity: 0;
+      pointer-events: none;
+      transform: scale(0.5);
     }
   }
-}
-
-.chat-messages {
-  flex: 1;
-  padding: $spacing-lg;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: $spacing-md;
-
-  .message {
-    padding: $spacing-sm $spacing-md;
-    border-radius: 18px;
-    max-width: 80%;
-    line-height: 1.5;
-
-    &.user {
-      background-color: $primary-blue;
-      color: $primary-white;
-      align-self: flex-end;
-      border-bottom-right-radius: 4px;
+  /* 1. Toggle Button (Floating Action Button) */
+  .chat-toggle-button {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: none;
+    box-shadow: 0 4px 15px rgba(25, 15, 218, 0.4);
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    bottom: 5%;
+    right: 3%;
+    z-index: 1001;
+    img {
+      width: 32px;
+      height: 32px;
+      object-fit: contain;
     }
 
-    &.bot {
-      background-color: #f1f1f1;
-      color: $text-dark;
-      align-self: flex-start;
-      border-bottom-left-radius: 4px;
+    &:hover {
+      transform: translateY(-2px) scale(1.05);
+      box-shadow: 0 6px 20px rgba(79, 70, 229, 0.6);
     }
 
-    &.loading {
+    &.hidden {
+      opacity: 0;
+      pointer-events: none;
+      transform: scale(0.5);
+    }
+  }
+
+  /* 2. Chat Window */
+  .chat-window {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 580px;
+    height: 600px;
+    max-height: 80vh;
+    background: #ffffff;
+    border-radius: 24px;
+    box-shadow: $shadow-lg;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+
+    /* Header */
+    .chat-header {
+      background: $primary-gradient;
+      padding: 20px;
       display: flex;
-      gap: 5px;
+      justify-content: space-between;
       align-items: center;
+      color: white;
 
-      span {
-        width: 8px;
-        height: 8px;
-        background-color: #999;
-        border-radius: 50%;
-        animation: bounce 1.4s infinite ease-in-out both;
-
-        &:nth-child(1) {
-          animation-delay: -0.32s;
+      .header-info {
+        h3 {
+          margin: 0;
+          font-size: 18px;
+          font-weight: 600;
         }
-        &:nth-child(2) {
-          animation-delay: -0.16s;
+        .status {
+          font-size: 12px;
+          opacity: 0.8;
+          display: flex;
+          align-items: center;
+
+          &::before {
+            content: "";
+            width: 8px;
+            height: 8px;
+            background: #34d399; /* Green dot */
+            border-radius: 50%;
+            margin-right: 6px;
+          }
+        }
+      }
+
+      .close-chat {
+        background: rgba(255, 255, 255, 0.2);
+        border: none;
+        color: white;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        cursor: pointer;
+        font-size: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.2s;
+
+        &:hover {
+          background: rgba(255, 255, 255, 0.4);
         }
       }
     }
+
+    /* Messages Area */
+    .chat-messages {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      background-color: #f9fafb;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+
+      /* Custom Scrollbar */
+      &::-webkit-scrollbar {
+        width: 6px;
+      }
+      &::-webkit-scrollbar-thumb {
+        background-color: rgba(0, 0, 0, 0.1);
+        border-radius: 3px;
+      }
+
+      .message-wrapper {
+        display: flex;
+        align-items: flex-end;
+        gap: 8px;
+        max-width: 85%;
+
+        &.user {
+          align-self: flex-end;
+          flex-direction: row-reverse;
+
+          .message-bubble {
+            background: $bg-user-bubble;
+            color: $text-user;
+            border-radius: $radius-bubble $radius-bubble 4px $radius-bubble;
+            box-shadow: 0 2px 5px rgba(79, 70, 229, 0.2);
+          }
+        }
+
+        &.bot {
+          align-self: flex-start;
+
+          .bot-avatar img {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #fff;
+            padding: 2px;
+            border: 1px solid #e5e7eb;
+          }
+
+          .message-bubble {
+            background: $bg-bot-bubble;
+            color: $text-bot;
+            border-radius: $radius-bubble $radius-bubble $radius-bubble 4px;
+            border: 1px solid #e5e7eb;
+          }
+        }
+
+        .message-bubble {
+          padding: 12px 16px;
+          font-size: 14px;
+          line-height: 1.5;
+          white-space: pre-wrap;
+          word-wrap: break-word;
+
+          /* Markdown styling simulation */
+          strong {
+            font-weight: 600;
+          }
+        }
+      }
+
+      /* Suggestion Chips */
+      .suggestion-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 8px;
+        margin-left: 40px; /* Align with bot text */
+
+        .chip {
+          background: #fff;
+          border: 1px solid $primary-color;
+          color: $primary-color;
+          padding: 8px 14px;
+          border-radius: 20px;
+          font-size: 13px;
+          cursor: pointer;
+          transition: all 0.2s;
+          font-weight: 500;
+
+          &:hover {
+            background: $primary-color;
+            color: white;
+            transform: translateY(-1px);
+          }
+        }
+      }
+
+      /* Loading Animation */
+      .loading {
+        display: flex;
+        gap: 4px;
+        padding: 16px !important;
+
+        span {
+          width: 6px;
+          height: 6px;
+          background: #9ca3af;
+          border-radius: 50%;
+          animation: bounce 1.4s infinite ease-in-out both;
+
+          &:nth-child(1) {
+            animation-delay: -0.32s;
+          }
+          &:nth-child(2) {
+            animation-delay: -0.16s;
+          }
+        }
+      }
+    }
+
+    /* Input Area */
+    .chat-input-area {
+      padding: 16px;
+      background: #fff;
+      border-top: 1px solid #f3f4f6;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+
+      input {
+        flex: 1;
+        padding: 12px 16px;
+        border: 1px solid #e5e7eb;
+        border-radius: 24px;
+        outline: none;
+        font-size: 14px;
+        background: #f9fafb;
+        transition: border 0.2s;
+
+        &:focus {
+          border-color: $primary-color;
+          background: #fff;
+        }
+
+        &::placeholder {
+          color: #9ca3af;
+        }
+      }
+
+      .send-btn {
+        background: $primary-color;
+        color: white;
+        border: none;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: background 0.2s;
+
+        &:hover {
+          background: darken($primary-color, 10%);
+        }
+
+        &:disabled {
+          background: #d1d5db;
+          cursor: not-allowed;
+        }
+      }
+    }
+  }
+}
+
+/* Animations */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
   }
 }
 
@@ -149,408 +362,5 @@
   }
   40% {
     transform: scale(1);
-  }
-}
-
-.chat-input-area {
-  display: flex;
-  padding: $spacing-md;
-  border-top: 1px solid #eee;
-
-  input {
-    flex: 1;
-    padding: $spacing-sm $spacing-md;
-    border: 1px solid #ddd;
-    border-radius: 20px;
-    outline: none;
-    transition: border-color 0.3s;
-
-    &:focus {
-      border-color: $primary-blue;
-    }
-  }
-
-  button {
-    margin-left: $spacing-sm;
-    padding: $spacing-sm $spacing-lg;
-    border: none;
-    background-color: $primary-blue;
-    color: $primary-white;
-    border-radius: 20px;
-    cursor: pointer;
-    font-weight: 600;
-    transition: background-color 0.3s;
-
-    &:hover {
-      background-color: darken($primary-blue, 10%);
-    }
-  }
-}
-
-/* ========== CHAT REALTIME BOX ========== */
-.chat-realtime {
-  position: fixed;
-  bottom: 110px; // 👈 nằm phía trên icon chat bot
-  right: 32px;
-  z-index: 900;
-
-  .chat-toggle-button {
-    cursor: pointer;
-    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
-    transition: transform 0.3s ease;
-    img {
-      width: 60px;
-      height: 55px;
-    }
-    &:hover {
-      transform: scale(1.1);
-    }
-  }
-
-  .chat-window {
-    position: absolute;
-    bottom: 70px;
-    right: 0;
-    width: 400px;
-    height: 400px;
-    background-color: $primary-white;
-    border-radius: 12px;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    animation: slideIn 0.3s ease-out;
-  }
-
-  .chat-header {
-    background: linear-gradient(135deg, #2d8cff, #1a73e8);
-    color: white;
-    padding: 12px 16px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-
-    h3 {
-      margin: 0;
-      font-size: 1rem;
-    }
-
-    .close-chat {
-      background: none;
-      border: none;
-      color: white;
-      font-size: 1.2rem;
-      cursor: pointer;
-      opacity: 0.8;
-
-      &:hover {
-        opacity: 1;
-      }
-    }
-  }
-
-  .chat-messages {
-    flex: 1;
-    padding: 12px;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-
-    .message {
-      padding: 8px 12px;
-      border-radius: 16px;
-      max-width: 80%;
-      line-height: 1.4;
-      font-size: 0.9rem;
-
-      &.user {
-        background-color: $primary-blue;
-        color: $primary-white;
-        align-self: flex-end;
-        border-bottom-right-radius: 4px;
-      }
-
-      &.other {
-        background-color: #f2f2f2;
-        color: $text-dark;
-        align-self: flex-start;
-        border-bottom-left-radius: 4px;
-      }
-    }
-  }
-
-  .chat-input-area {
-    display: flex;
-    padding: 10px;
-    border-top: 1px solid #eee;
-
-    input {
-      flex: 1;
-      padding: 8px 12px;
-      border-radius: 16px;
-      border: 1px solid #ddd;
-      outline: none;
-
-      &:focus {
-        border-color: $primary-blue;
-      }
-    }
-
-    button {
-      margin-left: 8px;
-      background-color: $primary-blue;
-      color: white;
-      border: none;
-      border-radius: 16px;
-      padding: 8px 14px;
-      cursor: pointer;
-      transition: background-color 0.3s;
-
-      &:hover {
-        background-color: darken($primary-blue, 10%);
-      }
-    }
-  }
-}
-.notification-bell {
-  position: fixed;
-  bottom: 110px; // nằm trên icon chat realtime
-  right: 32px;
-  height: 60px;
-  border-radius: 50%;
-  font-size: 2.2rem;
-  color: #666;
-  background-color: #e8f0fe;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
-  cursor: pointer;
-  z-index: 899;
-  transition: transform 0.2s ease, color 0.3s ease;
-  img {
-    width: 60px;
-    height: 55px;
-  }
-  &:hover {
-    transform: scale(1.1);
-  }
-
-  &.active {
-    color: #ff3b3b; // khi có thông báo mới -> icon màu đỏ
-  }
-
-  &.shake {
-    animation: shake 0.4s ease-in-out infinite alternate;
-  }
-}
-
-@keyframes shake {
-  0% {
-    transform: rotate(0deg);
-  }
-  25% {
-    transform: rotate(8deg);
-  }
-  50% {
-    transform: rotate(0deg);
-  }
-  75% {
-    transform: rotate(-8deg);
-  }
-  100% {
-    transform: rotate(0deg);
-  }
-}
-/* ====== BOX THÔNG BÁO ====== */
-.notification-box {
-  position: fixed;
-  bottom: 170px; // nằm trên icon chuông
-  right: 60px;
-  width: 280px;
-  max-height: 300px;
-  background: #fff;
-  border-radius: 10px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
-  overflow-y: auto;
-  animation: fadeIn 0.25s ease-out;
-  z-index: 899;
-  padding: 12px 16px;
-
-  h4 {
-    margin: 0 0 10px;
-    font-size: 1rem;
-    color: #1a73e8;
-    border-bottom: 1px solid #eee;
-    padding-bottom: 6px;
-  }
-
-  ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-
-    li {
-      background: #f8f9fa;
-      padding: 8px 10px;
-      border-radius: 8px;
-      margin-bottom: 6px;
-      font-size: 0.9rem;
-      color: #333;
-      transition: background 0.2s;
-
-      &:hover {
-        background: #e8f0fe;
-      }
-    }
-  }
-
-  .no-noti {
-    color: #777;
-    text-align: center;
-    font-size: 0.9rem;
-  }
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-/* =======================
-   GỢI Ý SỰ KIỆN & FLOW Q&A
-   ======================= */
-
-/* Khu vực hiển thị gợi ý ngay dưới header của chat AI */
-.chat-window {
-  /* ... giữ nguyên các style cũ ... */
-
-  .chat-suggestions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: $spacing-sm;
-    padding: $spacing-md $spacing-lg $spacing-sm;
-    border-bottom: 1px solid #eee;
-    background: #fafbff;
-  }
-
-  .suggestion-btn {
-    appearance: none;
-    border: 1px solid #dfe3eb;
-    background: #ffffff;
-    color: #1a1a1a;
-    border-radius: 999px;
-    padding: 8px 14px;
-    font-size: 0.92rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    box-shadow: 0 2px 8px rgba(26, 115, 232, 0.06);
-
-    &:hover {
-      background: #e8f0fe;
-      border-color: #cbd5e1;
-      transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(26, 115, 232, 0.12);
-    }
-
-    &:active {
-      transform: translateY(0);
-      box-shadow: 0 2px 8px rgba(26, 115, 232, 0.06);
-    }
-  }
-}
-
-/* Placeholder khi người dùng đang trong flow Q&A (đã set từ component) */
-.chat-input-area input::placeholder {
-  color: #9aa0a6;
-}
-
-/* Tin nhắn bot hiển thị tóm tắt dữ liệu đã thu thập (multi-line) */
-.message.bot {
-  white-space: pre-line; /* hỗ trợ xuống dòng \n từ text */
-}
-
-/* Nhãn nhỏ hiển thị lỗi/nhắc nhập đúng Full-time/Part-time (nếu cần) */
-.chat-input-area {
-  position: relative;
-
-  .input-hint {
-    position: absolute;
-    left: $spacing-md;
-    bottom: 100%;
-    transform: translateY(-6px);
-    font-size: 0.82rem;
-    color: #c62828;
-    background: #ffebee;
-    border: 1px solid #ffcdd2;
-    border-radius: 6px;
-    padding: 4px 8px;
-    box-shadow: 0 2px 8px rgba(198, 40, 40, 0.1);
-  }
-}
-
-/* ==========================
-   TỐI ƯU NHÌN - CẢM CHO FLOW
-   ========================== */
-
-/* Nhấn mạnh các câu hỏi từ bot trong flow */
-.chat-messages .message.bot {
-  border: 1px solid #eceff3;
-}
-
-/* Tin nhắn của người dùng trong flow: nhấn mạnh hơn */
-.chat-messages .message.user {
-  box-shadow: 0 2px 8px rgba(45, 140, 255, 0.18);
-}
-
-/* Nút gửi khi đang trong flow đổi text: đã xử lý ở component;
-   thêm màu nhấn nhẹ để người dùng nhận diện */
-.chat-input-area button {
-  &.flow-submit {
-    background-color: #2d8cff;
-  }
-}
-
-/* ==========================
-   RESPONSIVE & TRẢI NGHIỆM
-   ========================== */
-
-/* Bo góc nhẹ hơn ở phần suggestions & messages khi hẹp màn hình */
-@media (max-width: 480px) {
-  .chat-window {
-    width: 94vw;
-    height: 70vh;
-  }
-
-  .chat-window .chat-suggestions {
-    gap: 6px;
-    padding: 10px 12px;
-  }
-
-  .chat-window .suggestion-btn {
-    font-size: 0.88rem;
-    padding: 7px 12px;
-  }
-
-  .chat-messages .message {
-    max-width: 88%;
-  }
-}
-
-/* ==========================
-   TRẠNG THÁI LOADING NÂNG CAO
-   ========================== */
-
-/* Loader dots đã có; thêm nền nhẹ khi bot đang phản hồi dài */
-.message.bot.loading {
-  background: linear-gradient(180deg, #f7f9fc, #f1f5fb);
-  border: 1px dashed #cbd5e1;
-
-  span {
-    background-color: #78909c;
   }
 }

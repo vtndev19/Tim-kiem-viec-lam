@@ -1,0 +1,219 @@
+/* Variables */
+$primary-color: #4f46e5;
+$danger-color: #ef4444;
+$text-primary: #1f2937;
+$text-secondary: #6b7280;
+$bg-white: #ffffff;
+$shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+  0 4px 6px -2px rgba(0, 0, 0, 0.05);
+
+.notification-wrapper {
+  position: fixed;
+  bottom: 120px; /* Cách mép trên */
+  right: 2.5%; /* Cách mép phải */
+  z-index: 999; /* Cao hơn các thành phần khác */
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+
+  /* 1. NÚT CHUÔNG TRÒN */
+  .notification-bell {
+    position: relative;
+    width: 65px;
+    height: 65px;
+    background-color: $bg-white;
+    border-radius: 50%;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+
+    img {
+      width: 24px;
+      height: 24px;
+      object-fit: contain;
+      transition: transform 0.3s ease;
+    }
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+
+      img {
+        transform: rotate(15deg); /* Nghiêng chuông nhẹ khi hover */
+      }
+    }
+
+    /* Hiệu ứng rung lắc khi có tin mới */
+    &.shake {
+      animation: bell-shake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+    }
+
+    /* Badge số lượng (Chấm đỏ) */
+    .badge {
+      position: absolute;
+      top: -5px;
+      right: -5px;
+      background-color: $danger-color;
+      color: white;
+      font-size: 11px;
+      font-weight: 700;
+      min-width: 20px;
+      height: 20px;
+      padding: 0 4px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid $bg-white;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+  }
+
+  /* 2. POPUP DANH SÁCH THÔNG BÁO */
+  .notification-popup {
+    position: absolute;
+    bottom: 0px; /* Nằm ngay dưới nút chuông */
+    right: 75px; /* Canh phải thẳng hàng với nút chuông */
+    width: 320px;
+    max-height: 450px;
+    background-color: $bg-white;
+    border-radius: 12px;
+    box-shadow: $shadow-lg;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transform-origin: top right;
+    animation: scaleIn 0.2s ease-out;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+
+    /* Mũi tên trỏ lên (Optional - tạo cảm giác gắn kết) */
+    &::before {
+      content: "";
+      position: absolute;
+      top: -6px;
+      right: 18px;
+      width: 12px;
+      height: 12px;
+      background: $bg-white;
+      transform: rotate(45deg);
+      border-top: 1px solid rgba(0, 0, 0, 0.05);
+      border-left: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .popup-header {
+      padding: 14px 16px;
+      font-weight: 600;
+      font-size: 16px;
+      color: $text-primary;
+      border-bottom: 1px solid #f3f4f6;
+      background-color: #fafafa;
+    }
+
+    .popup-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      overflow-y: auto;
+      max-height: 380px;
+
+      /* Scrollbar đẹp */
+      &::-webkit-scrollbar {
+        width: 5px;
+      }
+      &::-webkit-scrollbar-thumb {
+        background: #ddd;
+        border-radius: 4px;
+      }
+
+      li {
+        padding: 12px 16px;
+        border-bottom: 1px solid #f3f4f6;
+        cursor: pointer;
+        transition: background 0.2s;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+
+        &:last-child {
+          border-bottom: none;
+        }
+
+        &:hover {
+          background-color: #f9fafb;
+        }
+
+        /* Tin chưa đọc: nền xanh nhạt + chữ đậm */
+        &.unread {
+          background-color: #eff6ff;
+          .msg {
+            font-weight: 600;
+            color: #1e40af;
+          }
+        }
+
+        &.read {
+          opacity: 0.8;
+        }
+
+        .msg {
+          margin: 0;
+          font-size: 14px;
+          line-height: 1.4;
+          color: $text-primary;
+
+          /* Cắt dòng nếu quá dài */
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+        }
+
+        .time {
+          font-size: 11px;
+          color: $text-secondary;
+          align-self: flex-end;
+        }
+      }
+
+      .empty {
+        padding: 24px;
+        text-align: center;
+        color: $text-secondary;
+        font-size: 14px;
+      }
+    }
+  }
+}
+
+/* Keyframes Animation */
+@keyframes bell-shake {
+  0%,
+  100% {
+    transform: rotate(0);
+  }
+  10%,
+  30%,
+  50%,
+  70%,
+  90% {
+    transform: rotate(10deg);
+  }
+  20%,
+  40%,
+  60%,
+  80% {
+    transform: rotate(-10deg);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
