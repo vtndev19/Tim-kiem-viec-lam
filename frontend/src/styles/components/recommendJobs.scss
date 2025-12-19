@@ -4,7 +4,7 @@
 .recommend-icon {
   position: fixed;
   bottom: 200px;
-  right: 2.5%;
+  right: 2.3%;
   background: #2564ebb7;
   color: #fff;
   width: 65px;
@@ -59,114 +59,275 @@
   }
 }
 
-/* ======================
-       PANEL JOB LIST
-====================== */
-.recommend-panel {
+// recommendJobs.scss
+
+:root {
+  --rec-primary: #080bb6; // Indigo
+  --rec-secondary: #030588; // Pink
+  --rec-bg: #ffffff;
+  --rec-text-main: #1f2937;
+  --rec-text-sub: #6b7280;
+  --rec-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1),
+    0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  --rec-gradient: linear-gradient(135deg, #060853 0%, #1215e4 100%);
+}
+
+.recommend-wrapper {
   position: fixed;
-  bottom: 240px;
-  right: 45px;
+  bottom: 0px;
+  right: 36px;
+  z-index: 9999;
+  font-family: "Inter", system-ui, sans-serif;
 
-  /* tăng chiều rộng panel lên cho đẹp */
-  width: 420px;
-  max-height: 300px;
-
-  background: #ffffff;
-  border-radius: 18px;
-  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.25);
-
-  padding: 20px;
-  z-index: 999;
-  transform: translateY(20px);
-  opacity: 0;
-  pointer-events: none;
-  transition: 0.25s ease;
-  overflow-y: auto;
-
-  &.open {
-    transform: translateY(0);
-    opacity: 1;
-    pointer-events: auto;
-  }
-
-  /* Thanh cuộn đẹp */
-  &::-webkit-scrollbar {
-    width: 6px;
-  }
-  &::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
-    border-radius: 4px;
-  }
-
-  .panel-title {
-    margin-bottom: 15px;
-    font-size: 20px;
-    font-weight: 700;
-    color: #1e293b;
-  }
-
-  /* ======================
-         JOB ITEM
-  ====================== */
-  .panel-item {
-    display: block;
-    padding: 15px 18px;
-    border-radius: 14px;
-
-    /* BG nhẹ + shadow đẹp */
-    background: #f8fafc;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-
-    margin-bottom: 15px;
-    border: 1px solid #e2e8f0;
-
-    transition: 0.2s ease;
+  // --- 1. Floating Action Button (FAB) ---
+  .recommend-icon {
+    width: 66px;
+    height: 66px;
+    background: var(--rec-gradient);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+      box-shadow 0.3s ease;
+    position: relative;
 
     &:hover {
-      transform: translateY(-3px);
-      background: #eef2ff;
-      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+      transform: scale(1.1) rotate(10deg);
+      box-shadow: 0 8px 25px rgba(99, 102, 241, 0.6);
     }
 
-    .header {
+    .badge {
+      position: absolute;
+      top: -5px;
+      right: -5px;
+      background: #ef4444;
+      color: white;
+      font-size: 11px;
+      font-weight: 700;
+      width: 20px;
+      height: 20px;
       display: flex;
-      flex-direction: column;
-      margin-bottom: 8px;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      border: 2px solid white;
+    }
+  }
 
-      h4 {
-        font-size: 17px;
-        margin: 0;
-        font-weight: 600;
-        color: #0f172a;
-      }
+  // --- 2. Toast Notification ---
+  .recommend-toast {
+    position: absolute;
+    bottom: 270px;
+    right: 0;
+    width: max-content;
+    background: white;
+    padding: 10px 16px;
+    border-radius: 12px;
+    box-shadow: var(--rec-shadow);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--rec-text-main);
+    animation: slideUpFade 0.4s ease-out forwards;
+    cursor: pointer;
+    border-left: 4px solid #1140da;
 
-      .company {
-        margin-top: 3px;
-        font-size: 14px;
-        font-weight: 500;
-        color: #475569;
-      }
+    &:hover {
+      background: #f9fafb;
+    }
+  }
+
+  // --- 3. Main Panel ---
+  .recommend-panel {
+    position: absolute;
+    bottom: 200px;
+    right: 0;
+    width: 380px;
+    max-height: 0; // Hidden by default
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(12px); // Glassmorphism
+    border-radius: 20px;
+    box-shadow: var(--rec-shadow);
+    overflow: hidden;
+    opacity: 0;
+    transform: scale(0.95);
+    transform-origin: bottom right;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    z-index: 1000;
+
+    &.open {
+      max-height: 600px; // Expand
+      opacity: 1;
+      transform: scale(1);
     }
 
-    .desc {
-      font-size: 14px;
-      margin: 10px 0;
-      color: #475569;
-      line-height: 1.45;
-    }
-
-    .meta {
+    // Header
+    .panel-header {
+      padding: 16px 20px;
+      background: linear-gradient(to right, #f8fafc, #ffffff);
+      border-bottom: 1px solid #e2e8f0;
       display: flex;
       justify-content: space-between;
-      font-size: 14px;
-      font-weight: 500;
-      color: #334155;
+      align-items: center;
 
-      span {
+      .panel-title {
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--rec-text-main);
+        margin: 0;
         display: flex;
         align-items: center;
-        gap: 4px;
+        gap: 8px;
+
+        .cache-badge {
+          font-size: 10px;
+          background: #e5e7eb;
+          color: #6b7280;
+          padding: 2px 6px;
+          border-radius: 4px;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+      }
+
+      .close-btn {
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: #9ca3af;
+        padding: 4px;
+        border-radius: 50%;
+        transition: all 0.2s;
+
+        &:hover {
+          background: #f1f5f9;
+          color: #ef4444;
+        }
       }
     }
+
+    // List Container
+    .panel-list {
+      padding: 12px;
+      max-height: 450px;
+      overflow-y: auto;
+
+      // Custom Scrollbar
+      &::-webkit-scrollbar {
+        width: 6px;
+      }
+      &::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 3px;
+      }
+    }
+
+    // Job Item Card
+    .panel-item {
+      display: block;
+      background: white;
+      border: 1px solid #f1f5f9;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 10px;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      position: relative;
+
+      &:hover {
+        border-color: #1c0da5;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(139, 92, 246, 0.1);
+
+        .job-title {
+          color: #070986;
+        }
+      }
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+
+      .item-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 8px;
+
+        .job-title {
+          font-size: 15px;
+          font-weight: 600;
+          color: var(--rec-text-main);
+          margin: 0;
+          line-height: 1.4;
+          flex: 1;
+          padding-right: 10px;
+          transition: color 0.2s;
+        }
+
+        .job-salary {
+          font-size: 13px;
+          font-weight: 700;
+          color: #10b981; // Green for money
+          white-space: nowrap;
+          background: #ecfdf5;
+          padding: 2px 6px;
+          border-radius: 6px;
+        }
+      }
+
+      .ai-reason {
+        font-size: 13px;
+        color: #4b5563;
+        background: linear-gradient(to right, #eff6ff, #f5f3ff);
+        padding: 8px 10px;
+        border-radius: 8px;
+        margin-bottom: 10px;
+        border-left: 3px solid #0d17a1;
+        line-height: 1.5;
+
+        display: -webkit-box;
+        -webkit-line-clamp: 2; // Limit to 2 lines
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+
+      .item-meta {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 12px;
+        color: var(--rec-text-sub);
+
+        span {
+          display: flex;
+          align-items: center;
+          gap: 4px;
+        }
+      }
+    }
+
+    // States
+    .panel-loading,
+    .panel-empty {
+      padding: 40px;
+      text-align: center;
+      color: var(--rec-text-sub);
+      font-size: 14px;
+    }
+  }
+}
+
+@keyframes slideUpFade {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

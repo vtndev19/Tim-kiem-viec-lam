@@ -35,6 +35,7 @@ import HiringDashboard from "../Page/HiringDashboard";
 
 /* ✅ IMPORT DASHBOARD MỚI */
 import RecruiterDashboard from "../Page/ApplicantDashboard/RecruiterDashboard.js";
+import AdminDashboard from "../components/AdminManager/components/Dashboard.js";
 
 /* 🎨 Styles */
 import "../styles/global.scss";
@@ -88,10 +89,10 @@ export default function App() {
             path="/recruiter-dashboard/:jobId"
             element={<RecruiterDashboard />}
           />
+          <Route path="/admin-dashboard" element={<AdminDashboard />} />
         </Routes>
       </main>
-      <Notification />
-      <Chat />
+
       <Footer />
     </AuthProvider>
   );
@@ -184,6 +185,8 @@ function HomeMain({ jobs }) {
           <Hiring />
           <FeaturedIndustries jobs={jobs} />
           <EmployerRegistration />
+          <Notification />
+          <Chat />
         </section>
       </div>
     </>

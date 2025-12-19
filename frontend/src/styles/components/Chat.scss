@@ -1,282 +1,247 @@
-/* Variables */
-$primary-color: #4f46e5; /* Indigo 600 - Màu xanh chuyên nghiệp */
-$primary-gradient: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%);
-$bg-user-bubble: $primary-color;
-$bg-bot-bubble: #f3f4f6;
-$text-user: #ffffff;
-$text-bot: #1f2937;
-$shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.1),
-  0 8px 10px -6px rgba(0, 0, 0, 0.1);
-$radius-bubble: 18px;
+/* src/styles/components/Chat.scss */
 
-.chat-container {
+/* =========================================
+   1. VARIABLES & CONFIG
+   ========================================= */
+$primary-blue: #0b57d0; // Google Blue
+$bg-bot: #f0f4f9; // Light grey background for bot
+$text-dark: #1f1f1f;
+$text-light: #ffffff;
+$shadow-soft: 0 4px 12px rgba(0, 0, 0, 0.15);
+$font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+  sans-serif;
+
+/* =========================================
+   2. MAIN CONTAINER
+   ========================================= */
+.chat-widget-container {
   position: fixed;
-  bottom: 24px;
-  right: 24px;
-  z-index: 1000;
-  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    sans-serif;
-  /* 1. Toggle Button (Nút tròn mở chat) */
-  .chat-toggle-button {
-    width: 100px;
-    height: 100px;
+  bottom: 35px;
+  right: 2%;
+  z-index: 9999;
+  font-family: $font-family;
+
+  /* --- Toggle Button --- */
+  .chat-toggle-btn {
+    width: 65px;
+    height: 65px;
     border-radius: 50%;
+    background: $primary-blue;
     border: none;
     cursor: pointer;
-
-    // ===== THAY ĐỔI QUAN TRỌNG =====
-    background: transparent; // Không màu nền
-    box-shadow: none; // Loại bỏ bóng của khung nút (nếu muốn ảnh tự nhiên)
-    padding: 0; // Xóa padding để ảnh tràn viền
-    // ===============================
-
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s, background-color 0.2s;
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 1001;
-
-    // Style cho ảnh icon bên trong
-    img {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-
-      // 🔥 FIX LỖI ẢNH BÉ (LỌT THỎM) TẠI ĐÂY:
-      // Phóng to ảnh lên 1.3 lần (130%) để lấp đầy khoảng trống thừa của ảnh gốc
-      // Bạn có thể chỉnh số 1.3 lên 1.4 hoặc 1.5 nếu vẫn thấy bé
-      transform: scale(2.3);
-
-      // Tạo bóng đổ bám sát theo hình dáng nhân vật
-      filter: drop-shadow(0 5px 15px rgba(0, 0, 0, 0.3));
-      transition: all 0.3s ease;
-    }
 
     &:hover {
-      // Hiệu ứng khi di chuột: phóng to nhẹ cả nút (chứa ảnh)
-      transform: scale(1.1);
+      transform: scale(1.05);
+      background-color: darken($primary-blue, 5%);
     }
 
-    &.hidden {
-      opacity: 0;
-      pointer-events: none;
-      transform: scale(0.5);
-    }
-  }
-  /* 1. Toggle Button (Floating Action Button) */
-  .chat-toggle-button {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    border: none;
-    box-shadow: 0 4px 15px rgba(25, 15, 218, 0.4);
-    cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: fixed;
-    bottom: 5%;
-    right: 3%;
-    z-index: 1001;
     img {
       width: 32px;
       height: 32px;
-      object-fit: contain;
+      display: block;
     }
 
-    &:hover {
-      transform: translateY(-2px) scale(1.05);
-      box-shadow: 0 6px 20px rgba(79, 70, 229, 0.6);
-    }
-
-    &.hidden {
-      opacity: 0;
-      pointer-events: none;
-      transform: scale(0.5);
+    &.hide {
+      display: none;
     }
   }
 
-  /* 2. Chat Window */
+  /* --- Chat Window --- */
   .chat-window {
-    position: absolute;
-    bottom: 0;
-    right: 0;
-    width: 580px;
+    width: 600px;
     height: 600px;
     max-height: 80vh;
-    background: #ffffff;
-    border-radius: 24px;
-    box-shadow: $shadow-lg;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: $shadow-soft;
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-    border: 1px solid rgba(0, 0, 0, 0.05);
+    animation: slideUp 0.3s ease-out;
 
-    /* Header */
+    /* 2.1 Header */
     .chat-header {
-      background: $primary-gradient;
-      padding: 20px;
+      background: $bg-bot;
+      padding: 16px 20px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      color: white;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
 
-      .header-info {
+      .header-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+
+        .sparkle-icon {
+          font-size: 1.2rem;
+          line-height: 1;
+        }
+
         h3 {
           margin: 0;
-          font-size: 18px;
+          font-size: 16px;
           font-weight: 600;
-        }
-        .status {
-          font-size: 12px;
-          opacity: 0.8;
-          display: flex;
-          align-items: center;
-
-          &::before {
-            content: "";
-            width: 8px;
-            height: 8px;
-            background: #34d399; /* Green dot */
-            border-radius: 50%;
-            margin-right: 6px;
-          }
+          color: $text-dark;
         }
       }
 
-      .close-chat {
-        background: rgba(255, 255, 255, 0.2);
+      .close-btn {
+        background: none;
         border: none;
-        color: white;
-        width: 30px;
-        height: 30px;
-        border-radius: 50%;
+        font-size: 24px;
+        color: #666;
         cursor: pointer;
-        font-size: 20px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: background 0.2s;
+        line-height: 1;
+        padding: 4px;
+        transition: color 0.2s;
 
         &:hover {
-          background: rgba(255, 255, 255, 0.4);
+          color: #000;
         }
       }
     }
 
-    /* Messages Area */
-    .chat-messages {
+    /* 2.2 Chat Body */
+    .chat-body {
       flex: 1;
       padding: 20px;
       overflow-y: auto;
-      background-color: #f9fafb;
       display: flex;
       flex-direction: column;
       gap: 16px;
+      background: #fff;
 
       /* Custom Scrollbar */
       &::-webkit-scrollbar {
         width: 6px;
       }
       &::-webkit-scrollbar-thumb {
-        background-color: rgba(0, 0, 0, 0.1);
+        background-color: #ddd;
         border-radius: 3px;
       }
 
-      .message-wrapper {
+      /* Message Row Styles */
+      .message-row {
         display: flex;
-        align-items: flex-end;
-        gap: 8px;
-        max-width: 85%;
+        gap: 12px;
+        max-width: 100%;
 
+        /* User Message */
         &.user {
-          align-self: flex-end;
-          flex-direction: row-reverse;
+          justify-content: flex-end;
 
-          .message-bubble {
-            background: $bg-user-bubble;
-            color: $text-user;
-            border-radius: $radius-bubble $radius-bubble 4px $radius-bubble;
-            box-shadow: 0 2px 5px rgba(79, 70, 229, 0.2);
+          .message-content {
+            background: $primary-blue;
+            color: $text-light;
+            border-radius: 18px 18px 4px 18px;
+            padding: 12px 16px;
+
+            .user-text {
+              font-size: 14px;
+              line-height: 1.5;
+              white-space: pre-wrap; /* Giữ định dạng xuống dòng của user */
+            }
           }
         }
 
+        /* Bot Message */
         &.bot {
-          align-self: flex-start;
+          justify-content: flex-start;
+          align-items: flex-start;
 
-          .bot-avatar img {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background: #fff;
-            padding: 2px;
-            border: 1px solid #e5e7eb;
+          .bot-avatar {
+            width: 28px;
+            height: 28px;
+            flex-shrink: 0;
+
+            img {
+              width: 100%;
+              height: 100%;
+              object-fit: contain;
+            }
           }
 
-          .message-bubble {
-            background: $bg-bot-bubble;
-            color: $text-bot;
-            border-radius: $radius-bubble $radius-bubble $radius-bubble 4px;
-            border: 1px solid #e5e7eb;
-          }
-        }
+          .message-content {
+            background: transparent;
+            color: $text-dark;
+            max-width: 90%;
+            font-size: 14px;
+            line-height: 1.6;
 
-        .message-bubble {
-          padding: 12px 16px;
-          font-size: 14px;
-          line-height: 1.5;
-          white-space: pre-wrap;
-          word-wrap: break-word;
+            /* --- MARKDOWN STYLING --- */
+            .markdown-renderer {
+              p {
+                margin-bottom: 10px;
+                &:last-child {
+                  margin-bottom: 0;
+                }
+              }
 
-          /* Markdown styling simulation */
-          strong {
-            font-weight: 600;
-          }
-        }
-      }
+              strong {
+                color: #000;
+                font-weight: 700;
+              }
 
-      /* Suggestion Chips */
-      .suggestion-container {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-        margin-top: 8px;
-        margin-left: 40px; /* Align with bot text */
+              ul,
+              ol {
+                margin: 8px 0 12px 20px;
+                padding: 0;
+              }
 
-        .chip {
-          background: #fff;
-          border: 1px solid $primary-color;
-          color: $primary-color;
-          padding: 8px 14px;
-          border-radius: 20px;
-          font-size: 13px;
-          cursor: pointer;
-          transition: all 0.2s;
-          font-weight: 500;
+              li {
+                margin-bottom: 6px;
+                &::marker {
+                  color: $primary-blue;
+                  font-weight: bold;
+                }
+              }
 
-          &:hover {
-            background: $primary-color;
-            color: white;
-            transform: translateY(-1px);
+              h3,
+              h4 {
+                font-size: 15px;
+                margin: 16px 0 8px 0;
+                color: $primary-blue;
+                font-weight: 600;
+              }
+
+              code {
+                background: #f1f1f1;
+                padding: 2px 5px;
+                border-radius: 4px;
+                font-family: "Consolas", monospace;
+                font-size: 0.9em;
+                color: #d63384;
+              }
+
+              blockquote {
+                border-left: 3px solid $primary-blue;
+                margin: 10px 0;
+                padding-left: 12px;
+                color: #555;
+                font-style: italic;
+              }
+            }
           }
         }
       }
 
       /* Loading Animation */
-      .loading {
+      .loading-dots {
         display: flex;
         gap: 4px;
-        padding: 16px !important;
-
+        padding: 8px 0;
         span {
           width: 6px;
           height: 6px;
-          background: #9ca3af;
+          background: #ccc;
           border-radius: 50%;
-          animation: bounce 1.4s infinite ease-in-out both;
-
+          animation: bounce 1.4s infinite ease-in-out;
           &:nth-child(1) {
             animation-delay: -0.32s;
           }
@@ -287,70 +252,111 @@ $radius-bubble: 18px;
       }
     }
 
-    /* Input Area */
-    .chat-input-area {
+    /* 2.3 Suggestions Area */
+    .suggestions-area {
+      padding: 0 16px 12px 16px;
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+
+      &::-webkit-scrollbar {
+        height: 0;
+      }
+
+      .suggestion-chip {
+        background: #f0f4f9;
+        border: 1px solid transparent;
+        border-radius: 8px;
+        padding: 8px 12px;
+        font-size: 13px;
+        color: #444746;
+        cursor: pointer;
+        white-space: nowrap;
+        transition: all 0.2s;
+        font-weight: 500;
+
+        &:hover {
+          background: #e3e3e3;
+          color: #1f1f1f;
+        }
+      }
+    }
+
+    /* 2.4 Footer Input */
+    .chat-footer {
       padding: 16px;
       background: #fff;
-      border-top: 1px solid #f3f4f6;
       display: flex;
-      gap: 10px;
       align-items: center;
+      gap: 10px;
+      border-top: 1px solid #eee;
 
       input {
         flex: 1;
         padding: 12px 16px;
-        border: 1px solid #e5e7eb;
         border-radius: 24px;
+        border: 1px solid #ccc;
         outline: none;
         font-size: 14px;
-        background: #f9fafb;
-        transition: border 0.2s;
+        transition: border-color 0.2s, background-color 0.2s;
+        background: #f0f4f9;
 
         &:focus {
-          border-color: $primary-color;
+          border-color: $primary-blue;
           background: #fff;
+          box-shadow: 0 0 0 2px rgba(11, 87, 208, 0.1);
         }
 
-        &::placeholder {
-          color: #9ca3af;
+        &:disabled {
+          background-color: #f5f5f5;
+          cursor: not-allowed;
         }
       }
 
       .send-btn {
-        background: $primary-color;
-        color: white;
-        border: none;
         width: 40px;
         height: 40px;
-        border-radius: 50%;
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        color: $primary-blue;
         display: flex;
         align-items: center;
         justify-content: center;
-        cursor: pointer;
+        border-radius: 50%;
         transition: background 0.2s;
 
-        &:hover {
-          background: darken($primary-color, 10%);
+        svg {
+          width: 20px;
+          height: 20px;
         }
 
+        &:hover {
+          background: #eff6ff;
+        }
         &:disabled {
-          background: #d1d5db;
-          cursor: not-allowed;
+          color: #ccc;
+          cursor: default;
+          &:hover {
+            background: transparent;
+          }
         }
       }
     }
   }
 }
 
-/* Animations */
+/* =========================================
+   3. ANIMATIONS
+   ========================================= */
 @keyframes slideUp {
   from {
     opacity: 0;
-    transform: translateY(20px) scale(0.95);
+    transform: translateY(20px);
   }
   to {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: translateY(0);
   }
 }
 

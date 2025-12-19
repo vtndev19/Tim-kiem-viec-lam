@@ -118,13 +118,14 @@ const notifyCandidateStatusChange = async (
 
 /**
  * =================================================================
- * 1. NỘP ĐƠN ỨNG TUYỂN (CANDIDATE)
- * - Logic: Candidate nộp đơn -> Email gửi về cho Recruiter/Công ty -> Bắn Notification
+ * 1. NỘP ĐƠN ỨNG TUYỂN (CANDIDATE) - ĐÃ SỬA
  * =================================================================
  */
 export const applyJob = async (req, res) => {
   const userId = req.user?.user_id;
-  const io = req.app.get("io"); // 🔥 Lấy socket io instance
+  const io = req.app.get("io");
+
+  // 1. Lấy email từ Form người dùng nhập
   const { job_id, cv_id, email, phone, cover_letter } = req.body;
 
   if (!job_id || !cv_id || !email || !phone) {
@@ -144,36 +145,34 @@ export const applyJob = async (req, res) => {
       userId,
       job_id,
       cv_id,
-      email,
+      email, // <-- Lưu email từ Form vào Database
       phone,
       cover_letter || "",
     ]);
 
-    const newAppId = result.insertId; // Lấy ID vừa tạo
+    const newAppId = result.insertId;
 
-    // BƯỚC 2: Tăng bộ đếm trong bảng jobs
-    const updateCountSql = `
-      UPDATE jobs SET application_count = application_count + 1 WHERE job_id = ?
-    `;
+    // BƯỚC 2: Tăng bộ đếm
+    const updateCountSql = `UPDATE jobs SET application_count = application_count + 1 WHERE job_id = ?`;
     await db.execute(updateCountSql, [job_id]);
 
-    // BƯỚC 3: Phản hồi Client NGAY LẬP TỨC
+    // BƯỚC 3: Phản hồi Client
     res.status(201).json({
       success: true,
       message: "Ứng tuyển thành công",
     });
 
-    // BƯỚC 4: Xử lý Background (Email & Notification)
+    // BƯỚC 4: Background Task (Gửi Email & Notification)
     (async () => {
       try {
         const infoSql = `
           SELECT 
             j.title, 
             c.contact_email as recruiter_email,
-            u.full_name as user_name -- Tên ứng viên
+            u.full_name as user_name 
           FROM jobs j
           JOIN companies c ON j.company_id = c.company_id
-          JOIN users u ON u.user_id = ? -- Lấy tên user đang login
+          JOIN users u ON u.user_id = ? 
           WHERE j.job_id = ?
         `;
         const [jobData] = await db.execute(infoSql, [userId, job_id]);
@@ -181,16 +180,21 @@ export const applyJob = async (req, res) => {
         if (jobData.length > 0) {
           const info = jobData[0];
 
-          // Task A: Gửi Email
-          if (info.recruiter_email) {
-            await sendApplicationEmails(
-              { name: info.user_name, email, phone, coverLetter: cover_letter },
-              { title: info.title },
-              info.recruiter_email
-            );
-          }
+          // --- PHẦN SỬA ĐỔI QUAN TRỌNG TẠI ĐÂY ---
+          // Truyền chính xác biến 'email' từ req.body vào hàm service
+          await sendApplicationEmails(
+            {
+              name: info.user_name,
+              email: email, // <--- EMAIL TỪ FORM NHẬP (req.body.email)
+              phone: phone,
+              coverLetter: cover_letter,
+            },
+            { title: info.title },
+            info.recruiter_email // Email HR (có thể null, service tự xử lý)
+          );
+          // ----------------------------------------
 
-          // Task B: Gửi Notification Real-time cho HR 🔥
+          // Gửi Notification Real-time cho HR
           await notifyRecruiters(io, job_id, newAppId, info.user_name);
         }
       } catch (bgError) {
@@ -373,13 +377,13 @@ export const getApplicationDetail = async (req, res) => {
 
 /**
  * =================================================================
- * 4. CẬP NHẬT TRẠNG THÁI (RECRUITER - APPROVE/REJECT)
- * - Logic: Cập nhật DB -> Gửi Mail -> Gửi Notification cho ứng viên
+ * 4. CẬP NHẬT TRẠNG THÁI - ĐÃ KIỂM TRA
+ * - Hàm này sẽ lấy email đã lưu trong DB (email lúc nộp đơn) để gửi kết quả
  * =================================================================
  */
 export const updateApplicationStatus = async (req, res) => {
   const userId = req.user.user_id;
-  const io = req.app.get("io"); // 🔥 Lấy socket io instance
+  const io = req.app.get("io");
   const { application_id } = req.params;
   const { status } = req.body;
 
@@ -388,18 +392,17 @@ export const updateApplicationStatus = async (req, res) => {
   }
 
   try {
-    // 1. Kiểm tra quyền và lấy thông tin cần thiết
+    // 1. Kiểm tra quyền và lấy email ứng viên từ DB
     const verifySql = `
       SELECT 
         a.application_id, 
-        a.user_id AS candidate_id, -- Lấy ID ứng viên để bắn noti
-        a.email, 
+        a.user_id AS candidate_id, 
+        a.email,  -- <--- LẤY EMAIL TỪ BẢNG APPLICATIONS (Email ứng viên nhập lúc nộp đơn)
         u.full_name AS candidate_name, 
         j.title as job_title
       FROM applications a
       INNER JOIN jobs j ON a.job_id = j.job_id
       INNER JOIN users u ON a.user_id = u.user_id
-      -- Check quyền
       INNER JOIN company_members cm ON j.company_id = cm.company_id
       WHERE a.application_id = ? 
       AND cm.user_id = ? 
@@ -427,12 +430,12 @@ export const updateApplicationStatus = async (req, res) => {
       message: `Đã cập nhật trạng thái: ${status}`,
     });
 
-    // 4. Background Task (Email & Notification)
+    // 4. Background Task
     (async () => {
-      // A. Gửi Email (nếu là Accepted/Rejected)
+      // Gửi Email kết quả về đúng email lấy từ DB (appData.email)
       if (status === "accepted" || status === "rejected") {
         sendResultEmail(
-          appData.email,
+          appData.email, // <--- Email này chính là email lưu lúc apply
           appData.candidate_name,
           appData.job_title,
           status
@@ -441,7 +444,6 @@ export const updateApplicationStatus = async (req, res) => {
         );
       }
 
-      // B. Gửi Notification cho Ứng viên 🔥
       await notifyCandidateStatusChange(
         io,
         application_id,

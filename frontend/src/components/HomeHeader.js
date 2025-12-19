@@ -17,17 +17,17 @@ export default function HomeHeader({ siteName }) {
   const loc = useLocation();
   const navigate = useNavigate();
 
+  // Load danh sách ngành nghề từ db.json
   useEffect(() => {
     setIndustries(db.industries || []);
   }, []);
 
-  //  HÀM GIẢI MÃ TOKEN (Đã khớp với Backend của bạn)
+  // --- HÀM GIẢI MÃ TOKEN (Logic gốc) ---
   const getUserRoleFromToken = () => {
     try {
       const token = localStorage.getItem("authToken");
       if (!token) return null;
 
-      // Token gồm 3 phần: Header.Payload.Signature
       const base64Url = token.split(".")[1];
       const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
       const jsonPayload = decodeURIComponent(
@@ -38,8 +38,6 @@ export default function HomeHeader({ siteName }) {
       );
 
       const parsedToken = JSON.parse(jsonPayload);
-
-      // Backend của bạn lưu: decoded.role => Frontend lấy: parsedToken.role
       return parsedToken.role ? parsedToken.role.toString() : null;
     } catch (error) {
       console.error("Lỗi khi đọc token:", error);
@@ -47,18 +45,19 @@ export default function HomeHeader({ siteName }) {
     }
   };
 
-  // ✅ CẬP NHẬT ROLE KHI CÓ USER
+  // --- CẬP NHẬT ROLE ---
   useEffect(() => {
     if (user) {
-      const role = getUserRoleFromToken();
-      // Chuẩn hóa về chữ thường để so sánh chính xác (tránh lỗi Hoa/Thường)
+      // Ưu tiên lấy role từ object user (nếu Context đã có), nếu không thì decode token
+      const role = user.role || getUserRoleFromToken();
+      // Chuẩn hóa về chữ thường
       setUserRole(role ? role.toLowerCase() : null);
     } else {
       setUserRole(null);
     }
   }, [user]);
 
-  // Click outside để đóng menu
+  // --- CLICK OUTSIDE ĐỂ ĐÓNG MENU ---
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (userMenuRef.current && !userMenuRef.current.contains(e.target)) {
@@ -69,13 +68,14 @@ export default function HomeHeader({ siteName }) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // --- 1. ĐỊNH NGHĨA HÀM LOGOUT TRƯỚC ĐỂ SỬ DỤNG TRONG CHECK TOKEN ---
   const handleLogout = () => {
-    logout();
+    console.log("Đang đăng xuất do người dùng click hoặc token hết hạn...");
+    logout(); // Xóa user trong context và localStorage
     setUserMenuVisible(false);
     setUserRole(null);
-    navigate("/");
+    navigate("/login"); // Chuyển về trang login thay vì trang chủ để user biết cần đăng nhập lại
   };
-
   return (
     <header className="header">
       <div className="header-inner container">
@@ -164,20 +164,34 @@ export default function HomeHeader({ siteName }) {
                       <Link to="/saved-jobs">Việc làm đã lưu</Link>
                     </li>
 
-                    {/* LOGIC HIỂN THỊ MENU TUYỂN DỤNG */}
-                    {/* So sánh với chữ thường 'recruiter' để đảm bảo chính xác */}
+                    {/* MENU CHO NHÀ TUYỂN DỤNG (RECRUITER) */}
                     {userRole === "recruiter" && (
+                      <>
+                        <li>
+                          <Link
+                            to="/hiring-dashboard"
+                            className="highlight-link"
+                          >
+                            Trang tuyển dụng
+                          </Link>
+                        </li>
+                        <li>
+                          <Link to="/recruiter-dashboard">
+                            Quản lý ứng viên
+                          </Link>
+                        </li>
+                      </>
+                    )}
+
+                    {/* MENU CHO ADMIN (Đã sửa label hiển thị) */}
+                    {userRole === "admin" && (
                       <li>
-                        <Link to="/hiring-dashboard" className="highlight-link">
-                          Trang tuyển dụng
+                        <Link to="/admin-dashboard" className="highlight-link">
+                          Trang quản trị
                         </Link>
                       </li>
                     )}
-                    {userRole === "recruiter" && (
-                      <li>
-                        <Link to="/recruiter-dashboard">Quản lý ứng viên</Link>
-                      </li>
-                    )}
+
                     <li className="logout" onClick={handleLogout}>
                       Đăng xuất
                     </li>

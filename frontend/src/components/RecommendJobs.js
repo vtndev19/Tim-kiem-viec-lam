@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
+import { Sparkles, X, MapPin, Banknote, BrainCircuit } from "lucide-react"; // Thêm icon
 import "../styles/components/recommendJobs.scss";
-import { Sparkles, X } from "lucide-react"; // Thêm icon đóng nếu cần
 
 const RecommendJobs = () => {
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [isCache, setIsCache] = useState(false); // Đổi tên biến cho rõ nghĩa
+  const [isCache, setIsCache] = useState(false);
   const [open, setOpen] = useState(false);
   const [showToast, setShowToast] = useState(false);
 
@@ -16,14 +16,11 @@ const RecommendJobs = () => {
     const fetchRecommendations = async () => {
       try {
         const token = localStorage.getItem("authToken");
-
         if (!token) {
-          console.error("Không có token → không thể lấy gợi ý");
           setLoading(false);
           return;
         }
 
-        // ✅ 1. SỬA URL CHO KHỚP BACKEND MỚI
         const res = await axios.get(
           `http://localhost:8080/api/recommendations`,
           {
@@ -31,17 +28,12 @@ const RecommendJobs = () => {
           }
         );
 
-        console.log("API Response:", res.data); // Log để debug
-
-        // ✅ 2. SỬA CÁCH LẤY DỮ LIỆU
-        // Backend trả về: { success: true, source: "...", data: [...] }
         if (res.data.success) {
           setJobs(res.data.data || []);
-          // Kiểm tra nguồn dữ liệu (cache hay ai_generated)
           setIsCache(res.data.source === "cache");
         }
       } catch (error) {
-        console.error("Lỗi khi lấy gợi ý việc làm:", error);
+        console.error("Error fetching recommendations:", error);
       } finally {
         setLoading(false);
       }
@@ -50,8 +42,7 @@ const RecommendJobs = () => {
     fetchRecommendations();
   }, []);
 
-  // ---------------- AUTO-TOAST EVERY 10 SECONDS ----------------
-  // (Tăng lên 10s để đỡ phiền user)
+  // ---------------- AUTO-TOAST LOGIC ----------------
   useEffect(() => {
     if (open || jobs.length === 0) return;
 
@@ -64,40 +55,74 @@ const RecommendJobs = () => {
   }, [jobs, open]);
 
   return (
-    <>
-      {/* Icon mở panel */}
-      <div className="recommend-icon" onClick={() => setOpen(!open)}>
-        <Sparkles size={26} color="#fff" />
-        {jobs.length > 0 && <span className="badge">{jobs.length}</span>}
+    <div className="recommend-wrapper">
+      {/* 1. Trigger Button (FAB) */}
+      <div
+        className="recommend-icon"
+        onClick={() => setOpen(!open)}
+        role="button"
+        aria-label="Open job recommendations"
+      >
+        {open ? (
+          <X size={24} color="#fff" />
+        ) : (
+          <Sparkles size={24} color="#fff" />
+        )}
+        {!open && jobs.length > 0 && (
+          <span className="badge">{jobs.length}</span>
+        )}
       </div>
 
-      {/* Toast thông báo (chỉ hiện khi panel đóng) */}
+      {/* 2. Toast Notification */}
       {!open && showToast && (
         <div className="recommend-toast" onClick={() => setOpen(true)}>
-          ✨ Có {jobs.length} việc làm phù hợp với bạn!
+          <span role="img" aria-label="sparkles">
+            ✨
+          </span>{" "}
+          Có <strong>{jobs.length}</strong> việc làm AI gợi ý cho bạn!
         </div>
       )}
 
-      {/* Panel danh sách job */}
+      {/* 3. Main Panel */}
       <div className={`recommend-panel ${open ? "open" : ""}`}>
+        {/* Panel Header */}
         <div className="panel-header">
           <h3 className="panel-title">
-            Gợi ý cho bạn{" "}
-            {isCache ? (
-              <span style={{ fontSize: "0.8em", color: "#888" }}>(Cache)</span>
-            ) : (
-              <Sparkles size={16} color="gold" />
-            )}
+            <BrainCircuit size={18} className="text-indigo-500" />{" "}
+            {/* Icon AI */}
+            Gợi ý việc làm
+            {isCache && <span className="cache-badge">Saved</span>}
           </h3>
-          <button className="close-btn" onClick={() => setOpen(false)}>
-            ×
+          <button
+            className="close-btn"
+            onClick={() => setOpen(false)}
+            aria-label="Close panel"
+          >
+            <X size={18} />
           </button>
         </div>
 
+        {/* Panel Content */}
         {loading ? (
-          <div className="panel-loading">Đang phân tích hồ sơ...</div>
+          <div className="panel-loading">
+            <Sparkles
+              className="animate-spin"
+              size={24}
+              color="#6366f1"
+              style={{ marginBottom: 8 }}
+            />
+            <p>Đang phân tích hồ sơ của bạn...</p>
+          </div>
         ) : jobs.length === 0 ? (
-          <div className="panel-empty">Chưa có gợi ý phù hợp!</div>
+          <div className="panel-empty">
+            <img
+              src="https://cdn-icons-png.flaticon.com/512/7486/7486754.png"
+              alt="Empty"
+              width="60"
+              style={{ opacity: 0.5, marginBottom: 10 }}
+            />
+            <p>Chưa tìm thấy công việc phù hợp.</p>
+          </div>
         ) : (
           <div className="panel-list">
             {jobs.map((job) => (
@@ -105,25 +130,38 @@ const RecommendJobs = () => {
                 to={`/job/${job.job_id}`}
                 key={job.job_id}
                 className="panel-item"
-                onClick={() => setOpen(false)} // Đóng khi click vào job
+                onClick={() => setOpen(false)}
               >
                 <div className="item-header">
-                  <h4 className="job-title">{job.title}</h4>
+                  <h4 className="job-title" title={job.title}>
+                    {job.title}
+                  </h4>
                   <span className="job-salary">{job.salary}</span>
                 </div>
 
-                {/* Hiển thị lý do gợi ý nếu có */}
-                {job.reason && <p className="ai-reason">💡 {job.reason}</p>}
+                {job.reason && (
+                  <div className="ai-reason">
+                    <Sparkles
+                      size={12}
+                      color="#8b5cf6"
+                      style={{ display: "inline", marginRight: 4 }}
+                    />
+                    {job.reason}
+                  </div>
+                )}
 
                 <div className="item-meta">
-                  <span className="location">📍 {job.location}</span>
+                  <span className="location">
+                    <MapPin size={12} /> {job.location}
+                  </span>
+                  {/* Bạn có thể thêm các thông tin meta khác ở đây */}
                 </div>
               </Link>
             ))}
           </div>
         )}
       </div>
-    </>
+    </div>
   );
 };
 

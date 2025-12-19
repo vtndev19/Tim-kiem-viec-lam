@@ -25,6 +25,8 @@ import recruiterRoutes from "./routes/recruiterRoutes.js";
 import applicationRoutes from "./routes/applicationRoutes.js";
 import predictSalary from "./routes/salaryRoutes.js";
 import notificationRoutes from "./routes/notificationRoutes.js"; // ✅ THÊM: Router thông báo
+import chatRoutes from "./routes/chatRoutes.js"; // ✅ THÊM: Router chat Groq AI
+import userRoutes from "./routes/userRoutes.js";
 
 /* database Connection */
 import db from "./configs/data.js";
@@ -140,7 +142,8 @@ app.use("/api/recommendations", recommendationRoutes);
 app.use("/api/applications", applicationRoutes);
 app.use("/api/salary", predictSalary);
 app.use("/api/notifications", notificationRoutes); // ✅ THÊM: Đăng ký route thông báo
-
+app.use("/api/chat", chatRoutes); // ✅ THÊM: Đăng ký route chat Groq AI
+app.use("/api/users", userRoutes);
 // ===================================================
 // 🚀 KHỞI ĐỘNG SERVER
 // ===================================================

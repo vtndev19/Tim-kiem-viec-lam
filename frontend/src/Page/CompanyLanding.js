@@ -55,7 +55,7 @@ const CompanyLanding = () => {
       <section className="top-companies-section">
         <div className="container">
           <div className="section-header">
-            <h2 className="section-title">🌟 Top Công ty Nổi Bật</h2>
+            <h2 className="section-title">Top Công ty Nổi Bật</h2>
             <p className="section-subtitle">
               Những công ty hàng đầu đang tuyển dụng
             </p>
@@ -82,7 +82,7 @@ const CompanyLanding = () => {
       <section className="all-companies-section">
         <div className="container">
           <div className="section-header">
-            <h2 className="section-title">📋 Tất cả Công ty</h2>
+            <h2 className="section-title">Tất cả Công ty</h2>
             <p className="section-subtitle">
               Danh sách đầy đủ tất cả các công ty
             </p>

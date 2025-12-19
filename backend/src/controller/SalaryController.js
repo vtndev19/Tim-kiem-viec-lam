@@ -284,6 +284,71 @@ const callGroqToAnalyzeProfile = async (listCVs) => {
     };
   }
 };
+/**
+ * AI SERVICE 4: Gợi ý việc làm (Job Recommendation)
+ */
+const callGroqToRecommendJobs = async (listCVs) => {
+  console.log("🤖 [AI STEP 4] Đang tìm kiếm việc làm phù hợp...");
+
+  // 1. Chuẩn bị dữ liệu CV
+  const candidatesText = listCVs
+    .map((cv, index) => {
+      const cleanSkills = parseSkills(cv.skills);
+      return `
+      === CV SỐ ${index + 1} ===
+      - Title: ${cv.title}
+      - Skills: ${cleanSkills}
+      - Experience: ${cv.experience || "Không rõ"}
+      - Summary: ${cv.summary || ""}
+      `;
+    })
+    .join("\n");
+
+  // 2. Viết Prompt
+  const prompt = `
+    Role: Senior Recruitment Consultant (Chuyên gia tư vấn tuyển dụng).
+    Context: Bạn đang có trong tay hồ sơ năng lực (CV) của một ứng viên.
+    
+    Input Data:
+    ${candidatesText}
+
+    Task:
+    Dựa trên kỹ năng và kinh nghiệm trong CV, hãy đề xuất 3 vị trí công việc (Job Titles) phù hợp nhất với ứng viên này hiện nay.
+
+    Output Format (JSON strictly):
+    {
+      "recommendation_text": "Viết một đoạn văn ngắn (dùng Markdown) chào ứng viên và đưa ra danh sách 3 công việc. Với mỗi công việc, giải thích ngắn gọn tại sao phù hợp và mức lương thị trường ước tính (Range lương USD/năm hoặc VND/tháng)."
+    }
+
+    Example Content Structure inside 'recommendation_text':
+    "Chào bạn, dựa trên hồ sơ của bạn, tôi thấy bạn rất tiềm năng cho các vị trí sau:\n\n1. **Senior React Developer**\n   - Lý do: Bạn có kinh nghiệm sâu về Frontend...\n   - Lương tham khảo: $1500 - $2500\n..."
+  `;
+
+  try {
+    const response = await axios.post(
+      "https://api.groq.com/openai/v1/chat/completions",
+      {
+        model: "llama-3.3-70b-versatile",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.4, // Sáng tạo hơn một chút để gợi ý đa dạng
+        max_tokens: 1000,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.REACT_APP_GROQ_API_KEY}`,
+        },
+      }
+    );
+
+    const result = cleanAIResponse(response.data.choices[0].message.content);
+    return (
+      result?.recommendation_text || "Hệ thống đang bận, vui lòng thử lại."
+    );
+  } catch (error) {
+    console.error("❌ [AI RECOMMEND ERROR]:", error.message);
+    return "Xin lỗi, hiện tại tôi không thể kết nối với server phân tích việc làm.";
+  }
+};
 
 // ==================================================================
 // PHẦN 3: DB CONTROLLERS (BASIC CRUD)
@@ -488,5 +553,52 @@ export const analyzeUserProfile = async (req, res) => {
     return res
       .status(500)
       .json({ message: "Lỗi phân tích hồ sơ", error: error.message });
+  }
+};
+
+/**
+ * CONTROLLER 3: TƯ VẤN VIỆC LÀM (Job Recommendation)
+ */
+export const recommendJobs = async (req, res) => {
+  try {
+    const userId = req.user.user_id;
+    logSection("1. REQUEST JOB RECOMMENDATION", { userId });
+
+    // --- BƯỚC 1: LẤY DỮ LIỆU CV ---
+    // Chỉ lấy các trường cần thiết để tiết kiệm token
+    const [userCVs] = await db.query(
+      `SELECT cv_id, title, summary, experience, skills 
+       FROM cv 
+       WHERE user_id = ? ORDER BY created_at DESC LIMIT 3`, // Lấy tối đa 3 CV mới nhất
+      [userId]
+    );
+
+    if (!userCVs || userCVs.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Bạn chưa có CV nào để hệ thống phân tích.",
+      });
+    }
+
+    // --- BƯỚC 2: GỌI AI ---
+    const recommendationResult = await callGroqToRecommendJobs(userCVs);
+
+    // Log kết quả ngắn gọn
+    console.log("✅ [AI RESULT] Length:", recommendationResult.length);
+
+    // --- BƯỚC 3: TRẢ VỀ ---
+    return res.status(200).json({
+      success: true,
+      data: {
+        recommendation: recommendationResult,
+      },
+    });
+  } catch (error) {
+    console.error("❌ JOB RECOMMEND ERROR:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Lỗi hệ thống gợi ý việc làm",
+      error: error.message,
+    });
   }
 };

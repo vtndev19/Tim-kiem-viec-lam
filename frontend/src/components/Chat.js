@@ -1,21 +1,26 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
-// Styles (không thay đổi scss của bạn)
+import ReactMarkdown from "react-markdown";
+
+// Styles & Assets
 import "../styles/components/Chat.scss";
-import chatIcon from "../assets/images/chatImg.png";
+import chatIcon from "../assets/images/chatImg.png"; // Giữ nguyên icon của bạn
 
 // ==================================================================
-// CẤU HÌNH
+// CẤU HÌNH HỆ THỐNG
 // ==================================================================
 const API_ENDPOINTS = {
   PREDICT_SALARY: "http://localhost:8080/api/salary/predict",
   ANALYZE_PROFILE: "http://localhost:8080/api/salary/analyze-profile",
   NOTIFICATIONS: "http://localhost:8080/api/notifications",
+  CHAT_AI: "http://localhost:8080/api/chat/message",
+  RECOMMEND_JOBS: "http://localhost:8080/api/salary/recommend-jobs",
 };
 
 const SUGGESTIONS = [
-  { id: "predict_salary", text: "Dự đoán mức lương tương lai" },
-  { id: "analyze_cv", text: "Phân tích tổng quan hồ sơ" },
+  { id: "predict_salary", text: "💰 Dự đoán mức lương" },
+  { id: "analyze_cv", text: "📊 Phân tích hồ sơ" },
+  { id: "recommend_jobs", text: "💼 Tư vấn việc làm" },
 ];
 
 const STEPS_CONFIG = {
@@ -26,12 +31,11 @@ const STEPS_CONFIG = {
     },
     {
       key: "location",
-      question:
-        "Bạn muốn làm việc tại địa điểm nào? (Ví dụ: Hồ Chí Minh, Hà Nội...)",
+      question: "Bạn muốn làm việc tại địa điểm nào? (Ví dụ: Hồ Chí Minh)",
     },
     {
       key: "workType",
-      question: "Hình thức làm việc bạn mong muốn? (Full-time hoặc Part-time)",
+      question: "Hình thức làm việc? (Full-time / Part-time)",
     },
   ],
 };
@@ -40,15 +44,18 @@ const STEPS_CONFIG = {
 // COMPONENT: Chat
 // ==================================================================
 export default function Chat() {
-  // ================= STATE =================
+  // --- STATE ---
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
-    { sender: "bot", text: "Xin chào! Tôi có thể giúp gì cho bạn?" },
+    {
+      sender: "bot",
+      text: "Xin chào! Tôi là trợ lý AI. Tôi có thể giúp gì cho sự nghiệp của bạn hôm nay?",
+    },
   ]);
   const [inputValue, setInputValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  // Flow state
+  // Flow State
   const [activeFlow, setActiveFlow] = useState(null);
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [collectedData, setCollectedData] = useState({
@@ -57,75 +64,17 @@ export default function Chat() {
     workType: "",
   });
 
-  // Notification state (giữ nếu bạn dùng sau)
-  const [hasNotification, setHasNotification] = useState(false);
-  const [showNotifications, setShowNotifications] = useState(false);
-  const [notifications, setNotifications] = useState([]);
-
-  // Refs
   const messagesEndRef = useRef(null);
-  const notificationRef = useRef(null);
 
-  // ================= EFFECTS =================
+  // --- EFFECTS ---
+  // Tự động cuộn xuống cuối khi có tin nhắn mới
   useEffect(() => {
-    // Tự cuộn xuống khi có tin nhắn mới
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isLoading]);
 
-  useEffect(() => {
-    // Đóng popup thông báo khi click ra ngoài
-    const handleClickOutside = (e) => {
-      if (
-        notificationRef.current &&
-        !notificationRef.current.contains(e.target)
-      ) {
-        setShowNotifications(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  // ================= HANDLERS =================
-
-  // Mở / đóng chat
+  // --- HANDLERS: UTILS ---
   const toggleChat = () => setIsOpen((prev) => !prev);
 
-  // Xử lý click chuông (hiển thị/ẩn notifications)
-  const handleBellClick = () => {
-    setHasNotification(false);
-    setShowNotifications((prev) => !prev);
-  };
-
-  // Xử lý khi user chọn 1 gợi ý (suggestion)
-  const handleSuggestionClick = async (flowId) => {
-    // Reset dữ liệu flow
-    setCollectedData({ title: "", location: "", workType: "" });
-    setCurrentStepIndex(0);
-
-    const suggestionText =
-      SUGGESTIONS.find((s) => s.id === flowId)?.text || flowId;
-    setMessages((prev) => [...prev, { sender: "user", text: suggestionText }]);
-
-    if (flowId === "analyze_cv") {
-      setActiveFlow(null);
-      await triggerProfileAnalysis();
-      return;
-    }
-
-    if (flowId === "predict_salary") {
-      setActiveFlow(flowId);
-      const firstQuestion = STEPS_CONFIG[flowId][0].question;
-      setTimeout(() => {
-        setMessages((prev) => [
-          ...prev,
-          { sender: "bot", text: firstQuestion },
-        ]);
-      }, 250);
-    }
-  };
-
-  // Normalize workType để đảm bảo dữ liệu đầu vào
   const normalizeWorkType = (text) => {
     const lower = text.trim().toLowerCase();
     if (["full-time", "full time", "fulltime", "ft"].includes(lower))
@@ -135,16 +84,56 @@ export default function Chat() {
     return null;
   };
 
-  // Gửi message từ input
+  const handleApiError = (err) => {
+    let errorMsg = "Có lỗi kết nối server.";
+    if (err.response?.status === 404)
+      errorMsg = "Hệ thống không tìm thấy dữ liệu CV của bạn.";
+    setMessages((prev) => [...prev, { sender: "bot", text: `⚠️ ${errorMsg}` }]);
+  };
+
+  // --- HANDLERS: FLOW & API ---
+  const handleSuggestionClick = async (flowId) => {
+    setCollectedData({ title: "", location: "", workType: "" });
+    setCurrentStepIndex(0);
+
+    const suggestionText =
+      SUGGESTIONS.find((s) => s.id === flowId)?.text || flowId;
+    setMessages((prev) => [...prev, { sender: "user", text: suggestionText }]);
+
+    // 1. Phân tích CV
+    if (flowId === "analyze_cv") {
+      setActiveFlow(null);
+      await triggerProfileAnalysis();
+      return;
+    }
+
+    // 2. Tư vấn việc làm
+    if (flowId === "recommend_jobs") {
+      setActiveFlow(null);
+      await triggerJobRecommendation();
+      return;
+    }
+
+    // 3. Dự đoán lương (Flow)
+    if (flowId === "predict_salary") {
+      setActiveFlow(flowId);
+      setTimeout(() => {
+        setMessages((prev) => [
+          ...prev,
+          { sender: "bot", text: STEPS_CONFIG[flowId][0].question },
+        ]);
+      }, 400);
+    }
+  };
+
   const handleSendMessage = async () => {
     const text = inputValue.trim();
     if (!text) return;
 
-    // Thêm tin nhắn user vào UI
     setMessages((prev) => [...prev, { sender: "user", text }]);
     setInputValue("");
 
-    // Nếu đang trong flow (predict_salary) -> xử lý theo từng bước
+    // A. Xử lý Kịch bản (Flow)
     if (activeFlow && STEPS_CONFIG[activeFlow]) {
       const currentSteps = STEPS_CONFIG[activeFlow];
       const stepConfig = currentSteps[currentStepIndex];
@@ -178,29 +167,32 @@ export default function Chat() {
           ]);
         }, 400);
       } else {
-        // Hoàn tất flow -> gọi API dự đoán
         await triggerSalaryPrediction(newData);
       }
-
-      return; // kết thúc xử lý khi trong flow
+      return;
     }
 
-    // Nếu không ở trong flow thì gửi tới bot service (sendMessageToBot hoặc API)
+    // B. Xử lý Chat AI tự do
     setIsLoading(true);
     try {
-      // Nếu bạn có service gửi tới bot, giữ nguyên; nếu không, thay bằng call API khác
-      // Lưu ý: original có import sendMessageToBot từ ChatService; nếu bạn muốn dùng nó thì uncomment dòng import
-      // const botResponse = await sendMessageToBot(text);
-      // setMessages((prev) => [...prev, { sender: "bot", text: botResponse }]);
-
-      // Tạm thời echo trả lời đơn giản (nếu bạn dùng sendMessageToBot, hãy bật lại)
-      const botResponse = await (async () => {
-        // Ví dụ: gọi API nội bộ nếu bạn có endpoint; giữ nguyên logic ban đầu
-        return "Đã nhận tin nhắn: '" + text + "' (bot trả về giả lập)";
-      })();
-
-      setMessages((prev) => [...prev, { sender: "bot", text: botResponse }]);
+      const token = localStorage.getItem("authToken");
+      const response = await axios.post(
+        API_ENDPOINTS.CHAT_AI,
+        { message: text },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: token ? `Bearer ${token}` : "",
+          },
+        }
+      );
+      const botReply =
+        response.data?.data?.reply ||
+        response.data?.message ||
+        "Không có phản hồi.";
+      setMessages((prev) => [...prev, { sender: "bot", text: botReply }]);
     } catch (err) {
+      console.error(err);
       setMessages((prev) => [
         ...prev,
         { sender: "bot", text: "Xin lỗi, tôi đang gặp sự cố kết nối." },
@@ -210,16 +202,15 @@ export default function Chat() {
     }
   };
 
-  // ================= API: DỰ ĐOÁN LƯƠNG =================
+  // --- API CALLS ---
   const triggerSalaryPrediction = async (finalData) => {
     setActiveFlow(null);
     setIsLoading(true);
-
     setMessages((prev) => [
       ...prev,
       {
         sender: "bot",
-        text: `✅ Đã ghi nhận:\n- Vị trí: ${finalData.title}\n- Nơi làm: ${finalData.location}\n- Hình thức: ${finalData.workType}\n\n🤖 Đang phân tích CV và dự đoán lương...`,
+        text: `🤖 Đang tính toán mức lương cho vị trí **${finalData.title}**...`,
       },
     ]);
 
@@ -238,37 +229,27 @@ export default function Chat() {
 
       const { salary_prediction, analysis, used_cv } =
         response.data?.data || {};
-
       if (response.data?.success && salary_prediction) {
-        const minSalary =
-          salary_prediction.min_salary != null
-            ? salary_prediction.min_salary.toLocaleString()
-            : "0";
-        const maxSalary =
-          salary_prediction.max_salary != null
-            ? salary_prediction.max_salary.toLocaleString()
-            : "0";
+        const minSalary = salary_prediction.min_salary?.toLocaleString() || "0";
+        const maxSalary = salary_prediction.max_salary?.toLocaleString() || "0";
         const currency = salary_prediction.currency || "USD";
 
-        let botReply = `🎯 KẾT QUẢ DỰ ĐOÁN LƯƠNG\n`;
-        botReply += `💰 Mức lương: ${minSalary} - ${maxSalary} ${currency}/năm\n`;
-        botReply += `📄 Dựa trên CV: ${used_cv?.title || "CV mặc định"}\n`;
-        botReply += `--------------------------------\n`;
+        let botReply = `### 🎯 KẾT QUẢ DỰ ĐOÁN\n\n`;
+        botReply += `**💰 Mức lương ước tính:** ${minSalary} - ${maxSalary} ${currency}/năm\n\n`;
+        botReply += `_Dựa trên CV: ${used_cv?.title || "Mặc định"}_ \n\n`;
 
         if (analysis) {
-          botReply += `📊 ĐÁNH GIÁ TỪ AI:\n${
-            analysis.evaluation || "Đang cập nhật..."
+          botReply += `#### 📊 Đánh giá chi tiết\n${
+            analysis.evaluation || ""
           }\n\n`;
-          botReply += `✅ Điểm mạnh: ${analysis.pros || "N/A"}\n`;
-          if (analysis.cons) botReply += `⚠️ Lưu ý: ${analysis.cons}\n`;
-          botReply += `\n💡 LỜI KHUYÊN:\n${
+          botReply += `* **Điểm mạnh:** ${analysis.pros || "N/A"}\n`;
+          botReply += `* **Lời khuyên:** ${
             analysis.advice || "Tiếp tục phát huy!"
           }`;
         }
-
         setMessages((prev) => [...prev, { sender: "bot", text: botReply }]);
       } else {
-        throw new Error("Invalid Response Data");
+        throw new Error("Invalid Data");
       }
     } catch (err) {
       handleApiError(err);
@@ -277,54 +258,23 @@ export default function Chat() {
     }
   };
 
-  // ================= API: PHÂN TÍCH PROFILE =================
   const triggerProfileAnalysis = async () => {
     setIsLoading(true);
-
     setMessages((prev) => [
       ...prev,
-      {
-        sender: "bot",
-        text: "🤖 Đang đọc và tổng hợp dữ liệu từ toàn bộ CV của bạn...",
-      },
+      { sender: "bot", text: "🤖 Đang phân tích hồ sơ năng lực của bạn..." },
     ]);
-
     try {
       const token = localStorage.getItem("authToken");
       const response = await axios.get(API_ENDPOINTS.ANALYZE_PROFILE, {
         headers: { Authorization: token ? `Bearer ${token}` : "" },
       });
-
-      const { profile_analysis, total_cvs } = response.data?.data || {};
-
+      const { profile_analysis } = response.data?.data || {};
       if (response.data?.success && profile_analysis) {
-        const cvCount = total_cvs || 0;
-
-        const formatList = (items) => {
-          if (!items) return "Không có dữ liệu";
-          return Array.isArray(items) ? items.join(", ") : items;
-        };
-
-        let botReply = `📂 KẾT QUẢ PHÂN TÍCH TỔNG HỢP (Dựa trên ${cvCount} CV)\n\n`;
-
-        botReply += `🗣️ Nhận định chiến lược:\n${profile_analysis.general_assessment}\n`;
-        botReply += `────────────────────────\n\n`;
-
-        if (Array.isArray(profile_analysis.domains)) {
-          profile_analysis.domains.forEach((domain, idx) => {
-            const icon = ["1️⃣", "2️⃣", "3️⃣", "4️⃣"][idx] || "🔹";
-
-            botReply += `${icon} Lĩnh vực: ${domain.field_name}\n`;
-            botReply += `   • Cấp độ: ${domain.current_level} (${domain.estimated_experience})\n`;
-            botReply += `   • Thế mạnh: ${formatList(domain.strengths)}\n`;
-            botReply += `   • Hạn chế: ${formatList(domain.weaknesses)}\n`;
-            botReply += `   💡 Lời khuyên: ${domain.advice}\n\n`;
-          });
-        }
-
+        let botReply = `### 📂 PHÂN TÍCH HỒ SƠ\n\n${profile_analysis.general_assessment}\n`;
         setMessages((prev) => [...prev, { sender: "bot", text: botReply }]);
       } else {
-        throw new Error("Không nhận được dữ liệu phân tích từ server.");
+        throw new Error("No data");
       }
     } catch (err) {
       handleApiError(err);
@@ -333,78 +283,107 @@ export default function Chat() {
     }
   };
 
-  // Xử lý lỗi API chung
-  const handleApiError = (err) => {
-    console.error("❌ API Error:", err);
-    let errorMsg = "Có lỗi xảy ra khi xử lý.";
-    if (err.response?.status === 404) {
-      errorMsg = "Bạn chưa có CV nào trong hệ thống. Vui lòng tạo CV trước!";
-    } else {
-      errorMsg =
-        err.response?.data?.message ||
-        "Hệ thống đang bận, vui lòng thử lại sau.";
+  const triggerJobRecommendation = async () => {
+    setIsLoading(true);
+    setMessages((prev) => [
+      ...prev,
+      {
+        sender: "bot",
+        text: "🔍 Đang tìm kiếm cơ hội việc làm phù hợp với Skills của bạn...",
+      },
+    ]);
+    try {
+      const token = localStorage.getItem("authToken");
+      const response = await axios.post(
+        API_ENDPOINTS.RECOMMEND_JOBS,
+        {},
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: token ? `Bearer ${token}` : "",
+          },
+        }
+      );
+      const recommendationText = response.data?.data?.recommendation;
+      if (response.data?.success && recommendationText) {
+        setMessages((prev) => [
+          ...prev,
+          { sender: "bot", text: recommendationText },
+        ]);
+      } else {
+        throw new Error("No data");
+      }
+    } catch (err) {
+      handleApiError(err);
+    } finally {
+      setIsLoading(false);
     }
-    setMessages((prev) => [...prev, { sender: "bot", text: `⚠️ ${errorMsg}` }]);
   };
 
   // ================= RENDER =================
   return (
-    <div className="chat-container">
+    <div className={`chat-widget-container ${isOpen ? "open" : ""}`}>
+      {/* Nút bật/tắt Chat (Giữ nguyên icon của bạn) */}
       <button
-        className={`chat-toggle-button ${isOpen ? "hidden" : ""}`}
+        className={`chat-toggle-btn ${isOpen ? "hide" : ""}`}
         onClick={toggleChat}
       >
-        <img src={chatIcon} alt="ChatBot" />
+        <img src={chatIcon} alt="Chat" />
       </button>
 
+      {/* Cửa sổ Chat */}
       {isOpen && (
         <div className="chat-window">
+          {/* Header */}
           <div className="chat-header">
-            <div className="header-info">
+            <div className="header-title">
+              <span className="sparkle-icon">✨</span>
               <h3>Job Assistant AI</h3>
-              <span className="status">Online</span>
             </div>
-            <button
-              className="close-chat"
-              onClick={toggleChat}
-              aria-label="Đóng chat"
-            >
+            <button className="close-btn" onClick={toggleChat}>
               ×
             </button>
           </div>
 
-          <div className="chat-messages">
+          {/* Nội dung tin nhắn */}
+          <div className="chat-body">
             {messages.map((msg, i) => (
-              <div key={i} className={`message-wrapper ${msg.sender}`}>
-                {/* Avatar: không dùng hình, dùng chữ tường minh */}
-                {msg.sender === "bot" && <div className="bot-avatar">AI</div>}
-                <div className="message-bubble">{msg.text}</div>
+              <div key={i} className={`message-row ${msg.sender}`}>
+                {msg.sender === "bot" && (
+                  <div className="bot-avatar">
+                    {/* Icon Gemini Sparkle cho avatar Bot trong chat */}
+                    <img
+                      src="https://www.gstatic.com/lamda/images/gemini_sparkle_v002_d4735304ff6292a690345.svg"
+                      alt="AI"
+                    />
+                  </div>
+                )}
+
+                <div className="message-content">
+                  {msg.sender === "bot" ? (
+                    <div className="markdown-renderer">
+                      <ReactMarkdown>{msg.text}</ReactMarkdown>
+                    </div>
+                  ) : (
+                    <div className="user-text">{msg.text}</div>
+                  )}
+                </div>
               </div>
             ))}
 
-            {/* Gợi ý (suggestions) */}
-            {!activeFlow && !isLoading && (
-              <div className="suggestion-container">
-                {SUGGESTIONS.map((s) => (
-                  <button
-                    key={s.id}
-                    onClick={() => handleSuggestionClick(s.id)}
-                    className="chip"
-                  >
-                    {s.text}
-                  </button>
-                ))}
-              </div>
-            )}
-
-            {/* Loading indicator */}
+            {/* Hiệu ứng Loading "AI đang gõ..." */}
             {isLoading && (
-              <div className="message-wrapper bot">
-                <div className="bot-avatar">AI</div>
-                <div className="message-bubble loading">
-                  <span></span>
-                  <span></span>
-                  <span></span>
+              <div className="message-row bot">
+                <div className="bot-avatar">
+                  <img
+                    src="https://www.gstatic.com/lamda/images/gemini_sparkle_v002_d4735304ff6292a690345.svg"
+                    alt="AI"
+                  />
+                </div>
+                <div className="message-content loading-dots">
+                  <span>•</span>
+                  <span>•</span>
+                  <span>•</span>
                 </div>
               </div>
             )}
@@ -412,25 +391,41 @@ export default function Chat() {
             <div ref={messagesEndRef} />
           </div>
 
-          <div className="chat-input-area">
+          {/* Gợi ý (Chips) - Chỉ hiện khi không trong luồng & không loading */}
+          {!activeFlow && !isLoading && (
+            <div className="suggestions-area">
+              {SUGGESTIONS.map((s) => (
+                <button
+                  key={s.id}
+                  onClick={() => handleSuggestionClick(s.id)}
+                  className="suggestion-chip"
+                >
+                  {s.text}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* Input Area */}
+          <div className="chat-footer">
             <input
               type="text"
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
               placeholder={
-                activeFlow ? "Nhập câu trả lời..." : "Nhập tin nhắn..."
+                activeFlow ? "Nhập câu trả lời..." : "Hỏi tôi bất cứ điều gì..."
               }
               disabled={isLoading}
             />
             <button
               onClick={handleSendMessage}
-              disabled={isLoading}
+              disabled={!inputValue.trim() || isLoading}
               className="send-btn"
-              aria-label="Gửi"
             >
-              {/* Ícon gửi bị loại theo yêu cầu workflow không dùng icon */}
-              <span>Gửi</span>
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path>
+              </svg>
             </button>
           </div>
         </div>
